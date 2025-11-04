@@ -1,0 +1,599 @@
+/* Navbar Link ve Button Stilleri */
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+    color: #fcd303;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link-button {
+    background: none;
+    border: none;
+    color: white;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    transition: background-color 0.2s;
+}
+
+.nav-link-button:hover {
+    color: #fcd303;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Modern Sıfırdan Anket CSS - ÖZEL SINIFLAR */
+.sifirdan-anket-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.sifirdan-anket-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.sifirdan-anket-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #2d6a4f 0%, #52b788 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.sifirdan-anket-header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+/* Başlangıç Ekranı */
+.sifirdan-baslangic-ekrani {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+}
+
+.sifirdan-baslangic-kart {
+    background: white;
+    border-radius: 20px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    max-width: 480px;
+    width: 100%;
+}
+
+.sifirdan-ikon-cerceve {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #2d6a4f 0%, #52b788 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+}
+
+.sifirdan-ana-ikon {
+    font-size: 2rem;
+    color: white;
+}
+
+.sifirdan-baslangic-kart h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
+.sifirdan-baslangic-kart p {
+    color: #6b7280;
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+.sifirdan-soru-sayisi-girdi {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.sifirdan-soru-sayisi-girdi input {
+    width: 100px;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.sifirdan-soru-sayisi-girdi input:focus {
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+    outline: none;
+}
+
+.sifirdan-soru-sayisi-girdi span {
+    font-weight: 600;
+    color: #374151;
+}
+
+.sifirdan-baslat-butonu {
+    background: linear-gradient(135deg, #2d6a4f 0%, #52b788 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.sifirdan-baslat-butonu:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(45, 106, 79, 0.3);
+}
+
+.sifirdan-baslat-butonu:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Soru Oluşturma Ekranı */
+.sifirdan-soru-olusturma-ekrani {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f3f4f6;
+}
+
+.sifirdan-soru-listesi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.sifirdan-soru-listesi-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.sifirdan-soru-sayisi-badge {
+    background: #2d6a4f;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Modern Soru Kutusu */
+.sifirdan-modern-soru-kutusu {
+    background: #fafdfb;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.sifirdan-modern-soru-kutusu:hover {
+    border-color: #2d6a4f;
+    box-shadow: 0 8px 25px rgba(45, 106, 79, 0.1);
+}
+
+.sifirdan-soru-ust-alani {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sifirdan-soru-numarasi {
+    font-weight: 700;
+    color: #2d6a4f;
+    font-size: 1.1rem;
+}
+
+.sifirdan-soru-sil-butonu {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sifirdan-soru-sil-butonu:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+.sifirdan-soru-metin-alani {
+    margin-bottom: 20px;
+}
+
+.sifirdan-soru-metin-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    box-sizing: border-box;
+}
+
+.sifirdan-soru-metin-input:focus {
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+    outline: none;
+}
+
+.sifirdan-soru-ayarlari {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.sifirdan-tip-secim-alani,
+.sifirdan-zorunluluk-alani {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sifirdan-zorunluluk-alani {
+    margin-left: auto;
+    justify-content: flex-end;
+    min-width: 160px;
+}
+
+.sifirdan-tip-secim-alani label,
+.sifirdan-zorunluluk-alani span {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.sifirdan-tip-select {
+    padding: 8px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.sifirdan-tip-select:focus {
+    border-color: #2d6a4f;
+    outline: none;
+}
+
+/* Switch Toggle */
+.sifirdan-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.sifirdan-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.sifirdan-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.sifirdan-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked+.sifirdan-slider {
+    background-color: #2d6a4f;
+}
+
+input:checked+.sifirdan-slider:before {
+    transform: translateX(26px);
+}
+
+.sifirdan-slider.round {
+    border-radius: 24px;
+}
+
+.sifirdan-slider.round:before {
+    border-radius: 50%;
+}
+
+/* Cevap Alanları */
+.sifirdan-cevap-alani {
+    margin-top: 20px;
+}
+
+.sifirdan-cevap-etiket {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.sifirdan-acik-uclu-textarea {
+    width: 100%;
+    height: 100px;
+    padding: 16px;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-size: 0.9rem;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+/* Modern Slider */
+.sifirdan-slider-alani {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+}
+
+.sifirdan-slider-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.sifirdan-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.sifirdan-modern-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e5e7eb;
+    outline: none;
+}
+
+.sifirdan-modern-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2d6a4f;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Seçenekler Alanı */
+.sifirdan-secenekler-alani {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+}
+
+.sifirdan-secenek-satiri {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.sifirdan-secenek-tipi-goster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.sifirdan-radio-nokta {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #2d6a4f;
+    border-radius: 50%;
+    background: white;
+}
+
+.sifirdan-checkbox-kare {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #2d6a4f;
+    border-radius: 3px;
+    background: white;
+}
+
+.sifirdan-secenek-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: white;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.sifirdan-secenek-input:focus {
+    border-color: #2d6a4f;
+    outline: none;
+}
+
+.sifirdan-secenek-sil-butonu {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sifirdan-secenek-sil-butonu:hover {
+    background: #dc2626;
+}
+
+.sifirdan-secenek-ekle-butonu {
+    background: #2d6a4f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.sifirdan-secenek-ekle-butonu:hover {
+    background: #1e4e3a;
+    transform: translateY(-1px);
+}
+
+/* Aksiyon Butonları */
+.sifirdan-anket-aksiyonlari {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #f3f4f6;
+}
+
+.sifirdan-ikincil-buton {
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sifirdan-ikincil-buton:hover {
+    background: #4b5563;
+    transform: translateY(-1px);
+}
+
+.sifirdan-birincil-buton {
+    background: linear-gradient(135deg, #2d6a4f 0%, #52b788 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sifirdan-birincil-buton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(45, 106, 79, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sifirdan-anket-container {
+        padding: 20px 15px;
+    }
+
+    .sifirdan-soru-olusturma-ekrani {
+        padding: 25px 20px;
+    }
+
+    .sifirdan-soru-ayarlari {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sifirdan-zorunluluk-alani {
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+
+    .sifirdan-anket-aksiyonlari {
+        flex-direction: column;
+    }
+
+    .sifirdan-baslangic-kart {
+        padding: 30px 25px;
+    }
+
+    .nav-right {
+        gap: 10px;
+    }
+
+    .nav-link,
+    .nav-link-button {
+        padding: 6px 8px;
+        font-size: 0.9rem;
+    }
+}
