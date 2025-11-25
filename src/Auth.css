@@ -151,25 +151,11 @@ input:focus {
   min-width: 120px;
 }
 
-.social-btn.microsoft {
-  background-color: #2f2f2f;
-}
-
-.social-btn.facebook {
-  background-color: #1877f2;
-}
-
-.social-btn.linkedin {
-  background-color: #0a66c2;
-}
-
-.social-btn.google {
-  background-color: #ea4335;
-}
-
-.social-btn.apple {
-  background-color: #000;
-}
+.social-btn.microsoft { background-color: #2f2f2f; }
+.social-btn.facebook  { background-color: #1877f2; }
+.social-btn.linkedin  { background-color: #0a66c2; }
+.social-btn.google    { background-color: #ea4335; }
+.social-btn.apple     { background-color: #000; }
 
 .social-btn:hover {
   opacity: 0.9;
@@ -199,40 +185,31 @@ input:focus {
   background: #ddd;
 }
 
-.divider::before {
-  left: 0;
-}
-
-.divider::after {
-  right: 0;
-}
+.divider::before { left: 0; }
+.divider::after  { right: 0; }
 
 /* ------------------------------
    RESPONSIVE
 ------------------------------ */
 @media (max-width: 480px) {
-  .auth-box {
-    width: 100%;
-    padding: 30px 20px;
-  }
-
-  .social-btn {
-    min-width: 100%;
-  }
+  .auth-box { width: 100%; padding: 30px 20px; }
+  .social-btn { min-width: 100%; }
 
   .anket-card {
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
   }
-
   .anket-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     border-color: #4CAF50;
   }
-
-  .anket-card:active {
-    transform: translateY(-2px);
-  }
+  .anket-card:active { transform: translateY(-2px); }
 }
+
+/* ------------------------------
+   UFACIK UX DOKUNUŞLARI (ekledim)
+------------------------------ */
+.btn-green:disabled { opacity: 0.7; cursor: not-allowed; }
+.error-text { color: #c62828; font-size: 0.85rem; margin: 6px 0 0 2px; }
