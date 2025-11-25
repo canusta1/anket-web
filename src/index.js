@@ -3,15 +3,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-// Tüm import'ları üste al
+
 import Anasayfa from './anasayfa';
 import Giris from './Giris';
 import UyeOl from './UyeOl';
 import Panel from './Panel';
 import AnketOlustur from './AnketOlustur';
 import SifirdanAnket from './SifirdanAnket';
+import Profil from './Profil';
 
-// Debug için console.log'lar
+
 console.log('🔍 Anasayfa.js import ediliyor...');
 console.log('✅ Anasayfa:', Anasayfa);
 
@@ -41,6 +42,7 @@ root.render(
         <Route path="/panel" element={<Panel />} />
         <Route path="/anket-olustur" element={<AnketOlustur />} />
         <Route path="/sifirdan-anket" element={<SifirdanAnket />} />
+        <Route path="/profil" element={<Profil />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

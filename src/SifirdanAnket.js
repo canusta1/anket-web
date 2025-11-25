@@ -23,18 +23,7 @@ function SifirdanAnket() {
     const handleGeriDon = () => navigate("/anket-olustur");
     const handleAnketOlustur = () => navigate("/anket-olustur");
 
-    // Geçici işlevler
-    const handlePaketler = () => {
-        console.log("Paketler sayfasına yönlendirilecek");
-    };
 
-    const handleAnaliz = () => {
-        console.log("Analiz sayfasına yönlendirilecek");
-    };
-
-    const handleYukselt = () => {
-        console.log("Yükselt butonuna tıklandı");
-    };
 
     const handleOlustur = () => {
         const yeniSorular = [];
@@ -44,7 +33,7 @@ function SifirdanAnket() {
                 metin: "",
                 tip: "acik-uclu",
                 secenekler: [],
-                zorunlu: true // Varsayılan olarak zorunlu
+                zorunlu: true
             });
         }
         setSorular(yeniSorular);
@@ -61,7 +50,7 @@ function SifirdanAnket() {
             sorular.map((s) => (s.id === id ? {
                 ...s,
                 tip,
-                secenekler: tip.includes("coktan") ? ["", ""] : [] // İki boş seçenekle başla
+                secenekler: tip.includes("coktan") ? ["", ""] : []
             } : s))
         );
     };
@@ -113,7 +102,7 @@ function SifirdanAnket() {
 
     const handleAnketiYayinla = () => {
         alert("Anket başarıyla yayınlandı! 🎉");
-        // Burada anketi kaydetme ve yayınlama işlemleri yapılacak
+        // anketi kaydetme işlemleri eklenecek
     };
 
     return (
@@ -138,7 +127,7 @@ function SifirdanAnket() {
             {/* Sidebar */}
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
                 <ul>
-                    <li><FaUser className="icon" /> Profil</li>
+                    <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
                     <li><FaClipboardList className="icon" /> Anket Oluştur</li>
                     <li><FaChartBar className="icon" /> Sonuçları Gör</li>
                     <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
@@ -150,7 +139,7 @@ function SifirdanAnket() {
                 <div className="sifirdan-anket-container">
                     <div className="sifirdan-anket-header">
                         <h1>🎯 Sıfırdan Anket Oluştur</h1>
-                        <p>Profesyonel anketinizi adım adım oluşturun</p>
+                        <p>Profesyonel anketinizi adım adım oluşturun.</p>
                     </div>
 
                     {sorular.length === 0 ? (

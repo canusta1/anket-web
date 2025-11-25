@@ -27,9 +27,7 @@ function AnketOlustur() {
 
         <div className="nav-right">
           <a href="/">Ana Sayfa</a>
-          <button className="nav-link-button" onClick={() => alert('Paketler sayfası yakında eklenecek')}>Paketler</button>
-          <button className="nav-link-button" onClick={() => alert('Analiz sayfası yakında eklenecek')}>Analiz</button>
-          <button className="btn-green">Yükselt</button>
+
           <button className="btn-white">Anket Oluştur</button>
         </div>
       </nav>
@@ -37,7 +35,7 @@ function AnketOlustur() {
       {/* Sidebar */}
       <div className={`sidebar ${menuOpen ? "open" : ""}`}>
         <ul>
-          <li><FaUser className="icon" /> Profil</li>
+          <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
           <li><FaClipboardList className="icon" /> Anket Oluştur</li>
           <li><FaChartBar className="icon" /> Sonuçları Gör</li>
           <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>

@@ -7,10 +7,10 @@ function Giris() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // örnek sabit kullanıcı
+  //sabit kullanıcı
   const correctUser = {
-    email: "a@a.com",
-    password: "a",
+    email: "",
+    password: "",
   };
 
   const handleSubmit = (e) => {
@@ -44,7 +44,6 @@ function Giris() {
             placeholder="E-posta adresinizi girin"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
           />
 
           <label>Şifre</label>
@@ -53,7 +52,6 @@ function Giris() {
             placeholder="Şifrenizi girin"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
 
           <button type="submit" className="btn-green">Giriş Yap</button>
