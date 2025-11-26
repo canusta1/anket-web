@@ -56,10 +56,20 @@ function AnketOlustur() {
       const result = await response.json();
 
       if (result.success) {
-        setAnketBaslik(result.data.anketBaslik);
-        setSorular(result.data.sorular);
-        setEditMode(true);
-        setAiFormMode(false);
+        // Anket verilerini localStorage'a kaydet
+        const anketVerisi = {
+            baslik: result.data.anketBaslik,
+            sorular: result.data.sorular,
+            aiIleOlusturuldu: true
+        };
+        localStorage.setItem('anket_verisi', JSON.stringify(anketVerisi));
+        
+        // AIileAnket sayfasına yönlendir (modal kapalı)
+        navigate("/ai-ile-anket", { 
+            state: { 
+                openModal: false 
+            } 
+        });
         console.log("✨ Anket başarıyla oluşturuldu!");
       } else {
         alert("❌ Hata: " + result.error);
@@ -170,9 +180,9 @@ function AnketOlustur() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "calc(100vh - 70px)",   // navbar yüksekliği
+          height: "calc(100vh - 70px)",
           padding: "0",
-          overflow: "hidden",             // scroll'u tamamen yok eder
+          overflow: "hidden",
         }}>
           <div style={{
             backgroundColor: "#fff",
@@ -181,8 +191,8 @@ function AnketOlustur() {
             padding: "50px",
             width: "100%",
             maxWidth: "650px",
-            maxHeight: "90vh",        // taşmayı engelle
-            overflowY: "auto"         // scroll sadece kart içinde olsun
+            maxHeight: "90vh",
+            overflowY: "auto"
           }}>
             <div style={{
               display: 'flex',

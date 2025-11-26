@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
     FaBars,
@@ -13,24 +13,39 @@ import {
     FaMagic,
     FaSpinner
 } from "react-icons/fa";
-import "./SifirdanAnket.css"; // Aynı CSS'i kullanabiliriz
+import "./SifirdanAnket.css";
 
 function AIileAnket() {
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    // if navigated with state.openModal, honor it; otherwise default to true
     const [aiModalOpen, setAiModalOpen] = useState(location?.state?.openModal ?? true);
 
     // AI için state'ler
     const [aiTopic, setAiTopic] = useState(location?.state?.topic ?? "");
     const [aiQuestionCount, setAiQuestionCount] = useState(10);
 
-    // Anket state'leri (SifirdanAnket ile aynı)
+    // Anket state'leri
     const [anketBaslik, setAnketBaslik] = useState("");
     const [sorular, setSorular] = useState([]);
 
     const navigate = useNavigate();
+
+    // ✅ SAYFA AÇILDIĞINDA LOCALSTORAGE'DAN OKU
+    useEffect(() => {
+        const kayitliVeri = localStorage.getItem('anket_verisi');
+        if (kayitliVeri) {
+            try {
+                const anketVerisi = JSON.parse(kayitliVeri);
+                console.log("📂 localStorage'dan anket yüklendi:", anketVerisi);
+                setAnketBaslik(anketVerisi.baslik || "");
+                setSorular(anketVerisi.sorular || []);
+                setAiModalOpen(false); // Modal'ı kapat, direkt düzenleme ekranını göster
+            } catch (error) {
+                console.error("❌ localStorage okuma hatası:", error);
+            }
+        }
+    }, []);
 
     const handleLogout = () => navigate("/giris");
     const handleGeriDon = () => navigate("/anket-olustur");
@@ -81,7 +96,7 @@ function AIileAnket() {
         }
     };
 
-    // Soru düzenleme fonksiyonları (SifirdanAnket ile aynı)
+    // Soru düzenleme fonksiyonları
     const handleSoruDegis = (id, yeniMetin) => {
         setSorular(sorular.map((s) => (s.id === id ? { ...s, metin: yeniMetin } : s)));
     };
@@ -137,16 +152,53 @@ function AIileAnket() {
         setSorular(sorular.filter(s => s.id !== id));
     };
 
-    const handleAnketiYayinla = () => {
+    const handleIleriGit = () => {
+        console.log("🔍 İleri butonuna tıklandı!");
+        console.log("📊 Anket başlığı:", anketBaslik);
+        console.log("📝 Sorular sayısı:", sorular.length);
+        
         if (sorular.length === 0) {
-            alert("En az bir soru eklemelisiniz!");
+            alert("❌ En az bir soru eklemelisiniz!");
             return;
         }
 
-        // Burada backend'e kaydetme işlemi yapılacak
-        console.log("Yayınlanacak anket:", { anketBaslik, sorular });
-        alert("🎉 Anket başarıyla yayınlandı!");
-        // navigate("/anketlerim"); // veya başka bir sayfaya yönlendir
+        // Boş soru kontrolü
+        const bosSorular = sorular.filter(s => !s.metin.trim());
+        if (bosSorular.length > 0) {
+            alert("❌ Lütfen tüm soruları doldurun!");
+            return;
+        }
+
+        // Çoktan seçmeli sorularda seçenek kontrolü
+        const eksikSecenekliSorular = sorular.filter(s => 
+            (s.tip === "coktan-tek" || s.tip === "coktan-coklu") && 
+            s.secenekler.filter(sec => sec.trim()).length < 2
+        );
+        
+        if (eksikSecenekliSorular.length > 0) {
+            alert("❌ Çoktan seçmeli sorularda en az 2 seçenek olmalıdır!");
+            return;
+        }
+
+        // Anket başlığı kontrolü
+        if (!anketBaslik.trim()) {
+            alert("❌ Lütfen anket başlığı girin!");
+            return;
+        }
+
+        // Anket verilerini localStorage'a kaydet
+        const anketVerisi = {
+            baslik: anketBaslik,
+            sorular: sorular,
+            olusturmaTarihi: new Date().toISOString(),
+            aiIleOlusturuldu: true
+        };
+        
+        console.log("💾 Kaydedilen anket verisi:", anketVerisi);
+        localStorage.setItem('anket_verisi', JSON.stringify(anketVerisi));
+        
+        console.log("✅ Hedef kitle seçimi sayfasına yönlendiriliyor...");
+        navigate("/hedef-kitle-secimi");
     };
 
     return (
@@ -410,8 +462,8 @@ function AIileAnket() {
                                 >
                                     Yeniden Oluştur
                                 </button>
-                                <button className="sifirdan-birincil-buton" onClick={handleAnketiYayinla}>
-                                    Anketi Yayınla
+                                <button className="sifirdan-birincil-buton" onClick={handleIleriGit}>
+                                    İLERİ
                                 </button>
                             </div>
                         </div>

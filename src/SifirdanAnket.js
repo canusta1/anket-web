@@ -101,8 +101,40 @@ function SifirdanAnket() {
     };
 
     const handleAnketiYayinla = () => {
-        alert("Anket başarıyla yayınlandı! 🎉");
-        // anketi kaydetme işlemleri eklenecek
+        if (sorular.length === 0) {
+            alert("❌ En az bir soru eklemelisiniz!");
+            return;
+        }
+
+        // Boş soru kontrolü
+        const bosSorular = sorular.filter(s => !s.metin.trim());
+        if (bosSorular.length > 0) {
+            alert("❌ Lütfen tüm soruları doldurun!");
+            return;
+        }
+
+        // Çoktan seçmeli sorularda seçenek kontrolü
+        const eksikSecenekliSorular = sorular.filter(s => 
+            (s.tip === "coktan-tek" || s.tip === "coktan-coklu") && 
+            s.secenekler.filter(sec => sec.trim()).length < 2
+        );
+        
+        if (eksikSecenekliSorular.length > 0) {
+            alert("❌ Çoktan seçmeli sorularda en az 2 seçenek olmalıdır!");
+            return;
+        }
+
+        // Anket verilerini localStorage'a kaydet
+        const anketVerisi = {
+            baslik: "Anketim",
+            sorular: sorular,
+            olusturmaTarihi: new Date().toISOString()
+        };
+        
+        localStorage.setItem('anket_verisi', JSON.stringify(anketVerisi));
+        
+        // Hedef kitle seçimi sayfasına yönlendir
+        navigate("/hedef-kitle-secimi");
     };
 
     return (
@@ -310,7 +342,7 @@ function SifirdanAnket() {
                                     Sıfırla
                                 </button>
                                 <button className="sifirdan-birincil-buton" onClick={handleAnketiYayinla}>
-                                    Anketi Yayınla
+                                    İleri
                                 </button>
                             </div>
                         </div>
