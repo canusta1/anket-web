@@ -35,9 +35,7 @@ function Profil() {
     const handleLogout = () => navigate("/giris");
     const handleGeriDon = () => navigate("/");
     const handleAnketOlustur = () => navigate("/anket-olustur");
-    const handlePaketler = () => console.log("Paketler sayfasına yönlendirilecek");
-    const handleAnaliz = () => console.log("Analiz sayfasına yönlendirilecek");
-    const handleYukselt = () => console.log("Yükselt butonuna tıklandı");
+    // paketler/analiz/yükselt handlers removed per request
 
     // Sidebar menü işlevleri
     const handleProfil = () => {
@@ -109,9 +107,6 @@ function Profil() {
 
                 <div className="nav-right">
                     <Link to="/" className="nav-link">Ana Sayfa</Link>
-                    <button className="nav-link-button" onClick={handlePaketler}>Paketler</button>
-                    <button className="nav-link-button" onClick={handleAnaliz}>Analiz</button>
-                    <button className="btn-green" onClick={handleYukselt}>Yükselt</button>
                     <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
                 </div>
             </nav>

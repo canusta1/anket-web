@@ -13,7 +13,8 @@ function Giris() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/api/auth/login", {
+      // use relative URL so CRA dev server proxy (package.json) forwards to backend
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
     FaBars,
     FaUser,
@@ -9,58 +9,97 @@ import {
     FaArrowLeft,
     FaPlus,
     FaTrash,
-    FaPalette
+    FaRobot,
+    FaMagic,
+    FaSpinner
 } from "react-icons/fa";
-import "./SifirdanAnket.css";
+import "./SifirdanAnket.css"; // Aynı CSS'i kullanabiliriz
 
-function SifirdanAnket() {
-    const [soruSayisi, setSoruSayisi] = useState(0);
-    const [sorular, setSorular] = useState([]);
+function AIileAnket() {
+    const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    // if navigated with state.openModal, honor it; otherwise default to true
+    const [aiModalOpen, setAiModalOpen] = useState(location?.state?.openModal ?? true);
+
+    // AI için state'ler
+    const [aiTopic, setAiTopic] = useState(location?.state?.topic ?? "");
+    const [aiQuestionCount, setAiQuestionCount] = useState(10);
+
+    // Anket state'leri (SifirdanAnket ile aynı)
+    const [anketBaslik, setAnketBaslik] = useState("");
+    const [sorular, setSorular] = useState([]);
+
     const navigate = useNavigate();
 
     const handleLogout = () => navigate("/giris");
     const handleGeriDon = () => navigate("/anket-olustur");
     const handleAnketOlustur = () => navigate("/anket-olustur");
 
-
-
-    const handleOlustur = () => {
-        const yeniSorular = [];
-        for (let i = 0; i < soruSayisi; i++) {
-            yeniSorular.push({
-                id: Date.now() + i,
-                metin: "",
-                tip: "acik-uclu",
-                secenekler: [],
-                zorunlu: true
-            });
+    // AI ile anket oluştur
+    const handleAIileOlustur = async () => {
+        if (!aiTopic.trim()) {
+            alert("Lütfen bir anket konusu girin!");
+            return;
         }
-        setSorular(yeniSorular);
+
+        if (aiQuestionCount < 1 || aiQuestionCount > 50) {
+            alert("Soru sayısı 1-50 arasında olmalıdır!");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await fetch('/api/ai/generate-survey', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    topic: aiTopic,
+                    questionCount: aiQuestionCount
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setAnketBaslik(result.data.anketBaslik);
+                setSorular(result.data.sorular);
+                setAiModalOpen(false);
+                alert("✨ Anket başarıyla oluşturuldu! Şimdi düzenleyebilirsiniz.");
+            } else {
+                alert("❌ Hata: " + result.error);
+            }
+
+        } catch (error) {
+            console.error('AI Hatası:', error);
+            alert("❌ Anket oluşturulurken bir hata oluştu. Backend'in çalıştığından emin olun.");
+        } finally {
+            setLoading(false);
+        }
     };
 
+    // Soru düzenleme fonksiyonları (SifirdanAnket ile aynı)
     const handleSoruDegis = (id, yeniMetin) => {
-        setSorular(
-            sorular.map((s) => (s.id === id ? { ...s, metin: yeniMetin } : s))
-        );
+        setSorular(sorular.map((s) => (s.id === id ? { ...s, metin: yeniMetin } : s)));
     };
 
     const handleTipDegis = (id, tip) => {
         setSorular(
-            sorular.map((s) => (s.id === id ? {
-                ...s,
-                tip,
-                secenekler: tip.includes("coktan") ? ["", ""] : []
-            } : s))
+            sorular.map((s) =>
+                s.id === id
+                    ? { ...s, tip, secenekler: tip.includes("coktan") ? s.secenekler.length > 0 ? s.secenekler : ["", ""] : [] }
+                    : s
+            )
         );
     };
 
     const handleSecenekEkle = (id) => {
         setSorular(
             sorular.map((s) =>
-                s.id === id
-                    ? { ...s, secenekler: [...s.secenekler, ""] }
-                    : s
+                s.id === id ? { ...s, secenekler: [...s.secenekler, ""] } : s
             )
         );
     };
@@ -91,9 +130,7 @@ function SifirdanAnket() {
     };
 
     const handleZorunluDegis = (id) => {
-        setSorular(
-            sorular.map((s) => (s.id === id ? { ...s, zorunlu: !s.zorunlu } : s))
-        );
+        setSorular(sorular.map((s) => (s.id === id ? { ...s, zorunlu: !s.zorunlu } : s)));
     };
 
     const handleSoruSil = (id) => {
@@ -101,8 +138,15 @@ function SifirdanAnket() {
     };
 
     const handleAnketiYayinla = () => {
-        alert("Anket başarıyla yayınlandı! 🎉");
-        // anketi kaydetme işlemleri eklenecek
+        if (sorular.length === 0) {
+            alert("En az bir soru eklemelisiniz!");
+            return;
+        }
+
+        // Burada backend'e kaydetme işlemi yapılacak
+        console.log("Yayınlanacak anket:", { anketBaslik, sorular });
+        alert("🎉 Anket başarıyla yayınlandı!");
+        // navigate("/anketlerim"); // veya başka bir sayfaya yönlendir
     };
 
     return (
@@ -131,49 +175,98 @@ function SifirdanAnket() {
                 </ul>
             </div>
 
-            {/* İçerik */}
+            {/* Ana İçerik */}
             <main className="anket-main">
                 <div className="sifirdan-anket-container">
-                    <div className="sifirdan-anket-header">
-                        <h1>🎯 Sıfırdan Anket Oluştur</h1>
-                        <p>Profesyonel anketinizi adım adım oluşturun.</p>
-                    </div>
 
-                    {sorular.length === 0 ? (
-                        <div className="sifirdan-baslangic-ekrani">
-                            <div className="sifirdan-baslangic-kart">
-                                <div className="sifirdan-ikon-cerceve">
-                                    <FaPalette className="sifirdan-ana-ikon" />
+                    {/* AI Modal */}
+                    {aiModalOpen && (
+                        <div className="ai-modal-overlay">
+                            <div className="ai-modal">
+                                <div className="ai-modal-header">
+                                    <FaRobot className="ai-icon" />
+                                    <h2>🤖 AI ile Anket Oluştur</h2>
+                                    <p>Yapay zeka size profesyonel anket soruları oluşturacak</p>
                                 </div>
-                                <h2>Anketinizi Özelleştirin</h2>
-                                <p>Kaç sorudan oluşan bir anket hazırlamak istiyorsunuz?</p>
 
-                                <div className="sifirdan-soru-sayisi-girdi">
+                                <div className="ai-input-group">
+                                    <label>📝 Anket Konusu</label>
+                                    <textarea
+                                        value={aiTopic}
+                                        onChange={(e) => setAiTopic(e.target.value)}
+                                        placeholder="Örn: Restoran temizliği ve hijyen hakkında açık uçlu sorular oluştur"
+                                        className="ai-topic-input"
+                                        disabled={loading}
+                                        rows="5"
+                                        style={{ resize: 'vertical' }}
+                                    />
+                                </div>
+
+                                <div className="ai-input-group">
+                                    <label>🔢 Kaç Soru?</label>
                                     <input
                                         type="number"
+                                        value={aiQuestionCount}
+                                        onChange={(e) => setAiQuestionCount(parseInt(e.target.value) || 10)}
                                         min="1"
                                         max="50"
-                                        value={soruSayisi}
-                                        onChange={(e) => setSoruSayisi(parseInt(e.target.value) || 0)}
-                                        placeholder="Örn: 5"
+                                        className="ai-count-input"
+                                        disabled={loading}
                                     />
-                                    <span>soru</span>
                                 </div>
 
-                                <button
-                                    className="sifirdan-baslat-butonu"
-                                    onClick={handleOlustur}
-                                    disabled={soruSayisi < 1}
-                                >
-                                    <FaPlus style={{ marginRight: "8px" }} />
-                                    Anketi Oluşturmaya Başla
-                                </button>
+                                <div className="ai-modal-actions">
+                                    <button
+                                        className="ai-cancel-btn"
+                                        onClick={handleGeriDon}
+                                        disabled={loading}
+                                    >
+                                        İptal
+                                    </button>
+                                    <button
+                                        className="ai-generate-btn"
+                                        onClick={handleAIileOlustur}
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <FaSpinner className="spinning" />
+                                                Oluşturuluyor...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FaMagic />
+                                                AI ile Oluştur
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    ) : (
+                    )}
+
+                    {/* Anket Düzenleme Ekranı */}
+                    {!aiModalOpen && (
                         <div className="sifirdan-soru-olusturma-ekrani">
                             <div className="sifirdan-soru-listesi-header">
-                                <h2>📋 Sorularınızı Düzenleyin</h2>
+                                <div>
+                                    <h2>📋 {anketBaslik}</h2>
+                                    <input
+                                        type="text"
+                                        value={anketBaslik}
+                                        onChange={(e) => setAnketBaslik(e.target.value)}
+                                        placeholder="Anket başlığını düzenleyin..."
+                                        className="anket-baslik-input"
+                                        style={{
+                                            fontSize: "1.2em",
+                                            marginTop: "10px",
+                                            padding: "8px",
+                                            border: "1px solid #ddd",
+                                            borderRadius: "4px",
+                                            width: "100%"
+                                        }}
+                                    />
+                                </div>
                                 <span className="sifirdan-soru-sayisi-badge">{sorular.length} soru</span>
                             </div>
 
@@ -306,8 +399,16 @@ function SifirdanAnket() {
                             </div>
 
                             <div className="sifirdan-anket-aksiyonlari">
-                                <button className="sifirdan-ikincil-buton" onClick={() => setSorular([])}>
-                                    Sıfırla
+                                <button
+                                    className="sifirdan-ikincil-buton"
+                                    onClick={() => {
+                                        if (window.confirm("Yeniden AI ile oluşturmak ister misiniz?")) {
+                                            setAiModalOpen(true);
+                                            setSorular([]);
+                                        }
+                                    }}
+                                >
+                                    Yeniden Oluştur
                                 </button>
                                 <button className="sifirdan-birincil-buton" onClick={handleAnketiYayinla}>
                                     Anketi Yayınla
@@ -321,4 +422,4 @@ function SifirdanAnket() {
     );
 }
 
-export default SifirdanAnket;
+export default AIileAnket;

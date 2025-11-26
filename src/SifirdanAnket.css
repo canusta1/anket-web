@@ -597,3 +597,226 @@ input:checked+.sifirdan-slider:before {
         font-size: 0.9rem;
     }
 }
+
+/* AI Modal Stilleri - SifirdanAnket.css dosyanıza ekleyin */
+
+/* AI Modal Stilleri - SifirdanAnket.css dosyanıza ekleyin */
+
+.ai-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.ai-modal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+    color: white;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.ai-modal-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.ai-modal-header .ai-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.ai-modal-header h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.ai-modal-header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.ai-input-group {
+    margin-bottom: 25px;
+}
+
+.ai-input-group label {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.ai-topic-input,
+.ai-count-input {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.ai-topic-input:focus,
+.ai-count-input:focus {
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.ai-topic-input::placeholder {
+    color: #999;
+}
+
+.ai-count-input {
+    width: 100px;
+}
+
+.ai-modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.ai-cancel-btn,
+.ai-generate-btn {
+    flex: 1;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.ai-cancel-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.ai-cancel-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.ai-generate-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.ai-generate-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+}
+
+.ai-cancel-btn:disabled,
+.ai-generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Anket Başlığı Input */
+.anket-baslik-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.2em;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.anket-baslik-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ai-modal {
+        padding: 30px 20px;
+    }
+
+    .ai-modal-header h2 {
+        font-size: 24px;
+    }
+
+    .ai-modal-actions {
+        flex-direction: column;
+    }
+}
