@@ -1,0 +1,152 @@
+/* Genel alan */
+.panel-container {
+  background-color: #f9fdfb;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  color: #134e42;
+  transition: all 0.3s ease;
+}
+
+/* Navbar */
+.panel-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #134e42;
+  padding: 14px 50px;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel-logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fcd303;
+}
+
+.menu-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #fcd303;
+  transition: 0.2s ease;
+}
+
+.menu-icon:hover {
+  transform: scale(1.1);
+}
+
+.nav-right a {
+  color: #fff;
+  margin: 0 12px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.nav-right a:hover {
+  color: #fcd303;
+}
+
+.btn-green {
+  background-color: #00b067;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: 0.2s ease;
+}
+
+.btn-green:hover {
+  background-color: #01915a;
+}
+
+.btn-white {
+  background: #fff;
+  color: #134e42;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: 0.2s ease;
+}
+
+.btn-white:hover {
+  background-color: #fcd303;
+  color: #000;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 220px;
+  height: 100%;
+  background-color: #0f3d33;
+  color: white;
+  padding-top: 80px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  transition: left 0.3s ease;
+  z-index: 9;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 15px 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.2s ease;
+}
+
+.sidebar li:hover {
+  background-color: #007f4f;
+}
+
+.icon {
+  color: #fcd303;
+}
+
+/* Ana içerik */
+.panel-main {
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.panel-main h1 {
+  color: #134e42;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.panel-main .desc {
+  font-size: 1.05rem;
+  color: #333;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto;
+}
