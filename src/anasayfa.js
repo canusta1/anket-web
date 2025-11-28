@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import "./Anasayfa.css";
 import { Link } from "react-router-dom";
+import unnamedImg from "./res/drawable/unnamed.png";
 
 function Anasayfa() {
   function scrollSlider(direction) {
@@ -47,12 +48,14 @@ function Anasayfa() {
               Güzel görünen, ilgi çekici anket ve formlarla etkili geri bildirimler toplayın
               ve akıllı iş kararlarına yön verin.
             </p>
-            <button className="btn-green">Ücretsiz kullanmaya başlayın</button>
+            <Link to="/uyeol">
+              <button className="btn-green">Ücretsiz kullanmaya başlayın</button>
+            </Link>
           </div>
 
           <div className="hero-image">
             <img
-              src="public/logo192.png"
+              src={unnamedImg}
               alt="Yapay Zeka Destekli Anket"
             />
           </div>
@@ -61,7 +64,7 @@ function Anasayfa() {
 
       {/* Slider Alanı */}
       <section className="slider">
-        <h2>7 Adımda Anket Oluşturma</h2>
+        <h2>6 Adımda Anket Oluşturma</h2>
 
         <div className="slider-container">
           <button className="arrow-btn left" onClick={() => scrollSlider(-1)}>‹</button>
