@@ -1,0 +1,398 @@
+.hedef-kitle-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.hedef-kitle-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.hedef-kitle-header h1 {
+    font-size: 2.5em;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.hedef-kitle-header p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.hedef-kitle-kart {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.kart-baslik {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.kart-ikon {
+    font-size: 1.5em;
+    color: #3498db;
+}
+
+.kart-baslik h3 {
+    font-size: 1.4em;
+    color: #2c3e50;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.zorunlu-badge {
+    background: #e74c3c;
+    color: white;
+    font-size: 0.6em;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.kart-aciklama {
+    color: #7f8c8d;
+    margin-bottom: 20px;
+}
+
+.telefon-input-grup {
+    position: relative;
+}
+
+.telefon-input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.telefon-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.input-aciklama {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #95a5a6;
+    font-size: 0.9em;
+}
+
+.kriterler-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.kriter-kart {
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.kriter-kart:hover {
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+.kriter-kart.aktif {
+    background: #ebf5fb;
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.kriter-ust {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.kriter-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+}
+
+.kriter-checkbox input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 24px;
+    width: 24px;
+    background-color: white;
+    border: 2px solid #bdc3c7;
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+.kriter-checkbox input:checked ~ .checkmark {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.kriter-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.kriter-baslik-grup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.kriter-ikon {
+    font-size: 1.3em;
+    color: #3498db;
+}
+
+.kriter-isim {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1em;
+}
+
+.kriter-detay {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #d5dbdb;
+    position: relative;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kriter-input, .kriter-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d5dbdb;
+    border-radius: 8px;
+    font-size: 0.95em;
+    transition: all 0.3s;
+}
+
+.kriter-input:focus, .kriter-select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.input-sayac {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #95a5a6;
+    font-size: 0.85em;
+    pointer-events: none;
+}
+
+.link-olustur-alan {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.link-olustur-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 18px 50px;
+    font-size: 1.2em;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.link-olustur-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.link-olustur-btn:active {
+    transform: translateY(0);
+}
+
+.olusturulan-link-kart {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 30px;
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.link-baslik {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.basari-ikon {
+    font-size: 2em;
+    color: #2ecc71;
+    animation: pulse 1s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.link-baslik h3 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.link-gosterim {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.link-input {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    background: rgba(255,255,255,0.95);
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.link-kopyala-btn {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.link-kopyala-btn:hover {
+    background: #27ae60;
+    transform: scale(1.05);
+}
+
+.link-kopyala-btn:active {
+    transform: scale(0.98);
+}
+
+.link-aciklama {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+/* Responsive tasarım */
+@media (max-width: 768px) {
+    .hedef-kitle-header h1 {
+        font-size: 2em;
+    }
+
+    .kriterler-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .link-gosterim {
+        flex-direction: column;
+    }
+
+    .hedef-kitle-kart {
+        padding: 20px;
+    }
+
+    .link-olustur-btn {
+        padding: 15px 35px;
+        font-size: 1.1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .hedef-kitle-container {
+        padding: 0 15px;
+    }
+
+    .hedef-kitle-header h1 {
+        font-size: 1.6em;
+    }
+
+    .kart-baslik h3 {
+        font-size: 1.2em;
+    }
+
+    .telefon-input {
+        font-size: 1em;
+        padding: 12px;
+    }
+}
