@@ -1,4 +1,3 @@
-// anket-web/anket-backend/server.js
 console.log("Booting server...");
 require("dotenv").config();
 
@@ -9,17 +8,14 @@ const aiRoutes = require('./aiRoutes');
 
 const app = express();
 
-// Middlewares
-app.use(express.json());
-app.use(
-  cors({
-    origin:
-      (process.env.ALLOWED_ORIGIN &&
-        process.env.ALLOWED_ORIGIN.split(",").map((s) => s.trim())) || "*",
-  })
-);
+// --- 1. CORS AYARINI EN TEPEYE ALDIK (KRİTİK HAMLE) ---
+// Frontend hangi portta çalışırsa çalışsın (51900, 3000 vs.) izin verir.
+app.use(cors());
 
-// DB
+// --- 2. JSON Parser ---
+app.use(express.json());
+
+// DB Bağlantısı
 mongoose
   .connect(process.env.MONGODB_URI, { autoIndex: true })
   .then(() => console.log("✅ MongoDB bağlantısı başarılı"))
@@ -28,21 +24,22 @@ mongoose
     process.exit(1);
   });
 
-// Health
+// Health Check
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-// ROUTES —— BURASI ÖNEMLİ
+// ROUTES
 app.use("/api/auth", require("./routes/auth"));           // kayıt / giriş / me
 app.use("/api/surveys", require("./routes/surveys"));     // anket CRUD
 app.use("/api/responses", require("./routes/responses")); // yanıt + istatistik
 app.use("/api/ai", aiRoutes);                             // AI anket oluşturma
 
-// 404 (opsiyonel)
+// 404
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 
-// Server
+// Port Ayarı
 const port = process.env.PORT || 4000;
-const server = app.listen(port, 'localhost', function () {
+
+const server = app.listen(port, function () {
   console.log(`🚀 Server ${port} portunda başladı`);
 }).on('error', (err) => {
   console.error('Server error:', err);

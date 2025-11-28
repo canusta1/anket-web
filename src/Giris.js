@@ -1,35 +1,53 @@
 import React, { useState } from "react";
-import "./Auth.css";
+import "./Auth.css"; // Eğer css dosyanın adı farklıysa düzelt
 import { Link, useNavigate } from "react-router-dom";
 
 function Giris() {
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
-      // use relative URL so CRA dev server proxy (package.json) forwards to backend
-      const res = await fetch("/api/auth/login", {
+      // GÜNCELLEME: Windows makinelerde 'localhost' bazen geç algılanabilir.
+      // Bu yüzden doğrudan IP adresi (127.0.0.1) kullanmak daha garantidir.
+      const res = await fetch("http://127.0.0.1:4000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Giriş başarısız");
 
-      // Token sakla — backend korumalı endpointlerde kullanacağız
+      // Backend'den { error: "..." } dönerse buraya girer
+      if (!res.ok) {
+        throw new Error(data.error || "Giriş başarısız");
+      }
+
+      // BAŞARILI: Token'ı tarayıcıya kaydet
+      // Bu token, ileride anket oluştururken "Ben kimim?" ispatı olacak.
       localStorage.setItem("token", data.token);
-      // İstersen user da saklayabilirsin:
-      // localStorage.setItem("me", JSON.stringify(data.user));
 
+      // Kullanıcı bilgisini de saklayabilirsin
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Panele yönlendir
       navigate("/panel");
+
     } catch (err) {
-      setError(err.message);
+      console.error("Giriş Hatası Detayı:", err);
+      // Eğer hata "Failed to fetch" ise sunucu kapalı demektir, kullanıcıyı uyaralım.
+      if (err.message === "Failed to fetch") {
+        setError("Sunucuya ulaşılamadı. Backend'i başlattığınızdan emin olun.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -48,8 +66,8 @@ function Giris() {
             placeholder="E-posta adresinizi girin"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
+            required
+            autoComplete="email"
           />
 
           <label>Şifre</label>
@@ -58,25 +76,22 @@ function Giris() {
             placeholder="Şifrenizi girin"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
+            required
+            autoComplete="current-password"
           />
 
-          {error && <div className="error-text">{error}</div>}
+          {error && <div className="error-text" style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
 
           <button type="submit" className="btn-green" disabled={loading}>
-            {loading ? "Gönderiliyor..." : "Giriş Yap"}
+            {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
           </button>
         </form>
 
         <div className="divider">veya</div>
 
         <div className="social-login">
-          <button className="social-btn microsoft" type="button">Microsoft</button>
-          <button className="social-btn facebook"   type="button">Facebook</button>
-          <button className="social-btn linkedin"   type="button">LinkedIn</button>
-          <button className="social-btn google"     type="button">Google</button>
-          <button className="social-btn apple"      type="button">Apple</button>
+          {/* Sosyal medya butonları şimdilik görsel kalabilir */}
+          <button className="social-btn google" type="button">Google</button>
         </div>
       </div>
     </div>
