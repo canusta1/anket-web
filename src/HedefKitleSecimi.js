@@ -13,7 +13,8 @@ import {
     FaShieldAlt,
     FaLink,
     FaCheckCircle,
-    FaMobileAlt
+    FaMobileAlt,
+    FaPlus
 } from "react-icons/fa";
 
 function HedefKitleSecimi() {
@@ -33,6 +34,7 @@ function HedefKitleSecimi() {
     const handleLogout = () => navigate("/giris");
     const handleGeriDon = () => navigate(-1);
     const handleAnketOlustur = () => navigate("/anket-olustur");
+    const handlePaneleDon = () => navigate("/panel");
 
     const handleKriterToggle = (kriter) => {
         setSecilenKriterler({
@@ -306,7 +308,7 @@ function HedefKitleSecimi() {
                         )}
                     </div>
 
-                    {/* Link Oluştur Butonu */}
+                    {/* Butonlar */}
                     <div style={{ textAlign: "center", margin: "40px 0" }}>
                         <button 
                             onClick={handleLinkOlustur} 
@@ -322,13 +324,37 @@ function HedefKitleSecimi() {
                                 display: "inline-flex", 
                                 alignItems: "center", 
                                 boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
-                                transition: "all 0.3s"
+                                transition: "all 0.3s",
+                                marginRight: "15px"
                             }}
                             onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
                             onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
                         >
                             <FaLink style={{ marginRight: "10px" }} />
                             Anket Linki Oluştur
+                        </button>
+                        
+                        <button 
+                            onClick={handlePaneleDon} 
+                            style={{ 
+                                background: "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)", 
+                                color: "white", 
+                                border: "none", 
+                                padding: "18px 50px", 
+                                fontSize: "1.2em", 
+                                fontWeight: 600, 
+                                borderRadius: "50px", 
+                                cursor: "pointer", 
+                                display: "inline-flex", 
+                                alignItems: "center", 
+                                boxShadow: "0 4px 15px rgba(46, 204, 113, 0.4)",
+                                transition: "all 0.3s"
+                            }}
+                            onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
+                            onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
+                        >
+                            <FaPlus style={{ marginRight: "10px" }} />
+                            Anketi Oluştur
                         </button>
                     </div>
 
