@@ -22,7 +22,8 @@ function Anasayfa() {
     <div className="App">
       {/* Üst Menü */}
       <nav className="navbar">
-        <Link to="/" className="logo">AnketApp</Link>
+        {/* Sol üstteki logo zaten panele gidiyor */}
+        <Link to="/panel" className="logo">AnketApp</Link>
         <div className="nav-links">
           <Link to="/giris">
             <button className="btn-outline">Giriş Yap</button>
@@ -48,9 +49,14 @@ function Anasayfa() {
               Güzel görünen, ilgi çekici anket ve formlarla etkili geri bildirimler toplayın
               ve akıllı iş kararlarına yön verin.
             </p>
-            <Link to="/uyeol">
-              <button className="btn-green">Ücretsiz kullanmaya başlayın</button>
+
+            {/* --- DEĞİŞİKLİK BURADA --- */}
+            {/* Hedefi /panel yaptık */}
+            <Link to="/panel">
+              <button className="btn-green">Panele Git</button>
             </Link>
+            {/* ------------------------- */}
+
           </div>
 
           <div className="hero-image">

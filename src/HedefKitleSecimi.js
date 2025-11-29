@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
     FaBars,
     FaUser,
@@ -14,11 +14,30 @@ import {
     FaLink,
     FaCheckCircle,
     FaMobileAlt,
-    FaPlus
+    FaSpinner
 } from "react-icons/fa";
 
+
+
+
 function HedefKitleSecimi() {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Önceki sayfadan (AIileAnket veya SifirdanAnket) taşınan verileri alıyoruz
+    const gelenVeri = location.state;
+
+    // Güvenlik: Eğer bu sayfaya direkt linkten girildiyse (veri yoksa) anasayfaya yönlendir
+    useEffect(() => {
+        if (!gelenVeri) {
+            navigate("/");
+        }
+    }, [gelenVeri, navigate]);
+
     const [menuOpen, setMenuOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [olusanLink, setOlusanLink] = useState(null);
+
     const [secilenKriterler, setSecilenKriterler] = useState({
         mail: false,
         tcNo: false,
@@ -27,9 +46,6 @@ function HedefKitleSecimi() {
     });
 
     const [mailUzantisi, setMailUzantisi] = useState("");
-    const [anketLinki, setAnketLinki] = useState("");
-    
-    const navigate = useNavigate();
 
     const handleLogout = () => navigate("/giris");
     const handleGeriDon = () => navigate(-1);
@@ -37,64 +53,91 @@ function HedefKitleSecimi() {
     const handlePaneleDon = () => navigate("/panel");
 
     const handleKriterToggle = (kriter) => {
-        setSecilenKriterler({
-            ...secilenKriterler,
-            [kriter]: !secilenKriterler[kriter]
-        });
-        
+        setSecilenKriterler({ ...secilenKriterler, [kriter]: !secilenKriterler[kriter] });
         // Mail seçimi kaldırıldığında uzantıyı temizle
-        if (kriter === "mail" && secilenKriterler.mail) {
-            setMailUzantisi("");
-        }
+        if (kriter === "mail" && secilenKriterler.mail) setMailUzantisi("");
     };
 
-    const handleLinkOlustur = () => {
-        const secilenler = Object.entries(secilenKriterler)
-            .filter(([_, deger]) => deger)
-            .map(([kriter, _]) => kriter);
-
-        // Mail seçiliyse uzantı kontrolü
+    // =================================================================
+    // ASIL KAYIT VE LİNK OLUŞTURMA İŞLEMİ (BACKEND İLE)
+    // =================================================================
+    const handleLinkOlustur = async () => {
+        // 1. Validasyon
         if (secilenKriterler.mail && !mailUzantisi.trim()) {
-            alert("⚠️ Mail kriteri seçtiniz! Lütfen geçerli bir mail uzantısı girin (örn: @gmail.com veya @sirket.com)");
+            alert("⚠️ Mail kriteri seçtiniz! Lütfen geçerli bir mail uzantısı girin (örn: @gmail.com).");
             return;
         }
 
-        const benzersizKod = Math.random().toString(36).substring(2, 10).toUpperCase();
-        const yeniLink = `https://anketapp.com/s/${benzersizKod}`;
-        setAnketLinki(yeniLink);
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Oturum süreniz dolmuş, lütfen tekrar giriş yapın.");
+            navigate("/giris");
+            return;
+        }
 
-        // Seçilen kriterleri göster
-        const kriterIsimler = {
-            mail: mailUzantisi ? `E-Mail (${mailUzantisi})` : "E-Mail",
-            tcNo: "TC Kimlik No",
-            konum: "Konum",
-            kimlikDogrulama: "Kimlik Doğrulama"
+        setLoading(true);
+
+        // 2. Önceki sayfadan gelen veriyi ve burada seçilen kriterleri birleştir
+        const finalVeri = {
+            ...gelenVeri,
+            hedefKitleKriterleri: {
+                ...secilenKriterler,
+                mailUzantisi: mailUzantisi
+            }
         };
-        const secilenIsimler = secilenler.map(k => kriterIsimler[k]).join(", ");
-        
-        alert(`✨ Anket linki oluşturuldu!\n\n📱 Zorunlu: Cep Telefonu\n\nKatılımcılardan istenecek ek bilgiler:\n${secilenIsimler || "Yok"}`);
+
+        try {
+            // 3. Backend'e POST isteği at
+            const response = await fetch('http://localhost:4000/api/surveys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(finalVeri)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // --- DEĞİŞİKLİK BURADA ---
+                // Yönlendirme (navigate) YAPMIYORUZ.
+                // Linki state'e kaydediyoruz.
+                setOlusanLink(result.data.paylasimLinki);
+
+                alert("✅ Anket başarıyla oluşturuldu! Link aşağıda belirecektir.");
+
+            } else {
+                alert("Hata: " + (result.error || "Anket oluşturulamadı."));
+            }
+
+        } catch (error) {
+            console.error("Kayıt hatası:", error);
+            alert("Sunucuya bağlanılamadı.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleLinkKopyala = () => {
-        navigator.clipboard.writeText(anketLinki);
-        alert("📋 Link kopyalandı!");
-    };
+    // Eğer veri yoksa boş render (useEffect yönlendirecek)
+    if (!gelenVeri) return null;
 
     return (
         <div className="panel-container" style={{ minHeight: "100vh", background: "#f5f6fa" }}>
+            {/* Navbar */}
             <nav className="panel-navbar">
                 <div className="nav-left">
                     <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
                     <FaArrowLeft className="menu-icon" onClick={handleGeriDon} style={{ marginRight: "15px" }} />
                     <span className="panel-logo">AnketApp</span>
                 </div>
-
                 <div className="nav-right">
                     <Link to="/" className="nav-link">Ana Sayfa</Link>
                     <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
                 </div>
             </nav>
 
+            {/* Sidebar */}
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
                 <ul>
                     <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
@@ -104,6 +147,7 @@ function HedefKitleSecimi() {
                 </ul>
             </div>
 
+            {/* Ana İçerik */}
             <main className="anket-main" style={{ padding: "40px 20px" }}>
                 <div style={{ maxWidth: "900px", margin: "0 auto" }}>
                     <div style={{ textAlign: "center", marginBottom: "40px" }}>
@@ -111,7 +155,7 @@ function HedefKitleSecimi() {
                         <p style={{ color: "#7f8c8d", fontSize: "1.1em" }}>Katılımcılardan hangi bilgileri istediğinizi seçin</p>
                     </div>
 
-                    {/* ZORUNLU KRİTER - CEP TELEFONU */}
+                    {/* ZORUNLU KRİTER - CEP TELEFONU (Sabit) */}
                     <div style={{ background: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", borderRadius: "16px", padding: "25px", marginBottom: "30px", boxShadow: "0 6px 20px rgba(231, 76, 60, 0.3)", border: "3px solid #c0392b" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                             <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -130,7 +174,7 @@ function HedefKitleSecimi() {
                         </div>
                     </div>
 
-                    {/* EK KRİTERLER */}
+                    {/* SEÇİLEBİLİR KRİTERLER */}
                     <div style={{ background: "white", borderRadius: "16px", padding: "30px", marginBottom: "25px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
                             <FaShieldAlt style={{ fontSize: "1.5em", color: "#3498db" }} />
@@ -143,14 +187,14 @@ function HedefKitleSecimi() {
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", marginTop: "20px" }}>
                             {/* Mail Kriteri */}
                             <div style={{ gridColumn: secilenKriterler.mail ? "1 / -1" : "auto" }}>
-                                <div 
+                                <div
                                     onClick={() => handleKriterToggle("mail")}
-                                    style={{ 
-                                        background: secilenKriterler.mail ? "#ebf5fb" : "#f8f9fa", 
-                                        border: `2px solid ${secilenKriterler.mail ? "#3498db" : "#e0e0e0"}`, 
-                                        borderRadius: "12px", 
-                                        padding: "20px", 
-                                        cursor: "pointer", 
+                                    style={{
+                                        background: secilenKriterler.mail ? "#ebf5fb" : "#f8f9fa",
+                                        border: `2px solid ${secilenKriterler.mail ? "#3498db" : "#e0e0e0"}`,
+                                        borderRadius: "12px",
+                                        padding: "20px",
+                                        cursor: "pointer",
                                         transition: "all 0.3s",
                                         boxShadow: secilenKriterler.mail ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none"
                                     }}
@@ -159,7 +203,7 @@ function HedefKitleSecimi() {
                                         <input
                                             type="checkbox"
                                             checked={secilenKriterler.mail}
-                                            onChange={() => {}}
+                                            onChange={() => { }}
                                             style={{ width: "20px", height: "20px", cursor: "pointer" }}
                                         />
                                         <FaEnvelope style={{ fontSize: "1.3em", color: "#3498db" }} />
@@ -172,11 +216,11 @@ function HedefKitleSecimi() {
 
                                 {/* Mail Uzantısı Girişi */}
                                 {secilenKriterler.mail && (
-                                    <div style={{ 
-                                        marginTop: "15px", 
-                                        padding: "20px", 
-                                        background: "#f0f8ff", 
-                                        borderRadius: "10px", 
+                                    <div style={{
+                                        marginTop: "15px",
+                                        padding: "20px",
+                                        background: "#f0f8ff",
+                                        borderRadius: "10px",
                                         border: "2px dashed #3498db",
                                         animation: "slideDown 0.3s ease-out"
                                     }}>
@@ -188,11 +232,11 @@ function HedefKitleSecimi() {
                                             value={mailUzantisi}
                                             onChange={(e) => setMailUzantisi(e.target.value)}
                                             placeholder="Örn: @gmail.com veya @sirket.com"
-                                            style={{ 
-                                                width: "100%", 
-                                                padding: "12px 15px", 
-                                                border: "2px solid #3498db", 
-                                                borderRadius: "8px", 
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px 15px",
+                                                border: "2px solid #3498db",
+                                                borderRadius: "8px",
                                                 fontSize: "1em",
                                                 boxSizing: "border-box",
                                                 outline: "none",
@@ -202,7 +246,7 @@ function HedefKitleSecimi() {
                                             onBlur={(e) => e.target.style.borderColor = "#3498db"}
                                         />
                                         <p style={{ margin: "10px 0 0 0", fontSize: "0.85em", color: "#7f8c8d", lineHeight: 1.4 }}>
-                                            💡 <strong>İpucu:</strong> Sadece bu uzantıya sahip e-mail adresleri ankete erişebilecek. 
+                                            💡 <strong>İpucu:</strong> Sadece bu uzantıya sahip e-mail adresleri ankete erişebilecek.
                                             Örneğin "@sirket.com" yazarsanız, sadece sirket.com uzantılı mailler kabul edilir.
                                         </p>
                                     </div>
@@ -210,14 +254,14 @@ function HedefKitleSecimi() {
                             </div>
 
                             {/* TC Kriteri */}
-                            <div 
+                            <div
                                 onClick={() => handleKriterToggle("tcNo")}
-                                style={{ 
-                                    background: secilenKriterler.tcNo ? "#ebf5fb" : "#f8f9fa", 
-                                    border: `2px solid ${secilenKriterler.tcNo ? "#3498db" : "#e0e0e0"}`, 
-                                    borderRadius: "12px", 
-                                    padding: "20px", 
-                                    cursor: "pointer", 
+                                style={{
+                                    background: secilenKriterler.tcNo ? "#ebf5fb" : "#f8f9fa",
+                                    border: `2px solid ${secilenKriterler.tcNo ? "#3498db" : "#e0e0e0"}`,
+                                    borderRadius: "12px",
+                                    padding: "20px",
+                                    cursor: "pointer",
                                     transition: "all 0.3s",
                                     boxShadow: secilenKriterler.tcNo ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none"
                                 }}
@@ -226,7 +270,7 @@ function HedefKitleSecimi() {
                                     <input
                                         type="checkbox"
                                         checked={secilenKriterler.tcNo}
-                                        onChange={() => {}}
+                                        onChange={() => { }}
                                         style={{ width: "20px", height: "20px", cursor: "pointer" }}
                                     />
                                     <FaIdCard style={{ fontSize: "1.3em", color: "#3498db" }} />
@@ -238,14 +282,14 @@ function HedefKitleSecimi() {
                             </div>
 
                             {/* Konum Kriteri */}
-                            <div 
+                            <div
                                 onClick={() => handleKriterToggle("konum")}
-                                style={{ 
-                                    background: secilenKriterler.konum ? "#ebf5fb" : "#f8f9fa", 
-                                    border: `2px solid ${secilenKriterler.konum ? "#3498db" : "#e0e0e0"}`, 
-                                    borderRadius: "12px", 
-                                    padding: "20px", 
-                                    cursor: "pointer", 
+                                style={{
+                                    background: secilenKriterler.konum ? "#ebf5fb" : "#f8f9fa",
+                                    border: `2px solid ${secilenKriterler.konum ? "#3498db" : "#e0e0e0"}`,
+                                    borderRadius: "12px",
+                                    padding: "20px",
+                                    cursor: "pointer",
                                     transition: "all 0.3s",
                                     boxShadow: secilenKriterler.konum ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none"
                                 }}
@@ -254,7 +298,7 @@ function HedefKitleSecimi() {
                                     <input
                                         type="checkbox"
                                         checked={secilenKriterler.konum}
-                                        onChange={() => {}}
+                                        onChange={() => { }}
                                         style={{ width: "20px", height: "20px", cursor: "pointer" }}
                                     />
                                     <FaMapMarkerAlt style={{ fontSize: "1.3em", color: "#3498db" }} />
@@ -266,14 +310,14 @@ function HedefKitleSecimi() {
                             </div>
 
                             {/* Kimlik Doğrulama Kriteri */}
-                            <div 
+                            <div
                                 onClick={() => handleKriterToggle("kimlikDogrulama")}
-                                style={{ 
-                                    background: secilenKriterler.kimlikDogrulama ? "#ebf5fb" : "#f8f9fa", 
-                                    border: `2px solid ${secilenKriterler.kimlikDogrulama ? "#3498db" : "#e0e0e0"}`, 
-                                    borderRadius: "12px", 
-                                    padding: "20px", 
-                                    cursor: "pointer", 
+                                style={{
+                                    background: secilenKriterler.kimlikDogrulama ? "#ebf5fb" : "#f8f9fa",
+                                    border: `2px solid ${secilenKriterler.kimlikDogrulama ? "#3498db" : "#e0e0e0"}`,
+                                    borderRadius: "12px",
+                                    padding: "20px",
+                                    cursor: "pointer",
                                     transition: "all 0.3s",
                                     boxShadow: secilenKriterler.kimlikDogrulama ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none"
                                 }}
@@ -282,7 +326,7 @@ function HedefKitleSecimi() {
                                     <input
                                         type="checkbox"
                                         checked={secilenKriterler.kimlikDogrulama}
-                                        onChange={() => {}}
+                                        onChange={() => { }}
                                         style={{ width: "20px", height: "20px", cursor: "pointer" }}
                                     />
                                     <FaShieldAlt style={{ fontSize: "1.3em", color: "#3498db" }} />
@@ -308,116 +352,130 @@ function HedefKitleSecimi() {
                         )}
                     </div>
 
-                    {/* Butonlar */}
+                    {/* Aksiyon Alanı */}
                     <div style={{ textAlign: "center", margin: "40px 0" }}>
-                        <button 
-                            onClick={handleLinkOlustur} 
-                            style={{ 
-                                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
-                                color: "white", 
-                                border: "none", 
-                                padding: "18px 50px", 
-                                fontSize: "1.2em", 
-                                fontWeight: 600, 
-                                borderRadius: "50px", 
-                                cursor: "pointer", 
-                                display: "inline-flex", 
-                                alignItems: "center", 
-                                boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
-                                transition: "all 0.3s",
-                                marginRight: "15px"
-                            }}
-                            onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
-                            onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
-                        >
-                            <FaLink style={{ marginRight: "10px" }} />
-                            Anket Linki Oluştur
-                        </button>
-                        
-                        <button 
-                            onClick={handlePaneleDon} 
-                            style={{ 
-                                background: "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)", 
-                                color: "white", 
-                                border: "none", 
-                                padding: "18px 50px", 
-                                fontSize: "1.2em", 
-                                fontWeight: 600, 
-                                borderRadius: "50px", 
-                                cursor: "pointer", 
-                                display: "inline-flex", 
-                                alignItems: "center", 
-                                boxShadow: "0 4px 15px rgba(46, 204, 113, 0.4)",
-                                transition: "all 0.3s"
-                            }}
-                            onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
-                            onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
-                        >
-                            <FaPlus style={{ marginRight: "10px" }} />
-                            Anketi Oluştur
-                        </button>
-                    </div>
 
-                    {/* Oluşturulan Link */}
-                    {anketLinki && (
-                        <div style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", borderRadius: "16px", padding: "30px", color: "white", boxShadow: "0 8px 25px rgba(102, 126, 234, 0.3)", animation: "fadeIn 0.5s" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                                <FaCheckCircle style={{ fontSize: "2em", color: "#2ecc71" }} />
-                                <h3 style={{ margin: 0, fontSize: "1.5em" }}>Anket Linkiniz Hazır!</h3>
+                        {/* EĞER LİNK OLUŞTUYSA -> YEŞİL KUTUYU GÖSTER */}
+                        {olusanLink ? (
+                            <div className="anket-basari-kutusu">
+                                <h3>🎉 Anketiniz Yayına Hazır!</h3>
+                                <p>Aşağıdaki linki kopyalayarak hedef kitlenizle paylaşabilirsiniz:</p>
+
+                                <div className="link-satiri">
+                                    <a
+                                        href={olusanLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="olusan-link"
+                                    >
+                                        {olusanLink}
+                                    </a>
+
+                                    <button
+                                        className="link-kopyala-btn"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(olusanLink);
+                                            alert("Link kopyalandı! 📋");
+                                        }}
+                                    >
+                                        Kopyala
+                                    </button>
+                                </div>
+
+                                {/* İsteğe bağlı: Tekrar ana sayfaya dön butonu */}
+                                <div style={{ marginTop: '20px' }}>
+                                    <button className="sifirdan-ikincil-buton" onClick={() => navigate('/')}>Ana Sayfaya Dön</button>
+                                </div>
                             </div>
-                            <div style={{ display: "flex", gap: "10px", marginBottom: "15px", flexWrap: "wrap" }}>
-                                <input
-                                    type="text"
-                                    value={anketLinki}
-                                    readOnly
-                                    style={{ 
-                                        flex: 1, 
-                                        minWidth: "200px",
-                                        padding: "15px", 
-                                        border: "none", 
-                                        borderRadius: "10px", 
-                                        fontSize: "1em", 
-                                        background: "rgba(255,255,255,0.95)", 
-                                        color: "#2c3e50", 
-                                        fontWeight: 500 
+                        ) : (
+                            /* EĞER LİNK YOKSA -> SİZİN TASARIMINIZ OLAN BUTONU GÖSTER */
+                            <button
+                                onClick={handleLinkOlustur}
+                                disabled={loading}
+                                style={{
+                                    background: loading ? "#95a5a6" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                    color: "white",
+                                    border: "none",
+                                    padding: "18px 50px",
+                                    fontSize: "1.2em",
+                                    fontWeight: 600,
+                                    borderRadius: "50px",
+                                    cursor: loading ? "not-allowed" : "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    boxShadow: loading ? "none" : "0 4px 15px rgba(102, 126, 234, 0.4)",
+                                    transition: "all 0.3s",
+                                    marginRight: "15px",
+                                    opacity: loading ? 0.7 : 1
+                                }}
+                                onMouseOver={(e) => !loading && (e.target.style.transform = "translateY(-2px)")}
+                                onMouseOut={(e) => !loading && (e.target.style.transform = "translateY(0)")}
+                            >
+                                {loading ? (
+                                    <FaSpinner className="fa-spin" style={{ marginRight: "10px" }} />
+                                ) : (
+                                    <FaLink style={{ marginRight: "10px" }} />
+                                )}
+                                {loading ? "Oluşturuluyor..." : "Anketi Yayınla ve Link Al"}
+                            </button>
+                        )}
+                    </div>
+                    <button
+                        onClick={handlePaneleDon}
+                        disabled={loading}
+                        style={{
+                            background: "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
+                            color: "white",
+                            border: "none",
+                            padding: "18px 50px",
+                            fontSize: "1.2em",
+                            fontWeight: 600,
+                            borderRadius: "50px",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            boxShadow: "0 4px 15px rgba(46, 204, 113, 0.4)",
+                            transition: "all 0.3s"
+                        }}
+                        onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
+                        onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
+                    >
+                        İptal / Panele Dön
+                    </button>
+
+                    {/* Link oluştuysa bu kutuyu göster */}
+                    {olusanLink && (
+                        <div className="anket-basari-kutusu">
+                            <h3>🎉 Anket Hazır!</h3>
+                            <p>Anketiniz başarıyla oluşturuldu. Aşağıdaki linki kopyalayabilir veya tıklayabilirsiniz:</p>
+
+                            <div className="link-satiri">
+                                <a
+                                    href={olusanLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="olusan-link"
+                                >
+                                    {olusanLink}
+                                </a>
+
+                                <button
+                                    className="link-kopyala-btn"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(olusanLink);
+                                        alert("Link kopyalandı!");
                                     }}
-                                />
-                                <button 
-                                    onClick={handleLinkKopyala} 
-                                    style={{ 
-                                        background: "#2ecc71", 
-                                        color: "white", 
-                                        border: "none", 
-                                        padding: "15px 30px", 
-                                        borderRadius: "10px", 
-                                        fontWeight: 600, 
-                                        cursor: "pointer", 
-                                        whiteSpace: "nowrap",
-                                        transition: "all 0.3s"
-                                    }}
-                                    onMouseOver={(e) => e.target.style.background = "#27ae60"}
-                                    onMouseOut={(e) => e.target.style.background = "#2ecc71"}
                                 >
                                     Kopyala
                                 </button>
                             </div>
-                            <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: "10px", padding: "15px", marginBottom: "15px" }}>
-                                <p style={{ margin: "0 0 10px 0", fontWeight: 600, fontSize: "1.05em" }}>📋 Katılımcılardan İstenecek Bilgiler:</p>
-                                <div style={{ paddingLeft: "10px" }}>
-                                    <p style={{ margin: "5px 0", opacity: 0.95 }}>✓ Cep Telefonu (Zorunlu)</p>
-                                    {secilenKriterler.mail && <p style={{ margin: "5px 0", opacity: 0.95 }}>✓ E-Mail Adresi {mailUzantisi && `(${mailUzantisi})`}</p>}
-                                    {secilenKriterler.tcNo && <p style={{ margin: "5px 0", opacity: 0.95 }}>✓ TC Kimlik No</p>}
-                                    {secilenKriterler.konum && <p style={{ margin: "5px 0", opacity: 0.95 }}>✓ Konum Bilgisi</p>}
-                                    {secilenKriterler.kimlikDogrulama && <p style={{ margin: "5px 0", opacity: 0.95 }}>✓ Kimlik Belgesi</p>}
-                                </div>
-                            </div>
-                            <p style={{ margin: 0, opacity: 0.9, fontSize: "0.95em", lineHeight: 1.5 }}>
-                                Bu linki hedef kitlenizle paylaşın. Katılımcılar anketi doldururken seçtiğiniz kriterleri doldurmak zorunda kalacaklar.
-                            </p>
                         </div>
                     )}
+
+
                 </div>
-            </main>
+
+            </main >
 
             <style>{`
                 @keyframes slideDown {
@@ -441,8 +499,15 @@ function HedefKitleSecimi() {
                         transform: scale(1);
                     }
                 }
+                .fa-spin {
+                    animation: spin 1s infinite linear;
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
             `}</style>
-        </div>
+        </div >
     );
 }
 
