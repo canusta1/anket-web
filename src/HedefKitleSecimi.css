@@ -25,7 +25,7 @@
     border-radius: 16px;
     padding: 30px;
     margin-bottom: 25px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .kart-baslik {
@@ -149,7 +149,7 @@
     transition: all 0.3s;
 }
 
-.kriter-checkbox input:checked ~ .checkmark {
+.kriter-checkbox input:checked~.checkmark {
     background-color: #3498db;
     border-color: #3498db;
 }
@@ -167,7 +167,7 @@
     transform: rotate(45deg);
 }
 
-.kriter-checkbox input:checked ~ .checkmark:after {
+.kriter-checkbox input:checked~.checkmark:after {
     display: block;
 }
 
@@ -202,13 +202,15 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.kriter-input, .kriter-select {
+.kriter-input,
+.kriter-select {
     width: 100%;
     padding: 10px;
     border: 1px solid #d5dbdb;
@@ -217,7 +219,8 @@
     transition: all 0.3s;
 }
 
-.kriter-input:focus, .kriter-select:focus {
+.kriter-input:focus,
+.kriter-select:focus {
     outline: none;
     border-color: #3498db;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
@@ -276,6 +279,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -296,9 +300,12 @@
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.1);
     }
@@ -321,7 +328,7 @@
     border: none;
     border-radius: 10px;
     font-size: 1em;
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
     color: #2c3e50;
     font-weight: 500;
 }
@@ -394,5 +401,92 @@
     .telefon-input {
         font-size: 1em;
         padding: 12px;
+    }
+}
+
+/* Başarı Kutusu (Yeşil Alan) */
+.anket-basari-kutusu {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #4CAF50;
+    border-radius: 12px;
+    background-color: #f0fdf4;
+    /* Çok açık yeşil */
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Başlık */
+.anket-basari-kutusu h3 {
+    color: #166534;
+    /* Koyu yeşil */
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+}
+
+.anket-basari-kutusu p {
+    color: #4b5563;
+    margin-bottom: 15px;
+}
+
+/* Link ve Butonun olduğu satır */
+.link-satiri {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Linkin Kendisi */
+.olusan-link {
+    flex: 1;
+    /* Alanı kapla */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Çok uzunsa ... koy */
+    white-space: nowrap;
+    color: #2563eb;
+    /* Mavi */
+    font-weight: 600;
+    text-decoration: none;
+    padding: 5px;
+}
+
+.olusan-link:hover {
+    text-decoration: underline;
+}
+
+/* Kopyala Butonu */
+.link-kopyala-btn {
+    cursor: pointer;
+    padding: 8px 16px;
+    border: none;
+    background-color: #f3f4f6;
+    color: #374151;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.link-kopyala-btn:hover {
+    background-color: #e5e7eb;
+    color: #111827;
+}
+
+/* Ufak bir animasyon efekti */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

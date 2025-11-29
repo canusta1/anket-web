@@ -1,0 +1,280 @@
+/* --- COMPACT CARD LAYOUT (YENİ) --- */
+.compact-center-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 80px);
+    /* Navbar payı */
+    padding: 20px;
+    background-color: #f8f9fa;
+    /* Hafif gri arka plan */
+}
+
+.compact-card {
+    display: flex;
+    width: 100%;
+    max-width: 1000px;
+    /* Geniş ama çok da yayvan değil */
+    height: 600px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.compact-col {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.left-col {
+    border-right: 1px solid #eee;
+}
+
+.compact-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.compact-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.compact-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.small-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e3f2fd;
+    /* Mavi ton */
+}
+
+.ai-bg {
+    background-color: #e8f5e9;
+    /* Yeşil ton */
+}
+
+.ai-color {
+    color: #2e7d32;
+}
+
+.compact-input,
+.compact-textarea {
+    background-color: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.compact-textarea {
+    resize: none;
+    height: 100%;
+}
+
+.compact-input:focus,
+.compact-textarea:focus {
+    border-color: #2e7d32;
+    /* Odaklanınca yeşil */
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+/* --- YENİ FOOTER VE COUNTER YAPISI --- */
+.ai-footer-row {
+    display: flex;
+    align-items: flex-end;
+    /* Alt hizalama */
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.question-count-control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.question-count-control label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.counter-wrapper {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.counter-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f5f5f5;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    transition: 0.2s;
+}
+
+.counter-btn:hover:not(:disabled) {
+    background: #e0e0e0;
+}
+
+.counter-input {
+    width: 50px;
+    border: none;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #333;
+    outline: none;
+    -moz-appearance: textfield;
+    /* Firefox'ta okları gizle */
+}
+
+.counter-input::-webkit-outer-spin-button,
+.counter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.ai-generate-btn {
+    flex: 1;
+    height: 44px;
+    /* Counter ile aynı yükseklik */
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+    transition: transform 0.2s;
+}
+
+.ai-generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(45, 106, 79, 0.4);
+}
+
+.ai-generate-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Başarı Kutusu (Yeşil Alan) */
+.anket-basari-kutusu {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #4CAF50;
+    border-radius: 12px;
+    background-color: #f0fdf4;
+    /* Çok açık yeşil */
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Başlık */
+.anket-basari-kutusu h3 {
+    color: #166534;
+    /* Koyu yeşil */
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+}
+
+.anket-basari-kutusu p {
+    color: #4b5563;
+    margin-bottom: 15px;
+}
+
+/* Link ve Butonun olduğu satır */
+.link-satiri {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Linkin Kendisi */
+.olusan-link {
+    flex: 1;
+    /* Alanı kapla */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Çok uzunsa ... koy */
+    white-space: nowrap;
+    color: #2563eb;
+    /* Mavi */
+    font-weight: 600;
+    text-decoration: none;
+    padding: 5px;
+}
+
+.olusan-link:hover {
+    text-decoration: underline;
+}
+
+/* Kopyala Butonu */
+.link-kopyala-btn {
+    cursor: pointer;
+    padding: 8px 16px;
+    border: none;
+    background-color: #f3f4f6;
+    color: #374151;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.link-kopyala-btn:hover {
+    background-color: #e5e7eb;
+    color: #111827;
+}
+
+/* Ufak bir animasyon efekti */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
