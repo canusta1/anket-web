@@ -14,6 +14,10 @@ import {
 import "./SifirdanAnket.css";
 
 function SifirdanAnket() {
+    // --- YENİ STATE'LER ---
+    const [baslik, setBaslik] = useState("");
+    const [aciklama, setAciklama] = useState("");
+
     const [soruSayisi, setSoruSayisi] = useState(0);
     const [sorular, setSorular] = useState([]);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -23,9 +27,13 @@ function SifirdanAnket() {
     const handleGeriDon = () => navigate("/anket-olustur");
     const handleAnketOlustur = () => navigate("/anket-olustur");
 
-
-
     const handleOlustur = () => {
+        // --- BAŞLIK KONTROLÜ ---
+        if (!baslik.trim()) {
+            alert("Lütfen anketinize bir isim verin.");
+            return;
+        }
+
         const yeniSorular = [];
         for (let i = 0; i < soruSayisi; i++) {
             yeniSorular.push({
@@ -100,41 +108,83 @@ function SifirdanAnket() {
         setSorular(sorular.filter(s => s.id !== id));
     };
 
-    const handleAnketiYayinla = () => {
+    const handleAnketiYayinla = async () => {
+        // 1. GİRİŞ KONTROLÜ
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("❌ Önce giriş yapmalısınız!");
+            navigate("/giris");
+            return;
+        }
+
+        // 2. VALIDASYONLAR
+        if (!baslik.trim()) {
+            alert("❌ Anket başlığı boş olamaz!");
+            return;
+        }
+
         if (sorular.length === 0) {
             alert("❌ En az bir soru eklemelisiniz!");
             return;
         }
-
-        // Boş soru kontrolü
         const bosSorular = sorular.filter(s => !s.metin.trim());
         if (bosSorular.length > 0) {
             alert("❌ Lütfen tüm soruları doldurun!");
             return;
         }
 
-        // Çoktan seçmeli sorularda seçenek kontrolü
-        const eksikSecenekliSorular = sorular.filter(s => 
-            (s.tip === "coktan-tek" || s.tip === "coktan-coklu") && 
-            s.secenekler.filter(sec => sec.trim()).length < 2
-        );
-        
-        if (eksikSecenekliSorular.length > 0) {
-            alert("❌ Çoktan seçmeli sorularda en az 2 seçenek olmalıdır!");
-            return;
-        }
+        // 3. VERİYİ HAZIRLA (Mapping)
+        const backendFormatindaSorular = sorular.map((s, index) => ({
+            soruId: s.id.toString(),
+            soruMetni: s.metin,
+            soruTipi: s.tip,
+            zorunlu: s.zorunlu,
+            siraNo: index + 1,
+            secenekler: s.secenekler.map((sec, i) => ({
+                secenekId: `opt-${s.id}-${i}`,
+                metin: sec
+            })),
+            sliderMin: s.tip === 'slider' ? 1 : null,
+            sliderMax: s.tip === 'slider' ? 10 : null
+        }));
 
-        // Anket verilerini localStorage'a kaydet
         const anketVerisi = {
-            baslik: "Anketim",
-            sorular: sorular,
-            olusturmaTarihi: new Date().toISOString()
+            anketBaslik: baslik,    // Kullanıcının girdiği başlık
+            anketAciklama: aciklama, // Kullanıcının girdiği açıklama (opsiyonel)
+            sorular: backendFormatindaSorular,
+            hedefKitleKriterleri: {
+                mail: false,
+                tcNo: false,
+                konum: false,
+                kimlikDogrulama: false
+            }
         };
-        
-        localStorage.setItem('anket_verisi', JSON.stringify(anketVerisi));
-        
-        // Hedef kitle seçimi sayfasına yönlendir
-        navigate("/hedef-kitle-secimi");
+
+        try {
+            // 4. İSTEK GÖNDER
+            const response = await fetch('http://localhost:4000/api/surveys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(anketVerisi)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("✅ Anket başarıyla oluşturuldu!");
+                navigate("/hedef-kitle-secimi", { state: { anketId: result.data._id } });
+            } else {
+                alert("❌ Hata: " + (result.error || "Bilinmeyen bir hata oluştu"));
+            }
+
+        } catch (error) {
+            console.error("Bağlantı Hatası:", error);
+            alert("❌ Sunucuya bağlanılamadı. Port 4000 açık mı?");
+        }
     };
 
     return (
@@ -177,25 +227,52 @@ function SifirdanAnket() {
                                 <div className="sifirdan-ikon-cerceve">
                                     <FaPalette className="sifirdan-ana-ikon" />
                                 </div>
-                                <h2>Anketinizi Özelleştirin</h2>
-                                <p>Kaç sorudan oluşan bir anket hazırlamak istiyorsunuz?</p>
+                                <h2>Anket Detayları</h2>
+                                <p>Anketinizin genel bilgilerini girin.</p>
+
+                                {/* --- YENİ ALANLAR BURADA --- */}
+                                <div className="sifirdan-input-group">
+                                    <label>Anket Başlığı (Zorunlu)</label>
+                                    <input
+                                        type="text"
+                                        className="sifirdan-text-input"
+                                        placeholder="Örn: Müşteri Memnuniyet Anketi"
+                                        value={baslik}
+                                        onChange={(e) => setBaslik(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="sifirdan-input-group">
+                                    <label>Açıklama (İsteğe Bağlı)</label>
+                                    <textarea
+                                        className="sifirdan-textarea-input"
+                                        placeholder="Anketin amacı nedir?"
+                                        value={aciklama}
+                                        onChange={(e) => setAciklama(e.target.value)}
+                                        rows="3"
+                                    />
+                                </div>
 
                                 <div className="sifirdan-soru-sayisi-girdi">
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="50"
-                                        value={soruSayisi}
-                                        onChange={(e) => setSoruSayisi(parseInt(e.target.value) || 0)}
-                                        placeholder="Örn: 5"
-                                    />
-                                    <span>soru</span>
+                                    <label style={{ display: 'block', marginBottom: '5px' }}>Soru Sayısı</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="50"
+                                            value={soruSayisi}
+                                            onChange={(e) => setSoruSayisi(parseInt(e.target.value) || 0)}
+                                            placeholder="5"
+                                        />
+                                        <span style={{ marginLeft: '10px' }}>soru</span>
+                                    </div>
                                 </div>
+                                {/* ------------------------- */}
 
                                 <button
                                     className="sifirdan-baslat-butonu"
                                     onClick={handleOlustur}
-                                    disabled={soruSayisi < 1}
+                                    disabled={soruSayisi < 1 || !baslik.trim()}
                                 >
                                     <FaPlus style={{ marginRight: "8px" }} />
                                     Anketi Oluşturmaya Başla
@@ -205,7 +282,11 @@ function SifirdanAnket() {
                     ) : (
                         <div className="sifirdan-soru-olusturma-ekrani">
                             <div className="sifirdan-soru-listesi-header">
-                                <h2>📋 Sorularınızı Düzenleyin</h2>
+                                {/* Kullanıcının girdiği başlığı burada gösteriyoruz */}
+                                <div>
+                                    <h2>{baslik}</h2>
+                                    <p style={{ fontSize: '0.9rem', color: '#666' }}>{aciklama}</p>
+                                </div>
                                 <span className="sifirdan-soru-sayisi-badge">{sorular.length} soru</span>
                             </div>
 
