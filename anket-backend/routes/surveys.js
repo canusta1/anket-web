@@ -75,7 +75,7 @@ router.get("/", auth(true), async (req, res) => {
   try {
     const items = await Survey.find({ kullaniciId: req.user._id })
       .sort({ createdAt: -1 })
-      .select("anketBaslik durum toplamCevapSayisi createdAt paylasimLinki");
+      .select("anketBaslik anketAciklama sorular durum toplamCevapSayisi createdAt paylasimLinki aiIleOlusturuldu");
 
     res.json({ success: true, data: items });
   } catch (e) {
