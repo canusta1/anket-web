@@ -7,9 +7,7 @@ const cors = require("cors");
 const aiRoutes = require('./aiRoutes');
 
 const app = express();
-
-// --- 1. CORS AYARINI EN TEPEYE ALDIK (KRİTİK HAMLE) ---
-// Frontend hangi portta çalışırsa çalışsın (51900, 3000 vs.) izin verir.
+// --- 1. CORS Ayarları ---
 app.use(cors());
 
 // --- 2. JSON Parser ---
