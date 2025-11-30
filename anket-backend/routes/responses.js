@@ -1,50 +1,96 @@
+// anket-backend/routes/responses.js
+
 const router = require("express").Router();
-const mongoose = require("mongoose");
-const Response = require("../models/Response");
+const SurveyResponse = require("../models/SurveyResponse");
+const Survey = require("../models/Survey");
 const auth = require("../middleware/auth");
 
-// Yanıt oluştur (anonim de olabilir; login varsa userId ekleriz)
-router.post("/", auth(false), async (req, res) => {
+// ============================================
+// 1. TEK BİR CEVAP DETAYI
+// ============================================
+router.get("/:responseId", auth(true), async (req, res) => {
   try {
-    const body = { ...req.body };
-    if (req.user?._id) body.userId = req.user._id; // token varsa
-    const created = await Response.create(body);
-    res.status(201).json(created);
+    const cevap = await SurveyResponse.findById(req.params.responseId);
+    if (!cevap) {
+      return res.status(404).json({
+        success: false,
+        error: "Cevap bulunamadı"
+      });
+    }
+
+    // Güvenlik: Sadece sahibi görebilir
+    const anket = await Survey.findById(cevap.anketId);
+    if (!anket) {
+      return res.status(404).json({
+        success: false,
+        error: "İlişkili anket bulunamadı"
+      });
+    }
+
+    if (anket.kullaniciId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: "Bu cevabı görüntüleme yetkiniz yok"
+      });
+    }
+
+    res.json({
+      success: true,
+      data: cevap
+    });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    console.error("Cevap Detay Hatası:", e);
+    res.status(400).json({
+      success: false,
+      error: e.message
+    });
   }
 });
 
-// Belirli ankete ait yanıtları listele (sadece yetkili kullanıcı görsün)
-router.get("/:surveyId", auth(true), async (req, res) => {
-  const { surveyId } = req.params;
-  const items = await Response.find({ surveyId }).sort({ createdAt: -1 });
-  res.json(items);
-});
+// ============================================
+// 2. CEVAP SİL (ANKET SAHİBİ İÇİN)
+// ============================================
+router.delete("/:responseId", auth(true), async (req, res) => {
+  try {
+    const cevap = await SurveyResponse.findById(req.params.responseId);
+    if (!cevap) {
+      return res.status(404).json({
+        success: false,
+        error: "Cevap bulunamadı"
+      });
+    }
 
-// Basit istatistik: çoktan seçmeli sorular için dağılım
-router.get("/:surveyId/stats", auth(true), async (req, res) => {
-  const { surveyId } = req.params;
-  const oid = new mongoose.Types.ObjectId(surveyId);
+    // Güvenlik: Sadece sahibi silebilir
+    const anket = await Survey.findById(cevap.anketId);
+    if (!anket) {
+      return res.status(404).json({
+        success: false,
+        error: "İlişkili anket bulunamadı"
+      });
+    }
 
-  const pipeline = [
-    { $match: { surveyId: oid } },
-    { $unwind: "$answers" },
-    { $group: {
-        _id: { q: "$answers.questionIndex", v: "$answers.value" },
-        count: { $sum: 1 }
-    }},
-    { $group: {
-        _id: "$_id.q",
-        total: { $sum: "$count" },
-        options: { $push: { value: "$_id.v", count: "$count" } }
-    }},
-    { $project: { _id: 0, questionIndex: "$_id", total: 1, options: 1 } },
-    { $sort: { questionIndex: 1 } }
-  ];
+    if (anket.kullaniciId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: "Bu cevabı silme yetkiniz yok"
+      });
+    }
 
-  const stats = await Response.aggregate(pipeline);
-  res.json(stats);
+    // Toplam cevap sayısını azalt
+    anket.toplamCevapSayisi = Math.max(0, (anket.toplamCevapSayisi || 1) - 1);
+    await anket.save();
+
+    // Cevabı sil
+    await SurveyResponse.findByIdAndDelete(req.params.responseId);
+
+    res.status(204).end();
+  } catch (e) {
+    console.error("Cevap Silme Hatası:", e);
+    res.status(400).json({
+      success: false,
+      error: e.message
+    });
+  }
 });
 
 module.exports = router;

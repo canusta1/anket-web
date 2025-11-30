@@ -38,7 +38,8 @@ root.render(
         <Route path="/ai-ile-anket" element={<AIileAnket />} />
         <Route path="/hedef-kitle-secimi" element={<HedefKitleSecimi />} />
         <Route path="/profil" element={<Profil />} />
-        <Route path="/anket/:id" element={<AnketCoz />} />
+        {/*<Route path="/anket/:id" element={<AnketCoz />} />*/}
+        <Route path="/anket-coz/:linkKodu" element={<AnketCoz />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
