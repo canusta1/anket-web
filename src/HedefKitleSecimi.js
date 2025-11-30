@@ -14,20 +14,16 @@ import {
     FaLink,
     FaCheckCircle,
     FaMobileAlt,
-    FaSpinner
+    FaSpinner,
+    FaCopy
 } from "react-icons/fa";
-
-
-
 
 function HedefKitleSecimi() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Önceki sayfadan (AIileAnket veya SifirdanAnket) taşınan verileri alıyoruz
     const gelenVeri = location.state;
 
-    // Güvenlik: Eğer bu sayfaya direkt linkten girildiyse (veri yoksa) anasayfaya yönlendir
     useEffect(() => {
         if (!gelenVeri) {
             navigate("/");
@@ -54,15 +50,10 @@ function HedefKitleSecimi() {
 
     const handleKriterToggle = (kriter) => {
         setSecilenKriterler({ ...secilenKriterler, [kriter]: !secilenKriterler[kriter] });
-        // Mail seçimi kaldırıldığında uzantıyı temizle
         if (kriter === "mail" && secilenKriterler.mail) setMailUzantisi("");
     };
 
-    // =================================================================
-    // ASIL KAYIT VE LİNK OLUŞTURMA İŞLEMİ (BACKEND İLE)
-    // =================================================================
     const handleLinkOlustur = async () => {
-        // 1. Validasyon
         if (secilenKriterler.mail && !mailUzantisi.trim()) {
             alert("⚠️ Mail kriteri seçtiniz! Lütfen geçerli bir mail uzantısı girin (örn: @gmail.com).");
             return;
@@ -77,7 +68,6 @@ function HedefKitleSecimi() {
 
         setLoading(true);
 
-        // 2. Önceki sayfadan gelen veriyi ve burada seçilen kriterleri birleştir
         const finalVeri = {
             ...gelenVeri,
             hedefKitleKriterleri: {
@@ -87,7 +77,6 @@ function HedefKitleSecimi() {
         };
 
         try {
-            // 3. Backend'e POST isteği at
             const response = await fetch('http://localhost:4000/api/surveys', {
                 method: 'POST',
                 headers: {
@@ -100,13 +89,8 @@ function HedefKitleSecimi() {
             const result = await response.json();
 
             if (result.success) {
-                // --- DEĞİŞİKLİK BURADA ---
-                // Yönlendirme (navigate) YAPMIYORUZ.
-                // Linki state'e kaydediyoruz.
                 setOlusanLink(result.data.paylasimLinki);
-
-                alert("✅ Anket başarıyla oluşturuldu! Link aşağıda belirecektir.");
-
+                alert("✅ Anket başarıyla oluşturuldu!");
             } else {
                 alert("Hata: " + (result.error || "Anket oluşturulamadı."));
             }
@@ -119,12 +103,15 @@ function HedefKitleSecimi() {
         }
     };
 
-    // Eğer veri yoksa boş render (useEffect yönlendirecek)
+    const handleLinkKopyala = () => {
+        navigator.clipboard.writeText(olusanLink);
+        alert("📋 Link kopyalandı!");
+    };
+
     if (!gelenVeri) return null;
 
     return (
         <div className="panel-container" style={{ minHeight: "100vh", background: "#f5f6fa" }}>
-            {/* Navbar */}
             <nav className="panel-navbar">
                 <div className="nav-left">
                     <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
@@ -137,7 +124,6 @@ function HedefKitleSecimi() {
                 </div>
             </nav>
 
-            {/* Sidebar */}
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
                 <ul>
                     <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
@@ -147,7 +133,6 @@ function HedefKitleSecimi() {
                 </ul>
             </div>
 
-            {/* Ana İçerik */}
             <main className="anket-main" style={{ padding: "40px 20px" }}>
                 <div style={{ maxWidth: "900px", margin: "0 auto" }}>
                     <div style={{ textAlign: "center", marginBottom: "40px" }}>
@@ -155,7 +140,7 @@ function HedefKitleSecimi() {
                         <p style={{ color: "#7f8c8d", fontSize: "1.1em" }}>Katılımcılardan hangi bilgileri istediğinizi seçin</p>
                     </div>
 
-                    {/* ZORUNLU KRİTER - CEP TELEFONU (Sabit) */}
+                    {/* ZORUNLU KRİTER - CEP TELEFONU */}
                     <div style={{ background: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", borderRadius: "16px", padding: "25px", marginBottom: "30px", boxShadow: "0 6px 20px rgba(231, 76, 60, 0.3)", border: "3px solid #c0392b" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                             <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -214,7 +199,6 @@ function HedefKitleSecimi() {
                                     </p>
                                 </div>
 
-                                {/* Mail Uzantısı Girişi */}
                                 {secilenKriterler.mail && (
                                     <div style={{
                                         marginTop: "15px",
@@ -239,15 +223,11 @@ function HedefKitleSecimi() {
                                                 borderRadius: "8px",
                                                 fontSize: "1em",
                                                 boxSizing: "border-box",
-                                                outline: "none",
-                                                transition: "all 0.3s"
+                                                outline: "none"
                                             }}
-                                            onFocus={(e) => e.target.style.borderColor = "#2980b9"}
-                                            onBlur={(e) => e.target.style.borderColor = "#3498db"}
                                         />
-                                        <p style={{ margin: "10px 0 0 0", fontSize: "0.85em", color: "#7f8c8d", lineHeight: 1.4 }}>
+                                        <p style={{ margin: "10px 0 0 0", fontSize: "0.85em", color: "#7f8c8d" }}>
                                             💡 <strong>İpucu:</strong> Sadece bu uzantıya sahip e-mail adresleri ankete erişebilecek.
-                                            Örneğin "@sirket.com" yazarsanız, sadece sirket.com uzantılı mailler kabul edilir.
                                         </p>
                                     </div>
                                 )}
@@ -352,130 +332,154 @@ function HedefKitleSecimi() {
                         )}
                     </div>
 
-                    {/* Aksiyon Alanı */}
+                    {/* BUTONLAR VE LİNK ALANI */}
                     <div style={{ textAlign: "center", margin: "40px 0" }}>
+                        {!olusanLink ? (
+                            <div style={{ display: "flex", gap: "15px", justifyContent: "center", flexWrap: "wrap" }}>
+                                <button
+                                    onClick={handleLinkOlustur}
+                                    disabled={loading}
+                                    style={{
+                                        background: loading ? "#95a5a6" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "18px 50px",
+                                        fontSize: "1.2em",
+                                        fontWeight: 600,
+                                        borderRadius: "50px",
+                                        cursor: loading ? "not-allowed" : "pointer",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        boxShadow: loading ? "none" : "0 4px 15px rgba(102, 126, 234, 0.4)",
+                                        transition: "all 0.3s",
+                                        opacity: loading ? 0.7 : 1
+                                    }}
+                                >
+                                    {loading ? <FaSpinner className="fa-spin" style={{ marginRight: "10px" }} /> : <FaLink style={{ marginRight: "10px" }} />}
+                                    {loading ? "Oluşturuluyor..." : "Anketi Yayınla ve Link Al"}
+                                </button>
 
-                        {/* EĞER LİNK OLUŞTUYSA -> YEŞİL KUTUYU GÖSTER */}
-                        {olusanLink ? (
-                            <div className="anket-basari-kutusu">
-                                <h3>🎉 Anketiniz Yayına Hazır!</h3>
-                                <p>Aşağıdaki linki kopyalayarak hedef kitlenizle paylaşabilirsiniz:</p>
+                                <button
+                                    onClick={handlePaneleDon}
+                                    disabled={loading}
+                                    style={{
+                                        background: "linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "18px 50px",
+                                        fontSize: "1.2em",
+                                        fontWeight: 600,
+                                        borderRadius: "50px",
+                                        cursor: "pointer",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        boxShadow: "0 4px 15px rgba(149, 165, 166, 0.4)",
+                                        transition: "all 0.3s"
+                                    }}
+                                >
+                                    İptal / Panele Dön
+                                </button>
+                            </div>
+                        ) : (
+                            /* LİNK OLUŞTUĞUNDA GÖSTER */
+                            <div style={{
+                                background: "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
+                                borderRadius: "20px",
+                                padding: "40px",
+                                boxShadow: "0 10px 40px rgba(46, 204, 113, 0.3)",
+                                animation: "fadeInUp 0.5s ease-out",
+                                color: "white"
+                            }}>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "15px", marginBottom: "20px" }}>
+                                    <FaCheckCircle style={{ fontSize: "3em", color: "white" }} />
+                                    <h2 style={{ margin: 0, fontSize: "2em" }}>🎉 Anket Hazır!</h2>
+                                </div>
 
-                                <div className="link-satiri">
+                                <p style={{ fontSize: "1.1em", marginBottom: "25px", opacity: 0.95 }}>
+                                    Anketiniz başarıyla oluşturuldu! Aşağıdaki linki kopyalayıp hedef kitlenizle paylaşabilirsiniz:
+                                </p>
+
+                                <div style={{
+                                    background: "rgba(255, 255, 255, 0.95)",
+                                    borderRadius: "15px",
+                                    padding: "20px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "15px",
+                                    flexWrap: "wrap",
+                                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)"
+                                }}>
                                     <a
                                         href={olusanLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="olusan-link"
+                                        style={{
+                                            flex: 1,
+                                            minWidth: "250px",
+                                            color: "#2c3e50",
+                                            fontSize: "1.05em",
+                                            fontWeight: 500,
+                                            textDecoration: "none",
+                                            wordBreak: "break-all"
+                                        }}
                                     >
                                         {olusanLink}
                                     </a>
 
                                     <button
-                                        className="link-kopyala-btn"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(olusanLink);
-                                            alert("Link kopyalandı! 📋");
+                                        onClick={handleLinkKopyala}
+                                        style={{
+                                            background: "#3498db",
+                                            color: "white",
+                                            border: "none",
+                                            padding: "12px 25px",
+                                            borderRadius: "10px",
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                            fontSize: "1em",
+                                            transition: "all 0.3s"
                                         }}
+                                        onMouseOver={(e) => e.target.style.background = "#2980b9"}
+                                        onMouseOut={(e) => e.target.style.background = "#3498db"}
                                     >
-                                        Kopyala
+                                        <FaCopy /> Kopyala
                                     </button>
                                 </div>
 
-                                {/* İsteğe bağlı: Tekrar ana sayfaya dön butonu */}
-                                <div style={{ marginTop: '20px' }}>
-                                    <button className="sifirdan-ikincil-buton" onClick={() => navigate('/')}>Ana Sayfaya Dön</button>
+                                <div style={{ marginTop: "30px" }}>
+                                    <button
+                                        onClick={() => navigate("/panel")}
+                                        style={{
+                                            background: "rgba(255, 255, 255, 0.2)",
+                                            color: "white",
+                                            border: "2px solid white",
+                                            padding: "12px 30px",
+                                            borderRadius: "25px",
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                            fontSize: "1em",
+                                            transition: "all 0.3s"
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.target.style.background = "white";
+                                            e.target.style.color = "#27ae60";
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.target.style.background = "rgba(255, 255, 255, 0.2)";
+                                            e.target.style.color = "white";
+                                        }}
+                                    >
+                                        Panele Dön
+                                    </button>
                                 </div>
                             </div>
-                        ) : (
-                            /* EĞER LİNK YOKSA -> SİZİN TASARIMINIZ OLAN BUTONU GÖSTER */
-                            <button
-                                onClick={handleLinkOlustur}
-                                disabled={loading}
-                                style={{
-                                    background: loading ? "#95a5a6" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                                    color: "white",
-                                    border: "none",
-                                    padding: "18px 50px",
-                                    fontSize: "1.2em",
-                                    fontWeight: 600,
-                                    borderRadius: "50px",
-                                    cursor: loading ? "not-allowed" : "pointer",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    boxShadow: loading ? "none" : "0 4px 15px rgba(102, 126, 234, 0.4)",
-                                    transition: "all 0.3s",
-                                    marginRight: "15px",
-                                    opacity: loading ? 0.7 : 1
-                                }}
-                                onMouseOver={(e) => !loading && (e.target.style.transform = "translateY(-2px)")}
-                                onMouseOut={(e) => !loading && (e.target.style.transform = "translateY(0)")}
-                            >
-                                {loading ? (
-                                    <FaSpinner className="fa-spin" style={{ marginRight: "10px" }} />
-                                ) : (
-                                    <FaLink style={{ marginRight: "10px" }} />
-                                )}
-                                {loading ? "Oluşturuluyor..." : "Anketi Yayınla ve Link Al"}
-                            </button>
                         )}
                     </div>
-                    <button
-                        onClick={handlePaneleDon}
-                        disabled={loading}
-                        style={{
-                            background: "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
-                            color: "white",
-                            border: "none",
-                            padding: "18px 50px",
-                            fontSize: "1.2em",
-                            fontWeight: 600,
-                            borderRadius: "50px",
-                            cursor: "pointer",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            boxShadow: "0 4px 15px rgba(46, 204, 113, 0.4)",
-                            transition: "all 0.3s"
-                        }}
-                        onMouseOver={(e) => e.target.style.transform = "translateY(-2px)"}
-                        onMouseOut={(e) => e.target.style.transform = "translateY(0)"}
-                    >
-                        İptal / Panele Dön
-                    </button>
-
-                    {/* Link oluştuysa bu kutuyu göster */}
-                    {olusanLink && (
-                        <div className="anket-basari-kutusu">
-                            <h3>🎉 Anket Hazır!</h3>
-                            <p>Anketiniz başarıyla oluşturuldu. Aşağıdaki linki kopyalayabilir veya tıklayabilirsiniz:</p>
-
-                            <div className="link-satiri">
-                                <a
-                                    href={olusanLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="olusan-link"
-                                >
-                                    {olusanLink}
-                                </a>
-
-                                <button
-                                    className="link-kopyala-btn"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(olusanLink);
-                                        alert("Link kopyalandı!");
-                                    }}
-                                >
-                                    Kopyala
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-
                 </div>
-
-            </main >
+            </main>
 
             <style>{`
                 @keyframes slideDown {
@@ -489,25 +493,27 @@ function HedefKitleSecimi() {
                     }
                 }
                 
-                @keyframes fadeIn {
+                @keyframes fadeInUp {
                     from {
                         opacity: 0;
-                        transform: scale(0.95);
+                        transform: translateY(30px);
                     }
                     to {
                         opacity: 1;
-                        transform: scale(1);
+                        transform: translateY(0);
                     }
                 }
+                
                 .fa-spin {
                     animation: spin 1s infinite linear;
                 }
+                
                 @keyframes spin {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
                 }
             `}</style>
-        </div >
+        </div>
     );
 }
 

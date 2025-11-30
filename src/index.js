@@ -13,7 +13,7 @@ import SifirdanAnket from './SifirdanAnket';
 import AIileAnket from './AIileAnket';
 import HedefKitleSecimi from './HedefKitleSecimi';
 import Profil from './Profil';
-import AnketCoz from "./pages/AnketCoz";
+import AnketCoz from "./AnketCoz";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
