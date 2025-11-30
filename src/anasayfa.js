@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import "./Anasayfa.css";
+import "./Anasayfa.css"; // CSS dosya adı küçük harfle ise burayı kontrol et (anasayfa.css)
 import { Link } from "react-router-dom";
 import unnamedImg from "./res/drawable/unnamed.png";
 
@@ -20,8 +20,8 @@ function Anasayfa() {
 
   return (
     <div className="App">
-      {/* Üst Menü */}
-      <nav className="navbar">
+      {/* Üst Menü - Padding azaltıldı */}
+      <nav className="navbar" style={{ padding: "10px 60px" }}>
         {/* Sol üstteki logo zaten panele gidiyor */}
         <Link to="/panel" className="logo">AnketApp</Link>
         <div className="nav-links">
@@ -34,8 +34,8 @@ function Anasayfa() {
         </div>
       </nav>
 
-      {/* Hero Bölümü */}
-      <section className="hero">
+      {/* Hero Bölümü - Padding azaltılarak içerik yukarı taşındı */}
+      <section className="hero" style={{ padding: "50px 120px" }}>
         <div className="hero-content">
           <div className="hero-text">
             <p className="hero-subtitle">
@@ -50,10 +50,10 @@ function Anasayfa() {
               ve akıllı iş kararlarına yön verin.
             </p>
 
-            {/* --- DEĞİŞİKLİK BURADA --- */}
-            {/* Hedefi /panel yaptık */}
-            <Link to="/panel">
-              <button className="btn-green">Panele Git</button>
+            {/* --- GÜNCELLENEN KISIM --- */}
+            {/* Hedef /uyeol yapıldı ve metin değiştirildi */}
+            <Link to="/uyeol">
+              <button className="btn-green">Hemen Kullanmaya Başlayın</button>
             </Link>
             {/* ------------------------- */}
 

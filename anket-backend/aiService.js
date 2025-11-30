@@ -105,7 +105,10 @@ KURALLAR:
             throw parseError;
         }
 
-        const sorularWithIds = (parsedData.sorular || []).map((soru, index) => ({
+        // İstenen soru sayısına kes (AI fazla soru üretebiliyor)
+        const sorularKesik = (parsedData.sorular || []).slice(0, questionCount);
+
+        const sorularWithIds = sorularKesik.map((soru, index) => ({
             id: Date.now() + index,
             metin: soru.metin || "",
             tip: soru.tip || "acik-uclu",
@@ -113,7 +116,7 @@ KURALLAR:
             zorunlu: soru.zorunlu !== false,
         }));
 
-        console.log('🎉 Anket başarıyla oluşturuldu, toplam soru:', sorularWithIds.length);
+        console.log('🎉 Anket başarıyla oluşturuldu, istenilen soru:', questionCount, 'alınan soru:', sorularWithIds.length);
         return {
             anketBaslik: parsedData.anketBaslik || topic,
             sorular: sorularWithIds,

@@ -13,6 +13,7 @@ import SifirdanAnket from './SifirdanAnket';
 import AIileAnket from './AIileAnket';
 import HedefKitleSecimi from './HedefKitleSecimi';
 import Profil from './Profil';
+import AnketCoz from "./AnketCoz";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -37,6 +38,7 @@ root.render(
         <Route path="/ai-ile-anket" element={<AIileAnket />} />
         <Route path="/hedef-kitle-secimi" element={<HedefKitleSecimi />} />
         <Route path="/profil" element={<Profil />} />
+        <Route path="/anket/:id" element={<AnketCoz />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
