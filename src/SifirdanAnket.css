@@ -149,44 +149,43 @@
 }
 
 /* ===========================
-   HEADER
+   HEADER - ÇOK KOMPAKT (SCROLL YOK)
    =========================== */
 .sifirdan-anket-header {
     background: linear-gradient(135deg, #2d6a4f, #52b788);
     color: white;
-    padding: 3rem 2rem;
+    padding: 1rem 2rem;
     text-align: center;
 }
 
 .sifirdan-anket-header h1 {
-    font-size: 2.5rem;
-    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    margin: 0 0 0.2rem 0;
     font-weight: 700;
 }
 
 .sifirdan-anket-header p {
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     opacity: 0.95;
     margin: 0;
 }
 
 /* ===========================
-   BAŞLANGIÇ EKRANI
+   BAŞLANGIÇ EKRANI - ÇOK KOMPAKT (SCROLL YOK)
    =========================== */
 .sifirdan-baslangic-ekrani {
-    padding: 3rem 2rem;
+    padding: 1.2rem 2rem 1.5rem 2rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 500px;
 }
 
 .sifirdan-baslangic-kart {
     background: white;
     border: 2px solid #f0f0f0;
     border-radius: 20px;
-    padding: 3rem;
-    max-width: 600px;
+    padding: 1.5rem 2rem;
+    max-width: 550px;
     width: 100%;
     text-align: center;
     transition: all 0.3s ease;
@@ -194,35 +193,35 @@
 
 .sifirdan-baslangic-kart:hover {
     box-shadow: 0 10px 40px rgba(45, 106, 79, 0.15);
-    transform: translateY(-5px);
+    transform: translateY(-3px);
 }
 
 .sifirdan-ikon-cerceve {
-    width: 100px;
-    height: 100px;
+    width: 60px;
+    height: 60px;
     background: linear-gradient(135deg, #2d6a4f15, #52b78815);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 2rem auto;
+    margin: 0 auto 1rem auto;
 }
 
 .sifirdan-ana-ikon {
-    font-size: 3rem;
+    font-size: 2rem;
     color: #2d6a4f;
 }
 
 .sifirdan-baslangic-kart h2 {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     color: #333;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
 }
 
 .sifirdan-baslangic-kart>p {
     color: #666;
-    margin-bottom: 2rem;
-    font-size: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
 }
 
 /* ===========================
@@ -266,18 +265,22 @@
 }
 
 .sifirdan-soru-sayisi-girdi {
-    margin: 2rem 0;
-    padding: 1.5rem;
+    margin: 1rem 0;
+    padding: 0.8rem;
     background: #f8f9ff;
     border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
 }
 
 .sifirdan-soru-sayisi-girdi input {
-    width: 100px;
-    padding: 0.7rem;
+    width: 65px;
+    padding: 0.45rem;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     text-align: center;
     font-weight: 600;
     transition: all 0.3s ease;
@@ -289,6 +292,11 @@
     box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
 }
 
+.sifirdan-soru-sayisi-girdi span {
+    font-weight: 500;
+    color: #666;
+}
+
 /* ===========================
    BUTONLAR
    =========================== */
@@ -296,22 +304,22 @@
     background: linear-gradient(135deg, #2d6a4f, #52b788);
     color: white;
     border: none;
-    padding: 1rem 2.5rem;
+    padding: 0.75rem 1.8rem;
     border-radius: 12px;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 25px rgba(45, 106, 79, 0.4);
-    margin-top: 1rem;
+    box-shadow: 0 6px 20px rgba(45, 106, 79, 0.4);
+    margin-top: 0.3rem;
 }
 
 .sifirdan-baslat-butonu:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(45, 106, 79, 0.5);
+    box-shadow: 0 10px 30px rgba(45, 106, 79, 0.5);
 }
 
 .sifirdan-baslat-butonu:disabled {
@@ -324,6 +332,8 @@
    =========================== */
 .sifirdan-soru-olusturma-ekrani {
     padding: 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
 }
 
 .sifirdan-soru-listesi-header {
@@ -539,6 +549,10 @@ input:checked+.sifirdan-slider:before {
     font-size: 0.9rem;
 }
 
+.sifirdan-acik-uclu-alani {
+    margin-top: 0.8rem;
+}
+
 .sifirdan-acik-uclu-textarea {
     width: 100%;
     padding: 1rem;
@@ -553,6 +567,10 @@ input:checked+.sifirdan-slider:before {
 }
 
 /* Slider */
+.sifirdan-slider-alani {
+    margin-top: 0.8rem;
+}
+
 .sifirdan-slider-container {
     padding: 1.5rem;
     background: #f8f9ff;
@@ -591,6 +609,7 @@ input:checked+.sifirdan-slider:before {
     background: #f8f9ff;
     padding: 1.5rem;
     border-radius: 12px;
+    margin-top: 0.8rem;
 }
 
 .sifirdan-secenek-satiri {
@@ -598,6 +617,10 @@ input:checked+.sifirdan-slider:before {
     align-items: center;
     gap: 0.8rem;
     margin-bottom: 0.8rem;
+}
+
+.sifirdan-secenek-tipi-goster {
+    flex-shrink: 0;
 }
 
 .sifirdan-radio-nokta {
@@ -640,6 +663,7 @@ input:checked+.sifirdan-slider:before {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .sifirdan-secenek-sil-butonu:hover {
@@ -723,11 +747,32 @@ input:checked+.sifirdan-slider:before {
     }
 
     .sifirdan-anket-header h1 {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
+    }
+
+    .sifirdan-anket-header p {
+        font-size: 0.9rem;
+    }
+
+    .sifirdan-baslangic-ekrani {
+        padding: 1rem;
     }
 
     .sifirdan-baslangic-kart {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .sifirdan-ikon-cerceve {
+        width: 60px;
+        height: 60px;
+    }
+
+    .sifirdan-ana-ikon {
+        font-size: 1.8rem;
+    }
+
+    .sifirdan-baslangic-kart h2 {
+        font-size: 1.2rem;
     }
 
     .sifirdan-soru-ayarlari {
