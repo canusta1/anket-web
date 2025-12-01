@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import {
     FaBars,
     FaUser,
@@ -21,7 +21,47 @@ function SifirdanAnket() {
     const [soruSayisi, setSoruSayisi] = useState(0);
     const [sorular, setSorular] = useState([]);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [loading] = useState(false); // setLoading kaldırıldı (kullanılmıyordu)
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Component açılırken template veya initialQuestionCount varsa işle
+    useEffect(() => {
+        const template = location.state?.template;
+        const initialCount = location.state?.initialQuestionCount;
+
+        if (template) {
+            setAnketBaslik(`${template.anketBaslik || template.name} - Kopya`);
+            setAnketAciklama(template.anketAciklama || "");
+
+            const formatted = (template.sorular || []).map((soru) => ({
+                id: Math.random(),
+                metin: soru.soruMetni || soru.metin || soru.soru || '',
+                tip: soru.soruTipi || soru.tip || 'acik-uclu',
+                secenekler: (soru.secenekler || []).map(sec => (typeof sec === 'string' ? sec : (sec.metin || ""))),
+                zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : false
+            }));
+
+            setSorular(formatted);
+            return;
+        }
+
+        if (initialCount && Number.isInteger(initialCount) && initialCount > 0) {
+            const yeniSorular = [];
+            for (let i = 0; i < initialCount; i++) {
+                yeniSorular.push({
+                    id: Date.now() + i + Math.random(),
+                    metin: "",
+                    tip: "acik-uclu",
+                    secenekler: [],
+                    zorunlu: false
+                });
+            }
+            setSorular(yeniSorular);
+            // fonksiyon formunda default başlık atıyoruz (eslint bağımlılığına gerek yok)
+            setAnketBaslik(prev => prev || "Yeni Anket");
+        }
+    }, [location.state]); // location.state değişirse tekrar çalışır
 
     const handleLogout = () => navigate("/giris");
     const handleGeriDon = () => navigate("/anket-olustur");
@@ -60,7 +100,7 @@ function SifirdanAnket() {
             sorular.map((s) => (s.id === id ? {
                 ...s,
                 tip,
-                secenekler: tip.includes("coktan") ? ["", ""] : []
+                secenekler: tip.includes("coktan") ? s.secenekler.length > 0 ? s.secenekler : ["", ""] : []
             } : s))
         );
     };
@@ -108,6 +148,17 @@ function SifirdanAnket() {
 
     const handleSoruSil = (id) => {
         setSorular(sorular.filter(s => s.id !== id));
+    };
+
+    const handleYeniSoruEkle = () => {
+        const yeni = {
+            id: Math.random(),
+            metin: "",
+            tip: "acik-uclu",
+            secenekler: [],
+            zorunlu: false
+        };
+        setSorular(prev => [...prev, yeni]);
     };
 
     // --- ANKETİ YAYINLA / İLERLE ---
@@ -261,11 +312,41 @@ function SifirdanAnket() {
                         </div>
                     ) : (
                         <div className="sifirdan-soru-olusturma-ekrani">
+                            
+                            {/* Başlık ve Açıklama Düzenleme Alanı - EN ÜSTTE */}
+                            <div style={{ marginBottom: 30, padding: 20, background: "#f5f5f5", borderRadius: 8 }}>
+                                <h3 style={{ marginBottom: 15 }}>📝 Anket Detaylarını Düzenle</h3>
+                                
+                                <div className="sifirdan-input-group" style={{ marginBottom: 15 }}>
+                                    <label style={{ fontWeight: 600, marginBottom: 5, display: "block" }}>Anket Başlığı</label>
+                                    <input
+                                        type="text"
+                                        className="sifirdan-text-input"
+                                        value={anketBaslik}
+                                        onChange={(e) => setAnketBaslik(e.target.value)}
+                                        style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 6 }}
+                                    />
+                                </div>
+
+                                <div className="sifirdan-input-group" style={{ marginBottom: 15 }}>
+                                    <label style={{ fontWeight: 600, marginBottom: 5, display: "block" }}>Açıklama (İsteğe Bağlı)</label>
+                                    <textarea
+                                        className="sifirdan-textarea-input"
+                                        value={anketAciklama}
+                                        onChange={(e) => setAnketAciklama(e.target.value)}
+                                        rows="3"
+                                        style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 6 }}
+                                    />
+                                </div>
+
+                                {/* Soru sayısı bloğu buradan kaldırıldı */}
+                            </div>
+
                             <div className="sifirdan-soru-listesi-header">
                                 {/* Kullanıcının girdiği başlığı burada gösteriyoruz */}
                                 <div>
-                                    <h2>{anketBaslik}</h2> {/* Değişken adı güncellendi */}
-                                    <p style={{ fontSize: '0.9rem', color: '#666' }}>{anketAciklama}</p> {/* Değişken adı güncellendi */}
+                                    <h2>{anketBaslik}</h2>
+                                    <p style={{ fontSize: '0.9rem', color: '#666' }}>{anketAciklama}</p>
                                 </div>
                                 <span className="sifirdan-soru-sayisi-badge">{sorular.length} soru</span>
                             </div>
@@ -399,13 +480,78 @@ function SifirdanAnket() {
                             </div>
 
                             <div className="sifirdan-anket-aksiyonlari">
-                                <button className="sifirdan-ikincil-buton" onClick={() => setSorular([])}>
-                                    Sıfırla
+                                <button className="sifirdan-ikincil-buton" onClick={handleGeriDon}>
+                                    Geri
                                 </button>
-                                <button className="sifirdan-birincil-buton" onClick={handleAnketiYayinla}>
-                                    İleri
-                                </button>
+
+                                <div style={{ display: "flex", gap: "12px", alignItems: "center", flex: 1 }}>
+                                    {/* Soru Sayısı - Sol taraf */}
+                                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                        <label style={{ fontWeight: 600, whiteSpace: "nowrap" }}>Soru Sayısı:</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="50"
+                                            value={sorular.length}
+                                            onChange={(e) => {
+                                                const raw = parseInt(e.target.value, 10);
+                                                const newCount = isNaN(raw) ? 1 : Math.max(1, Math.min(50, raw));
+                                                setSorular(prev => {
+                                                    const currentCount = prev.length;
+                                                    if (newCount > currentCount) {
+                                                        const newQuestions = [];
+                                                        for (let i = 0; i < newCount - currentCount; i++) {
+                                                            newQuestions.push({
+                                                                id: Math.random(),
+                                                                metin: "",
+                                                                tip: "acik-uclu",
+                                                                secenekler: [],
+                                                                zorunlu: false
+                                                            });
+                                                        }
+                                                        return [...prev, ...newQuestions];
+                                                    } else if (newCount < currentCount) {
+                                                        return prev.slice(0, newCount);
+                                                    }
+                                                    return prev;
+                                                });
+                                            }}
+                                            style={{ width: 60, padding: 8, borderRadius: 6, border: "1px solid #ddd" }}
+                                        />
+                                    </div>
+
+                                    {/* Yeni Soru Ekle - Orta */}
+                                    <button
+                                        className="sifirdan-secenek-ekle-butonu"
+                                        onClick={handleYeniSoruEkle}
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                            padding: "10px 14px",
+                                            borderRadius: "8px",
+                                            backgroundColor: "#fff",
+                                            border: "1px solid #ccc",
+                                            cursor: "pointer",
+                                            whiteSpace: "nowrap"
+                                        }}
+                                    >
+                                        <FaPlus /> Yeni Soru Ekle
+                                    </button>
+
+                                    {/* İleri - Sağ taraf */}
+                                    <button 
+                                        className="sifirdan-birincil-buton" 
+                                        onClick={handleAnketiYayinla}
+                                        disabled={loading}
+                                        style={{ whiteSpace: "nowrap" }}
+                                    >
+                                        {loading ? 'Kaydediliyor...' : 'İleri'}
+                                    </button>
+                                </div>
                             </div>
+
+                            {/* Soru sayısı bloğu kaldırıldı (artık aksiyonlar içerisinde) */}
                         </div>
                     )}
                 </div>
