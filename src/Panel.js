@@ -25,6 +25,18 @@ function Panel() {
     navigate("/profil");
   };
 
+  // Menüyü kapatma fonksiyonu
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  // Ana içeriğe tıklanınca menüyü kapat
+  const handleMainClick = () => {
+    if (menuOpen) {
+      setMenuOpen(false);
+    }
+  };
+
   // MongoDB'den anketleri çek
   useEffect(() => {
     const anketleriGetir = async () => {
@@ -135,6 +147,10 @@ function Panel() {
 
       {/* Sol Menü (Sidebar) */}
       <div className={`sidebar ${menuOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
+        </div>
         <ul>
           <li onClick={handleProfil}>
             <FaUser className="icon" /> Profil
@@ -149,8 +165,11 @@ function Panel() {
         </ul>
       </div>
 
+      {/* Overlay - menü açıkken tıklanınca kapatmak için */}
+      {menuOpen && <div className="sidebar-overlay" onClick={closeMenu}></div>}
+
       {/* Ana İçerik */}
-      <main className="panel-main">
+      <main className="panel-main" onClick={handleMainClick}>
         <div className="panel-header">
           <div className="header-left">
             <h1>📋 Anketlerim</h1>
@@ -438,8 +457,9 @@ function Panel() {
         }
 
         .grid-body {
-          max-height: calc(100vh - 350px);
-          overflow-y: auto;
+         /* max-height: calc(100vh - 350px); KAPAT */
+    /* overflow-y: auto; KAPAT */
+    overflow-y: visible;
         }
 
         .grid-row {
