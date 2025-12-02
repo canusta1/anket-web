@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Panel.css";
-import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt } from "react-icons/fa";
+import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
 function Panel() {
@@ -139,7 +139,7 @@ function Panel() {
         </div>
 
         <div className="nav-right">
-          <Link to="/" className="nav-link"><FaHome /> Ana Sayfa</Link>
+          <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
           <button className="btn-white" onClick={handleAnketOlustur}>
             Anket Oluştur
           </button>
@@ -280,6 +280,15 @@ function Panel() {
                           >
                             <FaPencilAlt /> Detay
                           </button>
+                          {anket.paylasimLinki && (
+                            <button
+                              className="btn-view"
+                              onClick={() => window.open(anket.paylasimLinki, '_blank')}
+                              style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                            >
+                              <FaLink /> Link
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
