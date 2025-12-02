@@ -1,28 +1,29 @@
 /* -------- CSS Değişkenleri (Renk Paleti) -------- */
 :root {
-  --primary: #00b067;          /* Ana Yeşil */
-  --primary-dark: #008a50;     /* Koyu Yeşil (Hover için) */
-  --primary-light: #e6f7ef;    /* Çok Açık Yeşil (Arka plan vurguları için) */
-  --secondary: #134e42;        /* Koyu Yeşil/Lacivert (Metin başlıkları için) */
-  --text-main: #333333;        /* Ana Metin */
-  --text-light: #666666;       /* Açıklama Metinleri */
+  --primary: #00b067;
+  /* Ana Yeşil */
+  --primary-dark: #008a50;
+  /* Koyu Yeşil (Hover için) */
+  --primary-light: #e6f7ef;
+  /* Çok Açık Yeşil (Arka plan vurguları için) */
+  --secondary: #134e42;
+  /* Koyu Yeşil/Lacivert (Metin başlıkları için) */
+  --text-main: #333333;
+  /* Ana Metin */
+  --text-light: #666666;
+  /* Açıklama Metinleri */
   --white: #ffffff;
-  --bg-gradient: linear-gradient(135deg, #f0f9f4 0%, #ffffff 100%); /* Hero Arkaplanı */
+  --bg-gradient: linear-gradient(135deg, #f0f9f4 0%, #ffffff 100%);
+  /* Hero Arkaplanı */
   --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 10px 30px rgba(0, 176, 103, 0.15); /* Yeşilimsi gölge */
+  --shadow-md: 0 10px 30px rgba(0, 176, 103, 0.15);
+  /* Yeşilimsi gölge */
   --radius: 12px;
   --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 /* -------- Genel Ayarlar -------- */
-body {
-  margin: 0;
-  font-family: var(--font-family);
-  background-color: var(--white);
-  color: var(--text-main);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased; /* Yazıların daha pürüzsüz görünmesi için */
-}
+/* Global body stilleri index.css'de tanımlı */
 
 /* -------- Navbar (Glassmorphism Efekti) -------- */
 .navbar {
@@ -30,8 +31,10 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 16px 60px;
-  background-color: rgba(255, 255, 255, 0.9); /* Hafif şeffaf */
-  backdrop-filter: blur(10px); /* Buzlu cam efekti */
+  background-color: rgba(255, 255, 255, 0.9);
+  /* Hafif şeffaf */
+  backdrop-filter: blur(10px);
+  /* Buzlu cam efekti */
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -50,7 +53,8 @@ body {
 .nav-links button {
   margin-left: 12px;
   padding: 10px 24px;
-  border-radius: 50px; /* Daha oval butonlar */
+  border-radius: 50px;
+  /* Daha oval butonlar */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -88,7 +92,8 @@ body {
 /* -------- Hero Bölümü (Modern Gradient) -------- */
 .hero {
   background: var(--bg-gradient);
-  padding: 100px 120px; /* Daha ferah boşluklar */
+  padding: 100px 120px;
+  /* Daha ferah boşluklar */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -201,9 +206,17 @@ body {
 
 /* Görselin havada süzülüyormuş gibi görünmesi için animasyon */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .hero-image img {
@@ -212,7 +225,8 @@ body {
   display: block;
   /* Animasyonu aktif et */
   animation: float 6s ease-in-out infinite;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.1)); /* Resme gölge ver */
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.1));
+  /* Resme gölge ver */
 }
 
 /* -------- Slider Alanı -------- */
@@ -255,7 +269,8 @@ body {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   gap: 30px;
-  padding: 40px 20px; /* Gölgelerin kesilmemesi için padding artırıldı */
+  padding: 40px 20px;
+  /* Gölgelerin kesilmemesi için padding artırıldı */
   scrollbar-width: none;
 }
 
@@ -267,13 +282,15 @@ body {
 .step {
   background-color: var(--white);
   border-radius: 20px;
-  border: 1px solid rgba(0,0,0,0.03); /* Çok hafif sınır */
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  /* Çok hafif sınır */
   box-shadow: var(--shadow-sm);
   padding: 40px 30px;
   min-width: 280px;
   max-width: 320px;
   scroll-snap-align: center;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Yaylanma efekti */
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Yaylanma efekti */
   position: relative;
   overflow: hidden;
 }
@@ -346,7 +363,7 @@ body {
   transform: translateY(-50%);
   z-index: 10;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -375,7 +392,8 @@ footer {
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.95rem;
   margin-top: 0;
-  border-top: 4px solid var(--primary); /* Yeşil vurgu */
+  border-top: 4px solid var(--primary);
+  /* Yeşil vurgu */
 }
 
 /* -------- Responsive Ayarlar -------- */
@@ -383,17 +401,18 @@ footer {
   .navbar {
     padding: 16px 20px;
   }
-  
+
   .hero {
     padding: 60px 20px;
     text-align: center;
   }
 
   .hero-content {
-    flex-direction: column-reverse; /* Mobilde görsel üstte olsun istersen column, altta istersen column-reverse */
+    flex-direction: column-reverse;
+    /* Mobilde görsel üstte olsun istersen column, altta istersen column-reverse */
     gap: 40px;
   }
-  
+
   .hero-text {
     min-width: 100%;
   }
@@ -408,14 +427,15 @@ footer {
   }
 
   .arrow-btn {
-    display: none; /* Mobilde oklara gerek yok, kaydırarak gezilebilir */
+    display: none;
+    /* Mobilde oklara gerek yok, kaydırarak gezilebilir */
   }
 
   .slider-steps {
     padding: 20px;
     scroll-padding: 0 20px;
   }
-  
+
   .step {
     min-width: 260px;
   }

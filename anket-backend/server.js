@@ -7,9 +7,7 @@ const cors = require("cors");
 const aiRoutes = require('./aiRoutes');
 
 const app = express();
-
-// --- 1. CORS AYARINI EN TEPEYE ALDIK (KRİTİK HAMLE) ---
-// Frontend hangi portta çalışırsa çalışsın (51900, 3000 vs.) izin verir.
+// --- 1. CORS Ayarları ---
 app.use(cors());
 
 // --- 2. JSON Parser ---
@@ -38,9 +36,11 @@ app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 
 // Port Ayarı
 const port = process.env.PORT || 4000;
+const host = process.env.HOST || '0.0.0.0';
 
-const server = app.listen(port, function () {
-  console.log(`🚀 Server ${port} portunda başladı`);
+const server = app.listen(port, host, function () {
+  console.log(`🚀 Server ${host}:${port} portunda başladı`);
+  console.log(`📱 Mobil erişim için: http://192.168.1.28:${port}`);
 }).on('error', (err) => {
   console.error('Server error:', err);
   process.exit(1);

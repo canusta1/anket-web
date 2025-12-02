@@ -1,11 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
 
-body {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  background: linear-gradient(135deg, #f0fdf9 0%, #e8f7f1 50%, #daf2e8 100%);
-  min-height: 100vh;
-}
+/* Global body stilleri index.css'de tanımlı */
 
 .panel-container {
   min-height: 100vh;
