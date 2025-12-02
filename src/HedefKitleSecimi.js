@@ -94,7 +94,17 @@ function HedefKitleSecimi() {
             const result = await response.json();
 
             if (result.success) {
-                setOlusanLink(result.data.paylasimLinki);
+                // Backend'den gelen link muhtemelen şöyle: http://localhost:4000/anket-coz/KOD123
+                // Biz sadece sondaki KOD kısmını (KOD123) alacağız.
+                const gelenLink = result.data.paylasimLinki;
+                const linkParcalari = gelenLink.split('/');
+                const anketKodu = linkParcalari[linkParcalari.length - 1];
+
+                // window.location.origin = Şu an tarayıcının adres çubuğunda yazan ana domain
+                // (Örn: https://anket-web.vercel.app veya http://localhost:3000)
+                const dinamikLink = `${window.location.origin}/anket-coz/${anketKodu}`;
+
+                setOlusanLink(dinamikLink);
                 alert("✅ Anket başarıyla oluşturuldu!");
             } else {
                 alert("Hata: " + (result.error || "Anket oluşturulamadı."));
