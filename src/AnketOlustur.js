@@ -94,7 +94,7 @@ function AnketOlustur() {
   };
 
   const handleProfil = () => navigate("/profil");
-  const handleAnaSayfa = () => navigate("/");
+  const handleAnaSayfa = () => navigate("/panel");
 
   // Menüyü kapatma
   const closeMenu = () => setMenuOpen(false);
@@ -109,7 +109,7 @@ function AnketOlustur() {
             <span className="panel-logo">AnketApp</span>
           </div>
           <div className="nav-right">
-            <a href="/">Ana Sayfa</a>
+            <a href="/panel">Ana Sayfa</a>
             <button className="btn-white" onClick={() => setTemplateMode(false)}>Geri</button>
           </div>
         </nav>

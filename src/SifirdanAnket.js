@@ -9,7 +9,8 @@ import {
     FaArrowLeft,
     FaPlus,
     FaTrash,
-    FaPalette
+    FaPalette,
+    FaHome
 } from "react-icons/fa";
 import "./SifirdanAnket.css";
 
@@ -229,7 +230,7 @@ function SifirdanAnket() {
                 </div>
 
                 <div className="nav-right">
-                    <Link to="/" className="nav-link">Ana Sayfa</Link>
+                    <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
                     <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
                 </div>
             </nav>
@@ -312,11 +313,11 @@ function SifirdanAnket() {
                         </div>
                     ) : (
                         <div className="sifirdan-soru-olusturma-ekrani">
-                            
+
                             {/* Başlık ve Açıklama Düzenleme Alanı - EN ÜSTTE */}
                             <div style={{ marginBottom: 30, padding: 20, background: "#f5f5f5", borderRadius: 8 }}>
                                 <h3 style={{ marginBottom: 15 }}>📝 Anket Detaylarını Düzenle</h3>
-                                
+
                                 <div className="sifirdan-input-group" style={{ marginBottom: 15 }}>
                                     <label style={{ fontWeight: 600, marginBottom: 5, display: "block" }}>Anket Başlığı</label>
                                     <input
@@ -540,8 +541,8 @@ function SifirdanAnket() {
                                     </button>
 
                                     {/* İleri - Sağ taraf */}
-                                    <button 
-                                        className="sifirdan-birincil-buton" 
+                                    <button
+                                        className="sifirdan-birincil-buton"
                                         onClick={handleAnketiYayinla}
                                         disabled={loading}
                                         style={{ whiteSpace: "nowrap" }}
