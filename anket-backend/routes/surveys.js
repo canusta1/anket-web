@@ -152,7 +152,14 @@ router.post("/", auth(true), async (req, res) => {
 
     // Link kodunu oluştur
     const linkKodu = Math.random().toString(36).substring(2, 10).toUpperCase();
-    const tamLink = `${CLIENT_URL}/anket-coz/${linkKodu}`;
+
+    // Request'in geldikği origin'den URL al (localhost vs IP)
+    const requestOrigin = req.get('origin') || req.get('referer') || `http://${req.get('host')}`;
+    const baseUrl = requestOrigin.split('/').slice(0, 3).join('/'); // Protocol + Host + Port
+    const tamLink = `${baseUrl}/anket-coz/${linkKodu}`;
+
+    console.log("🌐 Request Origin:", requestOrigin);
+    console.log("🔗 Oluşturulan Link:", tamLink);
 
     // Anketi oluştur
     const newSurvey = new Survey({
@@ -179,7 +186,7 @@ router.post("/", auth(true), async (req, res) => {
     // Anketi kaydet
     const savedSurvey = await newSurvey.save();
 
-    console.log("✅ Anket Oluşturuldu. Link:", tamLink);
+    console.log("✅ Anket Oluşturuldu. DB'ye Link Kayıt Türü Değiştirildi. Link:", tamLink);
 
     res.status(201).json({
       success: true,
@@ -203,7 +210,18 @@ router.get("/", auth(true), async (req, res) => {
         "anketBaslik anketAciklama sorular durum toplamCevapSayisi createdAt paylasimLinki aiIleOlusturuldu"
       );
 
-    res.json({ success: true, data: items });
+    // Her anket için SurveyLink'ten tamLink'i al
+    const itemsWithLinks = await Promise.all(
+      items.map(async (item) => {
+        const link = await SurveyLink.findOne({ anketId: item._id });
+        return {
+          ...item.toObject(),
+          paylasimLinki: link ? link.tamLink : item.paylasimLinki
+        };
+      })
+    );
+
+    res.json({ success: true, data: itemsWithLinks });
   } catch (e) {
     res.status(400).json({ success: false, error: e.message });
   }
