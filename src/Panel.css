@@ -5,18 +5,18 @@
   --primary-dark: #00b86c;
   --primary-light: #e8fff3;
   --primary-glow: 0 0 20px rgba(0, 220, 130, 0.3);
-  
+
   /* Sidebar */
   --sidebar-bg: #0f172a;
   --sidebar-hover: #1e293b;
   --sidebar-glow: 0 0 30px rgba(0, 220, 130, 0.1);
-  
+
   /* Genel */
   --bg-body: linear-gradient(135deg, #f0fdf9 0%, #f8fafc 100%);
   --card-bg: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
-  
+
   /* Efektler */
   --shadow-card: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
   --shadow-hover: 0 24px 48px -12px rgba(0, 0, 0, 0.25);
@@ -25,14 +25,6 @@
 }
 
 /* -------- GENEL STİLLER -------- */
-body {
-  margin: 0;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  background: var(--bg-body);
-  color: var(--text-main);
-  overflow-x: hidden;
-}
-
 .panel-container {
   min-height: 100vh;
   position: relative;
@@ -59,6 +51,7 @@ body {
     transform: translateY(-100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -127,7 +120,7 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transition: left 0.5s;
 }
 
@@ -214,7 +207,7 @@ body {
 
 .sidebar-header {
   padding: 0 30px 40px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 20px;
 }
 
@@ -287,6 +280,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -478,7 +472,7 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   transition: left 0.5s;
 }
 
@@ -515,30 +509,31 @@ body {
   .panel-navbar {
     padding: 15px 20px;
   }
-  
+
   .panel-main {
     padding: 24px 16px;
   }
-  
+
   .anket-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  
+
   .sidebar {
     width: 85%;
     max-width: 320px;
   }
-  
+
   .panel-header h1 {
     font-size: 2.2rem;
   }
-  
+
   .nav-right {
     gap: 12px;
   }
-  
-  .btn-green, .btn-white {
+
+  .btn-green,
+  .btn-white {
     padding: 10px 20px;
     font-size: 0.9rem;
   }

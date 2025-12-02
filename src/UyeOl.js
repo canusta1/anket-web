@@ -4,12 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 
 function UyeOl() {
   const [firstName, setFirst] = useState("");
-  const [lastName, setLast]   = useState("");
-  const [tckn, setTckn]       = useState("");
-  const [phone, setPhone]     = useState("");
-  const [email, setEmail]     = useState("");
-  const [password, setPass]   = useState("");
-  const [agreeLoc, setAgreeLoc]   = useState(false);
+  const [lastName, setLast] = useState("");
+  const [tckn, setTckn] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPass] = useState("");
+  const [agreeLoc, setAgreeLoc] = useState(false);
   const [agreeKvkk, setAgreeKvkk] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -20,7 +20,8 @@ function UyeOl() {
     if (tckn && !/^\d{11}$/.test(tckn)) return alert("TC Kimlik No 11 haneli olmalıdır.");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/api/auth/register", {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+      const res = await fetch(`${apiUrl}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ firstName, lastName, tckn, phone, email, password }),
@@ -43,37 +44,37 @@ function UyeOl() {
         <form onSubmit={onSubmit}>
           <label>İsim</label>
           <input type="text" placeholder="Adınızı girin"
-                 value={firstName} onChange={(e)=>setFirst(e.target.value)} required />
+            value={firstName} onChange={(e) => setFirst(e.target.value)} required />
 
           <label>Soyisim</label>
           <input type="text" placeholder="Soyadınızı girin"
-                 value={lastName} onChange={(e)=>setLast(e.target.value)} required />
+            value={lastName} onChange={(e) => setLast(e.target.value)} required />
 
           <label>TC Kimlik No</label>
           <input type="text" placeholder="11 haneli kimlik numaranız" maxLength="11"
-                 value={tckn} onChange={(e)=>setTckn(e.target.value)} />
+            value={tckn} onChange={(e) => setTckn(e.target.value)} />
 
           <label>Telefon Numarası</label>
           <input type="tel" placeholder="05XX XXX XX XX"
-                 value={phone} onChange={(e)=>setPhone(e.target.value)} />
+            value={phone} onChange={(e) => setPhone(e.target.value)} />
 
           <label>E-posta Adresi</label>
           <input type="email" placeholder="E-posta adresinizi girin"
-                 value={email} onChange={(e)=>setEmail(e.target.value)} required />
+            value={email} onChange={(e) => setEmail(e.target.value)} required />
 
           <label>Şifre</label>
           <input type="password" placeholder="Şifrenizi girin"
-                 value={password} onChange={(e)=>setPass(e.target.value)} required />
+            value={password} onChange={(e) => setPass(e.target.value)} required />
 
           <div className="checkbox-group">
             <label>
               <input type="checkbox" checked={agreeLoc}
-                     onChange={(e)=>setAgreeLoc(e.target.checked)} required />
+                onChange={(e) => setAgreeLoc(e.target.checked)} required />
               {" "}Konumumun kullanılmasına onay veriyorum
             </label>
             <label>
               <input type="checkbox" checked={agreeKvkk}
-                     onChange={(e)=>setAgreeKvkk(e.target.checked)} required />
+                onChange={(e) => setAgreeKvkk(e.target.checked)} required />
               {" "}KVKK metnini okudum ve onaylıyorum
             </label>
           </div>

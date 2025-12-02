@@ -108,13 +108,35 @@ KURALLAR:
         // İstenen soru sayısına kes (AI fazla soru üretebiliyor)
         const sorularKesik = (parsedData.sorular || []).slice(0, questionCount);
 
-        const sorularWithIds = sorularKesik.map((soru, index) => ({
-            id: Date.now() + index,
-            metin: soru.metin || "",
-            tip: soru.tip || "acik-uclu",
-            secenekler: soru.secenekler || [],
-            zorunlu: soru.zorunlu !== false,
-        }));
+        // Tip normalizasyonu - AI yanlış tip üretirse düzelt
+        const tipMapping = {
+            "acik-uclu": "acik-uclu",
+            "açık-uçlu": "acik-uclu",
+            "açık uçlu": "acik-uclu",
+            "coktan-tek": "coktan-tek",
+            "çoktan-tek": "coktan-tek",
+            "çoktan seçmeli": "coktan-tek",
+            "tek-seçmeli": "coktan-tek",
+            "tek-seçenekli": "coktan-tek",
+            "tek-seçeneksiz": "acik-uclu", // Yanlış tip, açık uçluya çevir
+            "coktan-coklu": "coktan-coklu",
+            "çoktan-çoklu": "coktan-coklu",
+            "çok-seçmeli": "coktan-coklu",
+            "çok seçmeli": "coktan-coklu",
+            "slider": "slider"
+        };
+
+        const sorularWithIds = sorularKesik.map((soru, index) => {
+            const normalizedTip = tipMapping[soru.tip?.toLowerCase()] || "acik-uclu";
+
+            return {
+                id: Date.now() + index,
+                metin: soru.metin || "",
+                tip: normalizedTip,
+                secenekler: soru.secenekler || [],
+                zorunlu: soru.zorunlu !== false,
+            };
+        });
 
         console.log('🎉 Anket başarıyla oluşturuldu, istenilen soru:', questionCount, 'alınan soru:', sorularWithIds.length);
         return {

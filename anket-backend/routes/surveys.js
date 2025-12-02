@@ -24,7 +24,7 @@ function temizleSorular(sorular) {
     "çok-seçmeli": "coktan-coklu"
   };
 
-  return (sorular || []).map((soru) => {
+  return (sorular || []).map((soru, index) => {
     let secenekler = soru.secenekler || [];
 
     // Eğer seçenekler string ise (virgülü ayırılmış), diziye çevir
@@ -41,19 +41,21 @@ function temizleSorular(sorular) {
     }
 
     // Seçenekleri standart formata çevir { metni: string }
-    const formatlıSecenekler = secenekler.map((opt) => {
-      if (typeof opt === "object" && opt !== null && opt.metni) {
-        // Zaten doğru formatta
-        return { metni: opt.metni };
-      } else if (typeof opt === "string") {
-        // String ise objeye çevir
-        return { metni: opt };
-      }
-      return { metni: String(opt) };
-    });
+    const formatlıSecenekler = secenekler
+      .map((opt) => {
+        if (typeof opt === "object" && opt !== null) {
+          // Obje ise metni/metin alanını al
+          const metinDegeri = opt.metni || opt.metin || opt.text || '';
+          return { metni: metinDegeri };
+        } else if (typeof opt === "string") {
+          return { metni: opt };
+        }
+        return { metni: String(opt) };
+      })
+      .filter((opt) => opt.metni && opt.metni.trim().length > 0); // Boş seçenekleri filtrele
 
-    // Soru tipini normalize et
-    let normalizedTipi = soru.soruTipi || "acik-uclu";
+    // Soru tipini normalize et - soruTipi veya tip alanını kontrol et
+    let normalizedTipi = soru.soruTipi || soru.tip || "acik-uclu";
     if (tipiHaritas[normalizedTipi]) {
       normalizedTipi = tipiHaritas[normalizedTipi];
     }
@@ -62,10 +64,71 @@ function temizleSorular(sorular) {
       soruMetni: soru.soruMetni || "",
       soruTipi: normalizedTipi,
       secenekler: formatlıSecenekler,
-      siraNo: soru.siraNo || 1
+      siraNo: soru.siraNo || (index + 1),
+      zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : true
     };
   });
 }
+
+// ============================================
+// ⭐ ÖNEMLI: by-link ROUTE'U İLK YAZILMALI ⭐
+// ============================================
+// 4. ANKETİ KATILIMCIYA GETİR (LİNK KODU İLE) - PUBLIC ROUTE
+// ============================================
+router.get("/by-link/:linkKodu", async (req, res) => {
+  try {
+    const { linkKodu } = req.params;
+
+    console.log("🔍 Link kodu aranıyor:", linkKodu);
+
+    // Link kontrol et
+    const link = await SurveyLink.findOne({ linkKodu, aktif: true });
+
+    if (!link) {
+      console.log("❌ Link bulunamadı");
+      return res.status(404).json({
+        success: false,
+        error: "Geçersiz veya süresi dolmuş anket linki."
+      });
+    }
+
+    console.log("✅ Link bulundu:", link._id);
+
+    // Tıklanma istatistiğini güncelle
+    link.tiklanmaSayisi += 1;
+    link.sonTiklanmaTarihi = new Date();
+    await link.save();
+
+    // Anketi getir
+    const anket = await Survey.findById(link.anketId);
+
+    if (!anket || anket.durum !== "aktif") {
+      console.log("❌ Anket bulunamadı veya pasif");
+      return res.status(404).json({
+        success: false,
+        error: "Bu anket yayından kaldırılmış."
+      });
+    }
+
+    console.log("✅ Anket bulundu, katılımcıya gönderiliyor");
+
+    // Katılımcıya döndür
+    res.json({
+      success: true,
+      data: {
+        _id: anket._id,
+        anketBaslik: anket.anketBaslik,
+        anketAciklama: anket.anketAciklama,
+        sorular: anket.sorular,
+        hedefKitleKriterleri: anket.hedefKitleKriterleri,
+        paylasimLinki: link.tamLink
+      }
+    });
+  } catch (e) {
+    console.error("❌ Link Getirme Hatası:", e);
+    res.status(400).json({ success: false, error: "Sunucu hatası" });
+  }
+});
 
 // ============================================
 // 1. ANKET OLUŞTUR
@@ -80,8 +143,12 @@ router.post("/", auth(true), async (req, res) => {
       aiIleOlusturuldu
     } = req.body;
 
+    console.log("📝 Gelen Sorular (Ham):", JSON.stringify(sorular, null, 2));
+
     // Soruları temizle ve standardize et
     const islenmisSorular = temizleSorular(sorular);
+
+    console.log("✅ İşlenmiş Sorular:", JSON.stringify(islenmisSorular, null, 2));
 
     // Link kodunu oluştur
     const linkKodu = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -166,60 +233,8 @@ router.get("/:id", auth(true), async (req, res) => {
 });
 
 // ============================================
-// 4. ANKETİ KATILIMCIYA GETİR (LİNK KODU İLE)
+// 5. CEVAPLARI KAYDET (SUBMIT) - PUBLIC ROUTE
 // ============================================
-// PUBLIC ROUTE - Auth gerekli DEĞİL
-router.get("/by-link/:linkKodu", async (req, res) => {
-  try {
-    const { linkKodu } = req.params;
-
-    // Link kontrol et
-    const link = await SurveyLink.findOne({ linkKodu, aktif: true });
-
-    if (!link) {
-      return res.status(404).json({
-        success: false,
-        error: "Geçersiz veya süresi dolmuş anket linki."
-      });
-    }
-
-    // Tıklanma istatistiğini güncelle
-    link.tiklanmaSayisi += 1;
-    link.sonTiklanmaTarihi = new Date();
-    await link.save();
-
-    // Anketi getir
-    const anket = await Survey.findById(link.anketId);
-
-    if (!anket || anket.durum !== "aktif") {
-      return res.status(404).json({
-        success: false,
-        error: "Bu anket yayından kaldırılmış."
-      });
-    }
-
-    // Katılımcıya döndür
-    res.json({
-      success: true,
-      data: {
-        _id: anket._id,
-        anketBaslik: anket.anketBaslik,
-        anketAciklama: anket.anketAciklama,
-        sorular: anket.sorular,
-        hedefKitleKriterleri: anket.hedefKitleKriterleri,
-        paylasimLinki: link.tamLink
-      }
-    });
-  } catch (e) {
-    console.error("Link Getirme Hatası:", e);
-    res.status(400).json({ success: false, error: "Sunucu hatası" });
-  }
-});
-
-// ============================================
-// 5. CEVAPLARI KAYDET (SUBMIT)
-// ============================================
-// PUBLIC ROUTE - Auth gerekli DEĞİL
 router.post("/submit", async (req, res) => {
   try {
     const { anketId, cevaplar, katilimciBilgileri } = req.body;

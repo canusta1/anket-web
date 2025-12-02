@@ -15,9 +15,8 @@ function Giris() {
     setLoading(true);
 
     try {
-      // GÜNCELLEME: Windows makinelerde 'localhost' bazen geç algılanabilir.
-      // Bu yüzden doğrudan IP adresi (127.0.0.1) kullanmak daha garantidir.
-      const res = await fetch("http://127.0.0.1:4000/api/auth/login", {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+      const res = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

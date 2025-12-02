@@ -29,14 +29,15 @@ function Panel() {
   useEffect(() => {
     const anketleriGetir = async () => {
       const token = localStorage.getItem("token");
-      
+
       if (!token) {
         navigate("/giris");
         return;
       }
 
       try {
-        const response = await fetch('http://localhost:4000/api/surveys', {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+        const response = await fetch(`${apiUrl}/api/surveys`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -71,10 +72,10 @@ function Panel() {
   // Tarih formatlama
   const formatTarih = (tarih) => {
     const date = new Date(tarih);
-    return date.toLocaleDateString('tr-TR', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
+    return date.toLocaleDateString('tr-TR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
     });
   };
 
@@ -85,7 +86,7 @@ function Panel() {
       'pasif': { text: 'Pasif', class: 'completed' },
       'taslak': { text: 'Taslak', class: 'draft' }
     };
-    
+
     return durumlar[durum] || { text: 'Bilinmiyor', class: 'draft' };
   };
 
@@ -102,7 +103,7 @@ function Panel() {
   };
 
   // Arama ve sayfalama
-  const filteredAnketler = anketler.filter(anket => 
+  const filteredAnketler = anketler.filter(anket =>
     anket.anketBaslik?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     anket.anketAciklama?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -205,8 +206,8 @@ function Panel() {
 
                   <div className="grid-body">
                     {currentAnketler.map((anket, index) => (
-                      <div 
-                        key={anket._id} 
+                      <div
+                        key={anket._id}
                         className="grid-row"
                         style={{ '--row-index': index }}
                       >
@@ -254,7 +255,7 @@ function Panel() {
                         </div>
 
                         <div className="col col-actions">
-                          <button 
+                          <button
                             className="btn-view"
                             onClick={() => navigate(`/anket-detay/${anket._id}`)}
                           >
@@ -269,7 +270,7 @@ function Panel() {
                 {/* Sayfalama */}
                 {totalPages > 1 && (
                   <div className="pagination">
-                    <button 
+                    <button
                       className="page-btn"
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
@@ -302,7 +303,7 @@ function Panel() {
                       })}
                     </div>
 
-                    <button 
+                    <button
                       className="page-btn"
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}

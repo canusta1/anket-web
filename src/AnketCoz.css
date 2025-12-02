@@ -1,45 +1,40 @@
-/* AnketCoz.css */
+/* AnketCoz.css - Sadece AnketCoz sayfasına özel */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-    height: 100%;
-}
-
-.anket-container {
+.anket-coz-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 40px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #f5f7fa;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
+    padding: 40px 20px;
+}
+
+.anket-coz-page * {
+    box-sizing: border-box;
+}
+
+.anket-coz-page .anket-container {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 /* ==================== LOADING ==================== */
-.loading-wrapper {
+.anket-coz-page .loading-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
+    padding: 60px 20px;
 }
 
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid white;
+.anket-coz-page .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #667eea;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -48,216 +43,186 @@ body,
     }
 }
 
-.loading-wrapper p {
-    color: white;
-    font-size: 18px;
-    font-weight: 500;
+.anket-coz-page .loading-wrapper p {
+    color: #718096;
+    font-size: 14px;
 }
 
-/* ==================== CARDS ==================== */
-.anket-card,
-.error-card,
-.success-card {
+/* ==================== BOXES ==================== */
+.anket-coz-page .anket-card,
+.anket-coz-page .error-card,
+.anket-coz-page .success-card {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-    max-width: 700px;
-    width: 100%;
-    padding: 50px;
-    animation: slideIn 0.4s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    margin-bottom: 20px;
+    pointer-events: auto;
 }
 
 /* ==================== STEP INDICATOR ==================== */
-.step-indicator {
+.anket-coz-page .step-indicator {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 40px;
-    gap: 0;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-.step-badge {
-    width: 40px;
-    height: 40px;
+.anket-coz-page .step-badge {
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 16px;
+    font-weight: 600;
+    font-size: 14px;
     background: #e2e8f0;
     color: #718096;
-    transition: all 0.3s ease;
 }
 
-.step-badge.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.anket-coz-page .step-badge.active {
+    background: #667eea;
     color: white;
-    transform: scale(1.1);
 }
 
-.step-badge.completed {
+.anket-coz-page .step-badge.completed {
     background: #48bb78;
     color: white;
 }
 
-.step-line {
-    width: 40px;
-    height: 3px;
+.anket-coz-page .step-line {
+    width: 30px;
+    height: 2px;
     background: #e2e8f0;
-    margin: 0;
 }
 
-/* ==================== CARD HEADER ==================== */
-.card-header {
-    margin-bottom: 40px;
-    text-align: center;
-}
-
-.card-header h1 {
-    font-size: 28px;
-    color: #2d3748;
-    margin-bottom: 12px;
-    font-weight: 700;
-}
-
-.card-header p {
-    font-size: 16px;
-    color: #718096;
-    line-height: 1.6;
-}
-
-/* ==================== FORM ==================== */
-.form {
-    width: 100%;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+/* ==================== HEADER ==================== */
+.anket-coz-page .card-header {
     margin-bottom: 30px;
 }
 
-.form-group {
+.anket-coz-page .card-header h1 {
+    font-size: 24px;
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.anket-coz-page .card-header p {
+    font-size: 15px;
+    color: #718096;
+    line-height: 1.5;
+}
+
+/* ==================== FORM GROUP ==================== */
+.anket-coz-page .form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-bottom: 15px;
 }
 
-.form-label {
-    font-size: 14px;
+.anket-coz-page .form-label {
+    font-size: 13px;
     font-weight: 600;
     color: #2d3748;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.form-input,
-.textarea-input {
-    padding: 12px 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 15px;
+.anket-coz-page .form-input,
+.anket-coz-page .textarea-input {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
     color: #2d3748;
     font-family: inherit;
-    transition: all 0.3s ease;
-    background: #f9fafb;
+    background: white;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-input:focus,
-.textarea-input:focus {
+.anket-coz-page .form-input:focus,
+.anket-coz-page .textarea-input:focus {
     outline: none;
     border-color: #667eea;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-input.error {
+.anket-coz-page .form-input.error {
     border-color: #e53e3e;
     background: #fff5f5;
 }
 
-.error-text {
-    font-size: 13px;
+.anket-coz-page .error-text {
+    font-size: 12px;
     color: #e53e3e;
     font-weight: 500;
 }
 
-/* ==================== CRITERIA SECTION ==================== */
-.criteria-section {
-    margin: 40px 0;
-    padding: 25px;
-    background: #f7fafc;
-    border-radius: 12px;
-    border-left: 4px solid #667eea;
+/* ==================== FORM ROW ==================== */
+.anket-coz-page .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
 }
 
-.criteria-title {
-    font-size: 16px;
+/* ==================== CRITERIA SECTION ==================== */
+.anket-coz-page .criteria-section {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f9fafb;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #667eea;
+    border-radius: 4px;
+}
+
+.anket-coz-page .criteria-title {
+    font-size: 15px;
     font-weight: 600;
     color: #2d3748;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-bottom: 15px;
 }
 
 /* ==================== SORULAR ==================== */
-.sorular-container {
+.anket-coz-page .sorular-container {
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    margin-bottom: 40px;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.soru-card {
-    padding: 25px;
+.anket-coz-page .soru-card {
+    padding: 20px;
     background: #f9fafb;
-    border-radius: 12px;
-    border: 2px solid #e2e8f0;
-    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
 }
 
-.soru-card:hover {
-    border-color: #667eea;
-    background: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-}
-
-.soru-header {
+.anket-coz-page .soru-header {
     display: flex;
     align-items: flex-start;
     gap: 15px;
     margin-bottom: 20px;
 }
 
-.soru-numarasi {
+.anket-coz-page .soru-numarasi {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 35px;
-    height: 35px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-width: 28px;
+    height: 28px;
+    background: #667eea;
     color: white;
-    border-radius: 50%;
-    font-weight: 700;
-    font-size: 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
     flex-shrink: 0;
 }
 
-.soru-text {
+.anket-coz-page .soru-text {
     font-size: 16px;
     color: #2d3748;
     font-weight: 600;
@@ -265,328 +230,302 @@ body,
     margin: 0;
 }
 
-.soru-content {
+.anket-coz-page .soru-content {
     margin-top: 15px;
 }
 
 /* ==================== SEÇENEKLER ==================== */
-.secenekler {
+.anket-coz-page .secenekler {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
-.radio-wrapper,
-.checkbox-wrapper {
+.anket-coz-page .radio-wrapper,
+.anket-coz-page .checkbox-wrapper {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
+    gap: 10px;
+    padding: 8px 12px;
     background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
-    position: relative;
 }
 
-.radio-wrapper:hover,
-.checkbox-wrapper:hover {
-    border-color: #667eea;
-    background: #f0f4ff;
+.anket-coz-page .radio-wrapper:hover,
+.anket-coz-page .checkbox-wrapper:hover {
+    background: #f9fafb;
+    border-color: #cbd5e0;
 }
 
-.radio-input,
-.checkbox-input {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+.anket-coz-page .radio-input,
+.anket-coz-page .checkbox-input {
+    width: 18px;
+    height: 18px;
     accent-color: #667eea;
     flex-shrink: 0;
-}
-
-.radio-label,
-.checkbox-label {
-    font-size: 15px;
-    color: #2d3748;
     cursor: pointer;
-    margin: 0;
 }
 
-.radio-input:checked+.radio-label,
-.checkbox-input:checked+.checkbox-label {
-    font-weight: 600;
-    color: #667eea;
+.anket-coz-page .radio-label,
+.anket-coz-page .checkbox-label {
+    font-size: 14px;
+    color: #2d3748;
+    margin: 0;
+    display: inline;
+    cursor: pointer;
 }
 
 /* ==================== TEXTAREA ==================== */
-.textarea-input {
+.anket-coz-page .textarea-input {
     width: 100%;
-    min-height: 100px;
-    padding: 12px 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 15px;
+    min-height: 80px;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
     color: #2d3748;
     resize: vertical;
     font-family: inherit;
 }
 
-/* ==================== BUTTONS ==================== */
-.form-actions {
+/* ==================== SLIDER ==================== */
+.anket-coz-page .slider-container {
+    width: 100%;
+    padding: 20px 0;
+}
+
+.anket-coz-page .slider-wrapper {
     display: flex;
+    flex-direction: column;
     gap: 15px;
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 2px solid #e2e8f0;
 }
 
-.btn-primary,
-.btn-secondary {
-    padding: 14px 30px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
+.anket-coz-page .slider-input {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, #e2e8f0 0%, #e2e8f0 100%);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.anket-coz-page .slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: all 0.2s ease;
+}
+
+.anket-coz-page .slider-input::-webkit-slider-thumb:hover {
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.anket-coz-page .slider-input::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #667eea;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: all 0.2s ease;
+}
+
+.anket-coz-page .slider-input::-moz-range-thumb:hover {
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.anket-coz-page .slider-input::-moz-range-track {
+    background: none;
+    border: none;
+}
+
+.anket-coz-page .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.anket-coz-page .slider-label-min,
+.anket-coz-page .slider-label-max {
+    font-size: 13px;
+    color: #718096;
+    font-weight: 500;
+    min-width: 40px;
+}
+
+.anket-coz-page .slider-label-min {
+    text-align: left;
+}
+
+.anket-coz-page .slider-label-max {
+    text-align: right;
+}
+
+.anket-coz-page .slider-value {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #667eea;
+    background: #f0f4ff;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+/* ==================== BUTTONS ==================== */
+.anket-coz-page .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.anket-coz-page .btn-primary,
+.anket-coz-page .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.anket-coz-page .btn-primary {
+    background: #667eea;
     color: white;
     flex: 1;
 }
 
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+.anket-coz-page .btn-primary:hover:not(:disabled) {
+    background: #5568d3;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.btn-primary:disabled {
+.anket-coz-page .btn-primary:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.btn-secondary {
+.anket-coz-page .btn-secondary {
     background: #e2e8f0;
     color: #2d3748;
     flex: 1;
 }
 
-.btn-secondary:hover {
+.anket-coz-page .btn-secondary:hover {
     background: #cbd5e0;
-    transform: translateY(-2px);
 }
 
-.full-width {
+.anket-coz-page .full-width {
     width: 100%;
 }
 
 /* ==================== ERROR CARD ==================== */
-.error-card {
+.anket-coz-page .error-card {
     text-align: center;
 }
 
-.error-icon {
-    font-size: 60px;
-    margin-bottom: 20px;
-}
-
-.error-card h2 {
-    font-size: 24px;
-    color: #e53e3e;
+.anket-coz-page .error-icon {
+    font-size: 48px;
     margin-bottom: 15px;
 }
 
-.error-card p {
-    font-size: 16px;
+.anket-coz-page .error-card h2 {
+    font-size: 20px;
+    color: #e53e3e;
+    margin-bottom: 10px;
+}
+
+.anket-coz-page .error-card p {
+    font-size: 14px;
     color: #718096;
-    margin-bottom: 20px;
-    line-height: 1.6;
+    margin-bottom: 15px;
+    line-height: 1.5;
 }
 
 /* ==================== SUCCESS CARD ==================== */
-.success-card {
+.anket-coz-page .success-card {
     text-align: center;
 }
 
-.success-icon {
-    width: 80px;
-    height: 80px;
+.anket-coz-page .success-icon {
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    background: #48bb78;
     color: white;
-    font-size: 40px;
+    font-size: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 30px;
+    margin: 0 auto 20px;
 }
 
-.success-card h1 {
-    font-size: 28px;
+.anket-coz-page .success-card h1 {
+    font-size: 22px;
     color: #2d3748;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
-.success-card p {
-    font-size: 16px;
+.anket-coz-page .success-card p {
+    font-size: 14px;
     color: #718096;
-    margin-bottom: 15px;
-    line-height: 1.6;
+    margin-bottom: 12px;
+    line-height: 1.5;
 }
 
-.success-subtitle {
+.anket-coz-page .success-subtitle {
     font-weight: 600;
     color: #48bb78;
     margin-bottom: 30px !important;
 }
 
-.success-card .btn-primary {
+.anket-coz-page .success-card .btn-primary {
     width: 100%;
 }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
-
-    .anket-card,
-    .error-card,
-    .success-card {
-        padding: 30px 20px;
-    }
-
-    .form-row {
+    .anket-coz-page .form-row {
         grid-template-columns: 1fr;
-        gap: 20px;
     }
 
-    .card-header h1 {
-        font-size: 24px;
-    }
-
-    .soru-text {
-        font-size: 15px;
-    }
-
-    .form-actions {
+    .anket-coz-page .form-actions {
         flex-direction: column;
-    }
-
-    .form-actions button {
-        width: 100%;
-    }
-
-    .step-indicator {
-        margin-bottom: 30px;
-    }
-
-    .step-badge {
-        width: 35px;
-        height: 35px;
-        font-size: 14px;
-    }
-
-    .step-line {
-        width: 30px;
     }
 }
 
 @media (max-width: 480px) {
-    .anket-container {
-        padding: 20px 12px;
-    }
 
-    .anket-card,
-    .error-card,
-    .success-card {
-        padding: 20px 15px;
-        border-radius: 12px;
-    }
-
-    .card-header h1 {
-        font-size: 22px;
-        margin-bottom: 10px;
-    }
-
-    .card-header p {
-        font-size: 14px;
-    }
-
-    .soru-card {
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-
-    .soru-header {
-        gap: 12px;
-    }
-
-    .soru-numarasi {
-        min-width: 30px;
-        height: 30px;
-        font-size: 14px;
-    }
-
-    .soru-text {
-        font-size: 14px;
-    }
-
-    .form-label {
-        font-size: 13px;
-    }
-
-    .form-input,
-    .textarea-input {
-        font-size: 14px;
-        padding: 10px 12px;
-    }
-
-    .radio-wrapper,
-    .checkbox-wrapper {
-        padding: 10px 12px;
-        gap: 10px;
-    }
-
-    .radio-label,
-    .checkbox-label {
-        font-size: 14px;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-        padding: 12px 20px;
-        font-size: 14px;
-    }
-
-    .step-indicator {
-        margin-bottom: 25px;
-    }
-
-    .step-badge {
-        width: 32px;
-        height: 32px;
-        font-size: 12px;
-    }
-
-    .step-line {
-        width: 25px;
-        height: 2px;
-    }
-
-    .form-row {
-        margin-bottom: 20px;
-    }
-
-    .criteria-section {
+    .anket-coz-page .anket-card,
+    .anket-coz-page .error-card,
+    .anket-coz-page .success-card {
         padding: 20px;
-        margin: 30px 0;
     }
 
-    .sorular-container {
-        gap: 18px;
-        margin-bottom: 30px;
+    .anket-coz-page .card-header h1 {
+        font-size: 20px;
+    }
+
+    .anket-coz-page .soru-text {
+        font-size: 13px;
     }
 }

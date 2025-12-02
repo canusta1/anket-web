@@ -2,194 +2,178 @@ import React, { useState, useEffect } from 'react';
 import './AnketCoz.css';
 
 const AnketCoz = () => {
-  // URL'den linkKodu'nu al
-  const linkKodu = window.location.pathname.split('/').pop();
+  // URL'den link kodunu al
+  const pathParts = window.location.pathname.split('/').filter(p => p);
+  const linkKodu = pathParts[pathParts.length - 1];
 
+  // State tanımlamaları
   const [anket, setAnket] = useState(null);
+  const [cevaplar, setCevaplar] = useState({});
+  const [katilimciBilgileri, setKatilimciBilgileri] = useState({ ad: '', soyad: '' });
+  const [dogrulamaBilgileri, setDogrulamaBilgileri] = useState({});
+  const [hatalar, setHatalar] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [step, setStep] = useState(1); // 1: Katılımcı Bilgileri, 2: Sorular, 3: Başarı
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
-  // Katılımcı bilgileri
-  const [katilimciBilgileri, setKatilimciBilgileri] = useState({
-    ad: '',
-    soyad: ''
-  });
-
-  // Doğrulama bilgileri (hedefKitleKriterleri için)
-  const [dogrulamaBilgileri, setDogrulamaBilgileri] = useState({});
-  const [dogrulamaHatalari, setDogrulamaHatalari] = useState({});
-
-  // Sorulara verilen cevaplar
-  const [cevaplar, setCevaplar] = useState({});
-  const [gonderiliyor, setGonderiliyor] = useState(false);
-
-  // Anketi linke göre getir
+  // Anket verilerini çek
   useEffect(() => {
-    // Eğer linkKodu yoksa hata sayfasına git
-    if (!linkKodu) {
-      setError('Geçersiz anket linki');
-      setLoading(false);
-      return;
-    }
+    const fetchAnket = async () => {
+      if (!linkKodu) {
+        setError('Geçersiz anket linki');
+        setLoading(false);
+        return;
+      }
 
-    const anketiGetir = async () => {
       try {
-        setLoading(true);
-        const response = await fetch(
-          `http://localhost:4000/api/surveys/by-link/${linkKodu}`
-        );
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+        const response = await fetch(`${apiUrl}/api/surveys/by-link/${linkKodu}`);
 
         if (!response.ok) {
-          throw new Error('Anket bulunamadı veya süresi dolmuş');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Anket bulunamadı');
         }
 
         const result = await response.json();
         setAnket(result.data);
 
-        // Cevapları başlat
-        const initialCevaplar = {};
-        result.data.sorular.forEach((soru) => {
-          initialCevaplar[soru._id] = '';
+        // Cevapları initialize et
+        const initialAnswers = {};
+        result.data.sorular.forEach(soru => {
+          initialAnswers[soru._id] = soru.soruTipi === 'coktan-coklu' ? [] : '';
         });
-        setCevaplar(initialCevaplar);
+        setCevaplar(initialAnswers);
 
-        // Doğrulama bilgilerini başlat
+        // Doğrulama bilgilerini initialize et
         if (result.data.hedefKitleKriterleri) {
-          const dogrulama = {};
-          Object.keys(result.data.hedefKitleKriterleri).forEach((kriter) => {
-            if (result.data.hedefKitleKriterleri[kriter]) {
-              dogrulama[kriter] = '';
+          const kriterler = {};
+          Object.keys(result.data.hedefKitleKriterleri).forEach(key => {
+            if (result.data.hedefKitleKriterleri[key]) {
+              kriterler[key] = '';
             }
           });
-          setDogrulamaBilgileri(dogrulama);
+          setDogrulamaBilgileri(kriterler);
         }
+
+        setLoading(false);
       } catch (err) {
-        setError(err.message || 'Anket yüklenirken hata oluştu');
-        console.error('Hata:', err);
-      } finally {
+        setError(err.message);
         setLoading(false);
       }
     };
 
-    anketiGetir();
-  }, [linkKodu]); // SADECE linkKodu dependency olarak kal
+    fetchAnket();
+  }, [linkKodu]);
 
-  // Katılımcı bilgileri değişim
-  const handleKatilimciChange = (e) => {
-    const { name, value } = e.target;
-    setKatilimciBilgileri((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Doğrulama bilgileri değişim
-  const handleDogrulamaChange = (e) => {
-    const { name, value } = e.target;
-    setDogrulamaBilgileri((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-    // Hata temizle
-    if (dogrulamaHatalari[name]) {
-      setDogrulamaHatalari((prev) => ({
-        ...prev,
-        [name]: ''
-      }));
+  // Form değişikliklerini handle et
+  const handleInputChange = (field, value) => {
+    setKatilimciBilgileri(prev => ({ ...prev, [field]: value }));
+    if (hatalar[field]) {
+      setHatalar(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  // Cevap değişim
-  const handleCevapChange = (soruId, cevap) => {
-    setCevaplar((prev) => ({
-      ...prev,
-      [soruId]: cevap
-    }));
+  const handleKriterChange = (field, value) => {
+    setDogrulamaBilgileri(prev => ({ ...prev, [field]: value }));
+    if (hatalar[field]) {
+      setHatalar(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
-  // Katılımcı bilgileri doğrulaması
-  const handleDogrulamaSubmit = (e) => {
+  const handleAnswerChange = (soruId, value) => {
+    setCevaplar(prev => ({ ...prev, [soruId]: value }));
+  };
+
+  const handleCheckboxChange = (soruId, value, checked) => {
+    setCevaplar(prev => {
+      const current = Array.isArray(prev[soruId]) ? prev[soruId] : [];
+      if (checked) {
+        return { ...prev, [soruId]: [...current, value] };
+      } else {
+        return { ...prev, [soruId]: current.filter(v => v !== value) };
+      }
+    });
+  };
+
+  // Step 1 validasyonu ve ilerleme
+  const handleStep1Submit = (e) => {
     e.preventDefault();
+    const errors = {};
 
-    const yeniHatalar = {};
-
-    // Ad ve soyad kontrolü
     if (!katilimciBilgileri.ad.trim()) {
-      yeniHatalar.ad = 'Ad boş geçilemez';
+      errors.ad = 'Ad alanı zorunludur';
     }
     if (!katilimciBilgileri.soyad.trim()) {
-      yeniHatalar.soyad = 'Soyadı boş geçilemez';
+      errors.soyad = 'Soyad alanı zorunludur';
     }
 
-    // Doğrulama bilgileri kontrolü
-    Object.keys(dogrulamaBilgileri).forEach((kriter) => {
-      if (!dogrulamaBilgileri[kriter].trim()) {
-        yeniHatalar[kriter] = `${kriter} boş geçilemez`;
+    Object.keys(dogrulamaBilgileri).forEach(key => {
+      if (!dogrulamaBilgileri[key].trim()) {
+        errors[key] = `${key} alanı zorunludur`;
       }
     });
 
-    if (Object.keys(yeniHatalar).length > 0) {
-      setDogrulamaHatalari(yeniHatalar);
+    if (Object.keys(errors).length > 0) {
+      setHatalar(errors);
       return;
     }
 
-    // Doğrulama başarılı, sorulara geç
-    setStep(2);
+    setCurrentStep(2);
   };
 
-  // Anket gönderme
-  const handleAnketSubmit = async (e) => {
+  // Anket gönderimi
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Tüm soruların cevaplandığını kontrol et
-    const tümCevaplandiMi = anket.sorular.every(
-      (soru) => cevaplar[soru._id] && cevaplar[soru._id].toString().trim() !== ''
-    );
+    // Tüm soruların cevaplanıp cevaplanmadığını kontrol et
+    const unanswered = anket.sorular.find(soru => {
+      const answer = cevaplar[soru._id];
+      if (soru.soruTipi === 'coktan-coklu') {
+        return !Array.isArray(answer) || answer.length === 0;
+      }
+      return !answer || answer.toString().trim() === '';
+    });
 
-    if (!tümCevaplandiMi) {
+    if (unanswered) {
       alert('Lütfen tüm soruları cevaplayınız');
       return;
     }
 
-    try {
-      setGonderiliyor(true);
+    setSubmitting(true);
 
-      const response = await fetch('http://localhost:3001/api/surveys/submit', {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+      const response = await fetch(`${apiUrl}/api/surveys/submit`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           anketId: anket._id,
-          cevaplar,
-          katilimciBilgileri: {
-            ...katilimciBilgileri,
-            ...dogrulamaBilgileri
-          }
+          katilimciBilgileri,
+          cevaplar
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Cevaplar gönderilirken hata oluştu');
-      }
+      if (!response.ok) throw new Error('Gönderim başarısız');
 
-      setStep(3);
+      setSubmitted(true);
     } catch (err) {
       alert('Hata: ' + err.message);
-      console.error('Hata:', err);
     } finally {
-      setGonderiliyor(false);
+      setSubmitting(false);
     }
   };
 
-  // Yükleniyor durumu
+  // Loading durumu
   if (loading) {
     return (
-      <div className="anket-container">
-        <div className="loading-wrapper">
-          <div className="spinner"></div>
-          <p>Anket yükleniyor...</p>
+      <div className="anket-coz-page">
+        <div className="anket-container">
+          <div className="loading-wrapper">
+            <div className="spinner"></div>
+            <p>Anket yükleniyor...</p>
+          </div>
         </div>
       </div>
     );
@@ -198,243 +182,263 @@ const AnketCoz = () => {
   // Hata durumu
   if (error) {
     return (
-      <div className="anket-container">
-        <div className="error-card">
-          <div className="error-icon">❌</div>
-          <h2>Hata</h2>
-          <p>{error}</p>
-          <button onClick={() => (window.location.href = '/')} className="btn-primary">
-            Geri Dön
-          </button>
+      <div className="anket-coz-page">
+        <div className="anket-container">
+          <div className="error-card">
+            <div className="error-icon">❌</div>
+            <h2>Hata</h2>
+            <p>{error}</p>
+            <button onClick={() => window.location.href = '/'} className="btn-primary">
+              Geri Dön
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Step 1: Katılımcı Doğrulaması
-  if (step === 1) {
+  // Anket bulunamadı
+  if (!anket) {
     return (
-      <div className="anket-container">
-        <div className="anket-card">
-          <div className="step-indicator">
-            <div className="step-badge active">1</div>
-            <div className="step-line"></div>
-            <div className="step-badge">2</div>
+      <div className="anket-coz-page">
+        <div className="anket-container">
+          <div className="error-card">
+            <div className="error-icon">⚠️</div>
+            <h2>Anket Bulunamadı</h2>
+            <p>Lütfen geçerli bir anket linki kullanınız.</p>
+            <button onClick={() => window.location.href = '/'} className="btn-primary">
+              Geri Dön
+            </button>
           </div>
+        </div>
+      </div>
+    );
+  }
 
-          <div className="card-header">
-            <h1>Katılımcı Bilgileri</h1>
-            <p>Lütfen bilgilerinizi doğru ve eksiksiz şekilde doldurunuz</p>
+  // Başarılı gönderim
+  if (submitted) {
+    return (
+      <div className="anket-coz-page">
+        <div className="anket-container">
+          <div className="success-card">
+            <div className="success-icon">✓</div>
+            <h1>Teşekkürler!</h1>
+            <p>Anketimize katıldığınız için çok teşekkür ederiz.</p>
+            <p className="success-subtitle">Cevaplarınız başarıyla kaydedilmiştir.</p>
+            <button onClick={() => window.location.href = '/'} className="btn-primary full-width">
+              Ana Sayfaya Dön
+            </button>
           </div>
+        </div>
+      </div>
+    );
+  }
 
-          <form onSubmit={handleDogrulamaSubmit} className="form">
-            {/* Ad Soyad */}
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Ad *</label>
-                <input
-                  type="text"
-                  name="ad"
-                  value={katilimciBilgileri.ad}
-                  onChange={handleKatilimciChange}
-                  placeholder="Adınızı giriniz"
-                  className={`form-input ${dogrulamaHatalari.ad ? 'error' : ''}`}
-                />
-                {dogrulamaHatalari.ad && (
-                  <span className="error-text">{dogrulamaHatalari.ad}</span>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Soyadı *</label>
-                <input
-                  type="text"
-                  name="soyad"
-                  value={katilimciBilgileri.soyad}
-                  onChange={handleKatilimciChange}
-                  placeholder="Soyadınızı giriniz"
-                  className={`form-input ${dogrulamaHatalari.soyad ? 'error' : ''}`}
-                />
-                {dogrulamaHatalari.soyad && (
-                  <span className="error-text">{dogrulamaHatalari.soyad}</span>
-                )}
-              </div>
+  // STEP 1: Katılımcı Bilgileri
+  if (currentStep === 1) {
+    return (
+      <div className="anket-coz-page">
+        <div className="anket-container">
+          <div className="anket-wrapper">
+            <div className="step-indicator">
+              <span className="step-badge active">1</span>
+              <span className="step-line"></span>
+              <span className="step-badge">2</span>
             </div>
 
-            {/* Doğrulama Kriterleri */}
-            {Object.keys(dogrulamaBilgileri).length > 0 && (
-              <div className="criteria-section">
-                <h3 className="criteria-title">Ek Bilgiler</h3>
-                {Object.keys(dogrulamaBilgileri).map((kriter) => (
-                  <div key={kriter} className="form-group">
-                    <label className="form-label">{kriter} *</label>
-                    <input
-                      type="text"
-                      name={kriter}
-                      value={dogrulamaBilgileri[kriter]}
-                      onChange={handleDogrulamaChange}
-                      placeholder={`${kriter} giriniz`}
-                      className={`form-input ${dogrulamaHatalari[kriter] ? 'error' : ''
-                        }`}
-                    />
-                    {dogrulamaHatalari[kriter] && (
-                      <span className="error-text">
-                        {dogrulamaHatalari[kriter]}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="section-header">
+              <h1>Katılımcı Bilgileri</h1>
+              <p>Lütfen bilgilerinizi doğru ve eksiksiz şekilde doldurunuz</p>
+            </div>
 
-            <button type="submit" className="btn-primary full-width">
-              Devam Et →
-            </button>
-          </form>
+            <form onSubmit={handleStep1Submit} className="form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Ad *</label>
+                  <input
+                    type="text"
+                    className={`form-input ${hatalar.ad ? 'error' : ''}`}
+                    value={katilimciBilgileri.ad}
+                    onChange={(e) => handleInputChange('ad', e.target.value)}
+                    placeholder="Adınızı giriniz"
+                  />
+                  {hatalar.ad && <span className="error-text">{hatalar.ad}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Soyadı *</label>
+                  <input
+                    type="text"
+                    className={`form-input ${hatalar.soyad ? 'error' : ''}`}
+                    value={katilimciBilgileri.soyad}
+                    onChange={(e) => handleInputChange('soyad', e.target.value)}
+                    placeholder="Soyadınızı giriniz"
+                  />
+                  {hatalar.soyad && <span className="error-text">{hatalar.soyad}</span>}
+                </div>
+              </div>
+
+              {Object.keys(dogrulamaBilgileri).length > 0 && (
+                <div className="criteria-section">
+                  <h3 className="criteria-title">
+                    <span style={{ fontSize: '22px' }}>🔐</span> Ek Doğrulama Bilgileri
+                  </h3>
+                  {Object.keys(dogrulamaBilgileri).map(key => (
+                    <div key={key} className="form-group">
+                      <label className="form-label">{key} *</label>
+                      <input
+                        type="text"
+                        className={`form-input ${hatalar[key] ? 'error' : ''}`}
+                        value={dogrulamaBilgileri[key]}
+                        onChange={(e) => handleKriterChange(key, e.target.value)}
+                        placeholder={`${key} giriniz`}
+                      />
+                      {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="form-actions">
+                <button type="submit" className="btn-primary full-width">
+                  Devam Et →
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Step 2: Sorular
-  if (step === 2) {
-    return (
+  // STEP 2: Anket Soruları
+  return (
+    <div className="anket-coz-page">
       <div className="anket-container">
-        <div className="anket-card">
+        <div className="anket-wrapper">
           <div className="step-indicator">
-            <div className="step-badge completed">✓</div>
-            <div className="step-line"></div>
-            <div className="step-badge active">2</div>
+            <span className="step-badge completed">✓</span>
+            <span className="step-line"></span>
+            <span className="step-badge active">2</span>
           </div>
 
-          <div className="card-header">
+          <div className="section-header">
             <h1>{anket.anketBaslik}</h1>
             <p>{anket.anketAciklama}</p>
           </div>
 
-          <form onSubmit={handleAnketSubmit} className="form">
+          <form onSubmit={handleSubmit} className="form">
             <div className="sorular-container">
-              {anket.sorular.map((soru, index) => (
-                <div key={soru._id} className="soru-card">
-                  <div className="soru-header">
-                    <span className="soru-numarasi">{index + 1}</span>
-                    <h3 className="soru-text">{soru.soruMetni}</h3>
-                  </div>
+              {anket.sorular.map((soru, index) => {
+                const secenekler = Array.isArray(soru.secenekler) ? soru.secenekler : [];
 
-                  <div className="soru-content">
-                    {soru.soruTipi === 'çoktan-seçmeli' ? (
-                      <div className="secenekler">
-                        {soru.secenekler.map((secenek) => (
-                          <label key={secenek._id} className="radio-wrapper">
+                return (
+                  <div key={soru._id} className="soru-card">
+                    <div className="soru-header">
+                      <span className="soru-numarasi">{index + 1}</span>
+                      <h3 className="soru-text">{soru.soruMetni}</h3>
+                    </div>
+
+                    <div className="soru-content">
+                      {/* Radio - Tek Seçim */}
+                      {soru.soruTipi === 'coktan-tek' && (
+                        <div className="secenekler">
+                          {secenekler.map((secenek, idx) => {
+                            const text = typeof secenek === 'string' ? secenek : (secenek.metni || '');
+                            const id = `${soru._id}-${idx}`;
+
+                            return (
+                              <label key={id} className="radio-wrapper">
+                                <input
+                                  type="radio"
+                                  className="radio-input"
+                                  name={soru._id}
+                                  value={text}
+                                  checked={cevaplar[soru._id] === text}
+                                  onChange={(e) => handleAnswerChange(soru._id, e.target.value)}
+                                />
+                                <span className="radio-label">{text}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Checkbox - Çoklu Seçim */}
+                      {soru.soruTipi === 'coktan-coklu' && (
+                        <div className="secenekler">
+                          {secenekler.map((secenek, idx) => {
+                            const text = typeof secenek === 'string' ? secenek : (secenek.metni || '');
+                            const id = `${soru._id}-${idx}`;
+                            const isChecked = Array.isArray(cevaplar[soru._id]) &&
+                              cevaplar[soru._id].includes(text);
+
+                            return (
+                              <label key={id} className="checkbox-wrapper">
+                                <input
+                                  type="checkbox"
+                                  className="checkbox-input"
+                                  value={text}
+                                  checked={isChecked}
+                                  onChange={(e) => handleCheckboxChange(soru._id, text, e.target.checked)}
+                                />
+                                <span className="checkbox-label">{text}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Textarea - Açık Uçlu */}
+                      {soru.soruTipi === 'acik-uclu' && (
+                        <textarea
+                          className="textarea-input"
+                          value={cevaplar[soru._id] || ''}
+                          onChange={(e) => handleAnswerChange(soru._id, e.target.value)}
+                          placeholder="Cevabınızı buraya yazınız..."
+                          rows="4"
+                        />
+                      )}
+
+                      {/* Slider - Likert Ölçeği */}
+                      {soru.soruTipi === 'slider' && (
+                        <div className="slider-container">
+                          <div className="slider-wrapper">
                             <input
-                              type="radio"
-                              name={soru._id}
-                              value={secenek.metni}
-                              checked={cevaplar[soru._id] === secenek.metni}
-                              onChange={(e) =>
-                                handleCevapChange(soru._id, e.target.value)
-                              }
-                              className="radio-input"
+                              type="range"
+                              className="slider-input"
+                              min={soru.minDegeri || 0}
+                              max={soru.maxDegeri || 10}
+                              value={cevaplar[soru._id] || soru.minDegeri || 0}
+                              onChange={(e) => handleAnswerChange(soru._id, parseInt(e.target.value))}
                             />
-                            <span className="radio-label">{secenek.metni}</span>
-                          </label>
-                        ))}
-                      </div>
-                    ) : soru.soruTipi === 'çok-seçmeli' ? (
-                      <div className="secenekler">
-                        {soru.secenekler.map((secenek) => (
-                          <label key={secenek._id} className="checkbox-wrapper">
-                            <input
-                              type="checkbox"
-                              value={secenek.metni}
-                              checked={
-                                Array.isArray(cevaplar[soru._id])
-                                  ? cevaplar[soru._id].includes(secenek.metni)
-                                  : false
-                              }
-                              onChange={(e) => {
-                                const mevcut = Array.isArray(cevaplar[soru._id])
-                                  ? cevaplar[soru._id]
-                                  : [];
-                                if (e.target.checked) {
-                                  handleCevapChange(soru._id, [
-                                    ...mevcut,
-                                    secenek.metni
-                                  ]);
-                                } else {
-                                  handleCevapChange(
-                                    soru._id,
-                                    mevcut.filter((c) => c !== secenek.metni)
-                                  );
-                                }
-                              }}
-                              className="checkbox-input"
-                            />
-                            <span className="checkbox-label">
-                              {secenek.metni}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    ) : (
-                      <textarea
-                        value={cevaplar[soru._id] || ''}
-                        onChange={(e) =>
-                          handleCevapChange(soru._id, e.target.value)
-                        }
-                        placeholder="Cevabınızı buraya yazınız..."
-                        className="textarea-input"
-                        rows="4"
-                      />
-                    )}
+                            <div className="slider-labels">
+                              <span className="slider-label-min">{soru.minEtiket || soru.minDegeri || 0}</span>
+                              <span className="slider-value">{cevaplar[soru._id] || soru.minDegeri || 0}</span>
+                              <span className="slider-label-max">{soru.maxEtiket || soru.maxDegeri || 10}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="form-actions">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setStep(1)}
-              >
+              <button type="button" className="btn-secondary" onClick={() => setCurrentStep(1)}>
                 ← Geri
               </button>
-              <button
-                type="submit"
-                className="btn-primary"
-                disabled={gonderiliyor}
-              >
-                {gonderiliyor ? 'Gönderiliyor...' : 'Anketi Tamamla'}
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? 'Gönderiliyor...' : 'Anketi Tamamla'}
               </button>
             </div>
           </form>
         </div>
       </div>
-    );
-  }
-
-  // Step 3: Başarı
-  if (step === 3) {
-    return (
-      <div className="anket-container">
-        <div className="success-card">
-          <div className="success-icon">✓</div>
-          <h1>Teşekkürler!</h1>
-          <p>Anketimize katıldığınız için çok teşekkür ederiz.</p>
-          <p className="success-subtitle">
-            Cevaplarınız başarıyla kaydedilmiştir.
-          </p>
-          <button
-            onClick={() => (window.location.href = '/')}
-            className="btn-primary"
-          >
-            Ana Sayfaya Dön
-          </button>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 };
 
 export default AnketCoz;

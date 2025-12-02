@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
     FaBars,
@@ -21,14 +21,18 @@ import {
 function HedefKitleSecimi() {
     const location = useLocation();
     const navigate = useNavigate();
-
     const gelenVeri = location.state;
+    const navigationChecked = useRef(false);
 
+    // MOUNT'TA BİR KEZ KONTROL ET
     useEffect(() => {
-        if (!gelenVeri) {
-            navigate("/");
+        if (!navigationChecked.current) {
+            navigationChecked.current = true;
+            if (!gelenVeri) {
+                navigate("/");
+            }
         }
-    }, [gelenVeri, navigate]);
+    }, [gelenVeri, navigate]); // ← Bağımlılıklar eklendi, uyarı çözüldü
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -77,7 +81,8 @@ function HedefKitleSecimi() {
         };
 
         try {
-            const response = await fetch('http://localhost:4000/api/surveys', {
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+            const response = await fetch(`${apiUrl}/api/surveys`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -160,7 +165,16 @@ function HedefKitleSecimi() {
                     </div>
 
                     {/* SEÇİLEBİLİR KRİTERLER */}
-                    <div style={{ background: "white", borderRadius: "16px", padding: "30px", marginBottom: "25px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+                    <div
+                        className="guvenli-alan"
+                        style={{
+                            background: "white",
+                            borderRadius: "16px",
+                            padding: "30px",
+                            marginBottom: "25px",
+                            boxShadow: "0 2px 12px rgba(0,0,0,0.08)"
+                        }}
+                    >
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
                             <FaShieldAlt style={{ fontSize: "1.5em", color: "#3498db" }} />
                             <h3 style={{ fontSize: "1.4em", color: "#2c3e50", margin: 0 }}>Ek Doğrulama Kriterleri</h3>
@@ -482,6 +496,18 @@ function HedefKitleSecimi() {
             </main>
 
             <style>{`
+                /* BU KISIM ÖNEMLİ: "guvenli-alan" sınıfına sahip elementin
+                   görünürlüğünü zorla açıyoruz. !important ile diğer her şeyi eziyoruz.
+                */
+                .guvenli-alan {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    animation: none !important;
+                    transition: none !important;
+                    height: auto !important;
+                    display: block !important;
+                }
+
                 @keyframes slideDown {
                     from {
                         opacity: 0;

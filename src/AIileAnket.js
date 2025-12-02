@@ -86,7 +86,8 @@ function AIileAnket() {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:4000/api/ai/generate-survey', {
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+            const response = await fetch(`${apiUrl}/api/ai/generate-survey`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,11 +102,13 @@ function AIileAnket() {
             const result = await response.json();
 
             if (result.success) {
-                // Gelen sorulara frontend için unique ID ekle
+                // Gelen sorulara frontend için unique ID ekle ve secenekleri normalize et
                 const islenmisSorular = result.data.sorular.map((s, i) => ({
                     ...s,
                     id: Date.now() + i,
-                    zorunlu: true
+                    zorunlu: true,
+                    // Seçeneklerin array olduğundan emin ol
+                    secenekler: Array.isArray(s.secenekler) ? s.secenekler : []
                 }));
 
                 setSorular(islenmisSorular);
@@ -144,19 +147,29 @@ function AIileAnket() {
         }
 
         // 2. Veriyi Paketle (Backend'e uygun formatta hazırlıyoruz ama göndermiyoruz)
-        const backendFormatindaSorular = sorular.map((s, index) => ({
-            soruId: s.id ? s.id.toString() : (Date.now() + index).toString(),
-            soruMetni: s.metin,
-            soruTipi: s.tip,
-            zorunlu: s.zorunlu !== undefined ? s.zorunlu : true,
-            siraNo: index + 1,
-            secenekler: (s.secenekler || []).map((sec, i) => ({
-                secenekId: `opt-${index}-${i}`,
-                metin: sec
-            })),
-            sliderMin: s.tip === 'slider' ? 1 : null,
-            sliderMax: s.tip === 'slider' ? 10 : null
-        }));
+        const backendFormatindaSorular = sorular.map((s, index) => {
+            // Seçenekleri normalize et - array olduğundan emin ol
+            let secenekler = [];
+            if (Array.isArray(s.secenekler)) {
+                secenekler = s.secenekler.map((sec, i) => {
+                    // String ise direkt metni kullan, obje ise metni/text alanını al
+                    const metinDegeri = typeof sec === 'string' ? sec : (sec.metni || sec.metin || sec.text || '');
+                    return {
+                        metni: metinDegeri // Backend 'metni' (i ile biten) bekliyor
+                    };
+                });
+            }
+
+            return {
+                soruMetni: s.metin,
+                soruTipi: s.tip,
+                zorunlu: s.zorunlu !== undefined ? s.zorunlu : true,
+                siraNo: index + 1,
+                secenekler: secenekler,
+                sliderMin: s.tip === 'slider' ? 1 : null,
+                sliderMax: s.tip === 'slider' ? 10 : null
+            };
+        });
 
         const tasinanVeri = {
             anketBaslik: anketBaslik,
