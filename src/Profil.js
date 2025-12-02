@@ -1,79 +1,132 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import "./Profil.css"; // Senin mevcut CSS dosyanı kullanır
+
+// İkonlar (Lucide kütüphanesi ile güncellendi)
 import {
-    FaBars,
-    FaUser,
-    FaChartBar,
-    FaClipboardList,
-    FaSignOutAlt,
-    FaArrowLeft,
-    FaEdit,
-    FaSave,
-    FaTimes,
-    FaUsers,
-    FaPoll,
-    FaEnvelope,
-    FaPhone,
-    FaIdCard
-} from "react-icons/fa";
-import "./Profil.css";
+    Menu,           // FaBars
+    User,           // FaUser
+    BarChart2,      // FaChartBar
+    ClipboardList,  // FaClipboardList
+    LogOut,         // FaSignOutAlt
+    ArrowLeft,      // FaArrowLeft
+    Edit2,          // FaEdit
+    Save,           // FaSave
+    X,              // FaTimes
+    Users,          // FaUsers
+    PieChart,       // FaPoll
+    Mail,           // FaEnvelope
+    Phone,          // FaPhone
+    CreditCard      // FaIdCard
+} from "lucide-react";
+
+// Backend URL (Port 4000)
+const BASE_API_URL = "http://localhost:4000/api";
 
 function Profil() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // Kullanıcı bilgileri state'i
     const [userData, setUserData] = useState({
-        name: "",
-        surname: "",
-        tcKimlik: "",
+        firstName: "",
+        lastName: "",
+        tcknMasked: "",
         phone: "",
         email: ""
     });
+    
     const [originalData, setOriginalData] = useState({});
-    const navigate = useNavigate();
-
-
-    const handleLogout = () => navigate("/giris");
-    const handleGeriDon = () => navigate("/");
-    const handleAnketOlustur = () => navigate("/anket-olustur");
-    // paketler/analiz/yükselt handlers removed per request
-
-    // Sidebar menü işlevleri
-    const handleProfil = () => {
-        setMenuOpen(false);
-    };
-
-    const handleSonuclariGor = () => {
-        console.log("Sonuçları Gör sayfasına yönlendirilecek");
-        setMenuOpen(false);
-    };
-
+    
+    // İstatistikler state'i (Başlangıçta 0)
     const [stats, setStats] = useState({
         totalSurveys: 0,
         totalResponses: 0,
         activeSurveys: 0
     });
 
+    const navigate = useNavigate();
+
+    // --- TÜM VERİLERİ ÇEKME (Kullanıcı + Anketler) ---
     useEffect(() => {
-        //db den kullanıcı bilgileri çekilecek şuan bi temp
-        const mockUserData = {
-            name: "Ahmet",
-            surname: "Yılmaz",
-            tcKimlik: "12345678901",
-            phone: "+90 555 123 4567",
-            email: "ahmet.yilmaz@example.com"
+        const fetchAllData = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    navigate("/giris");
+                    return;
+                }
+
+                const headers = {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                };
+
+                // 1. Kullanıcı Bilgilerini Çek (/auth/me)
+                const userResponse = await fetch(`${BASE_API_URL}/auth/me`, {
+                    method: "GET",
+                    headers: headers
+                });
+
+                if (userResponse.ok) {
+                    const userDataRes = await userResponse.json();
+                    const userState = {
+                        firstName: userDataRes.firstName || "",
+                        lastName: userDataRes.lastName || "",
+                        tcknMasked: userDataRes.tcknMasked || "", 
+                        phone: userDataRes.phone || "",
+                        email: userDataRes.email || ""
+                    };
+                    setUserData(userState);
+                    setOriginalData(userState);
+                } else {
+                    if (userResponse.status === 401) {
+                        handleLogout();
+                        return;
+                    }
+                }
+
+                // 2. Anketleri Çek ve İstatistik Hesapla (/surveys)
+                const surveyResponse = await fetch(`${BASE_API_URL}/surveys`, {
+                    method: "GET",
+                    headers: headers
+                });
+
+                if (surveyResponse.ok) {
+                    const surveyResData = await surveyResponse.json();
+                    
+                    // surveys.js'den dönen yapı: { success: true, data: [...] }
+                    if (surveyResData.success && Array.isArray(surveyResData.data)) {
+                        const surveys = surveyResData.data;
+
+                        // --- İSTATİSTİK HESAPLAMA MANTIĞI ---
+                        const total = surveys.length;
+                        const active = surveys.filter(s => s.durum === "aktif").length;
+                        // Her anketteki 'toplamCevapSayisi' alanını topla
+                        const responses = surveys.reduce((acc, curr) => acc + (curr.toplamCevapSayisi || 0), 0);
+
+                        setStats({
+                            totalSurveys: total,
+                            activeSurveys: active,
+                            totalResponses: responses
+                        });
+                    }
+                } else {
+                    console.error("Anket verileri çekilemedi.");
+                }
+
+            } catch (error) {
+                console.error("Sunucu hatası:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
-        const mockStats = {
-            totalSurveys: 12,
-            totalResponses: 345,
-            activeSurveys: 3
-        };
+        fetchAllData();
+    }, [navigate]);
 
-        setUserData(mockUserData);
-        setOriginalData(mockUserData);
-        setStats(mockStats);
-    }, []);
-
+    // Input değişimi
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setUserData(prev => ({
@@ -82,12 +135,42 @@ function Profil() {
         }));
     };
 
-    const handleSave = () => {
-        // db de güncellenecek
-        console.log("Kullanıcı verileri kaydedildi:", userData);
-        setOriginalData(userData);
-        setEditMode(false);
-        alert("Profil bilgileriniz başarıyla güncellendi!");
+    // --- PROFİL GÜNCELLEME (PUT) ---
+    const handleSave = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            
+            const response = await fetch(`${BASE_API_URL}/auth/me`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
+                    phone: userData.phone,
+                    email: userData.email
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setOriginalData({
+                    ...userData,
+                    ...result.user
+                });
+                setEditMode(false);
+                alert("Profil başarıyla güncellendi!");
+            } else {
+                alert("Hata: " + (result.error || "Güncelleme başarısız."));
+            }
+
+        } catch (error) {
+            console.error("Güncelleme hatası:", error);
+            alert("Sunucuya bağlanılamadı.");
+        }
     };
 
     const handleCancel = () => {
@@ -95,13 +178,25 @@ function Profil() {
         setEditMode(false);
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate("/giris");
+    };
+    
+    const handleGeriDon = () => navigate("/");
+    const handleAnketOlustur = () => navigate("/anket-olustur");
+    const handleProfil = () => setMenuOpen(false);
+    const handleSonuclariGor = () => setMenuOpen(false);
+
+    if (loading) return <div style={{display:'flex', justifyContent:'center', marginTop:'50px'}}>Yükleniyor...</div>;
+
     return (
         <div className="panel-container">
             {/* Navbar */}
             <nav className="panel-navbar">
                 <div className="nav-left">
-                    <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-                    <FaArrowLeft className="menu-icon" onClick={handleGeriDon} style={{ marginRight: "15px" }} />
+                    <Menu className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
+                    <ArrowLeft className="menu-icon" onClick={handleGeriDon} style={{ marginRight: "15px" }} />
                     <span className="panel-logo">AnketApp</span>
                 </div>
 
@@ -115,16 +210,16 @@ function Profil() {
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
                 <ul>
                     <li className="active" onClick={handleProfil}>
-                        <FaUser className="icon" /> Profil
+                        <User size={20} /> Profil
                     </li>
                     <li onClick={handleAnketOlustur}>
-                        <FaClipboardList className="icon" /> Anket Oluştur
+                        <ClipboardList size={20} /> Anket Oluştur
                     </li>
                     <li onClick={handleSonuclariGor}>
-                        <FaChartBar className="icon" /> Sonuçları Gör
+                        <BarChart2 size={20} /> Sonuçları Gör
                     </li>
                     <li onClick={handleLogout}>
-                        <FaSignOutAlt className="icon" /> Çıkış Yap
+                        <LogOut size={20} /> Çıkış Yap
                     </li>
                 </ul>
             </div>
@@ -142,17 +237,17 @@ function Profil() {
                             className={`profil-duzenle-butonu ${editMode ? "iptal" : "duzenle"}`}
                             onClick={editMode ? handleCancel : () => setEditMode(true)}
                         >
-                            {editMode ? <FaTimes /> : <FaEdit />}
+                            {editMode ? <X size={18} /> : <Edit2 size={18} />}
                             {editMode ? " İptal" : " Düzenle"}
                         </button>
                     </div>
 
                     <div className="profil-icerik">
-                        {/* istatistik kartları */}
+                        {/* İstatistik Kartları (Dinamik Veriler) */}
                         <div className="profil-istatistikler">
                             <div className="istatistik-kart">
                                 <div className="istatistik-ikon yeşil">
-                                    <FaPoll />
+                                    <PieChart />
                                 </div>
                                 <div className="istatistik-bilgi">
                                     <h3>{stats.totalSurveys}</h3>
@@ -162,7 +257,7 @@ function Profil() {
 
                             <div className="istatistik-kart">
                                 <div className="istatistik-ikon mavi">
-                                    <FaUsers />
+                                    <Users />
                                 </div>
                                 <div className="istatistik-bilgi">
                                     <h3>{stats.totalResponses}</h3>
@@ -172,7 +267,7 @@ function Profil() {
 
                             <div className="istatistik-kart">
                                 <div className="istatistik-ikon turuncu">
-                                    <FaChartBar />
+                                    <BarChart2 />
                                 </div>
                                 <div className="istatistik-bilgi">
                                     <h3>{stats.activeSurveys}</h3>
@@ -181,22 +276,22 @@ function Profil() {
                             </div>
                         </div>
 
-                        {/* profil bilgileri */}
+                        {/* Profil Bilgileri Formu */}
                         <div className="profil-bilgileri-kart">
                             <h2>📝 Kişisel Bilgiler</h2>
 
                             <div className="profil-form">
                                 <div className="form-satir">
                                     <div className="form-grup">
-                                        <label htmlFor="name">
-                                            <FaUser className="input-ikon" />
+                                        <label htmlFor="firstName">
+                                            <User className="input-ikon" size={16} />
                                             Ad
                                         </label>
                                         <input
                                             type="text"
-                                            id="name"
-                                            name="name"
-                                            value={userData.name}
+                                            id="firstName"
+                                            name="firstName"
+                                            value={userData.firstName}
                                             onChange={handleInputChange}
                                             disabled={!editMode}
                                             className={editMode ? "edit-mode" : ""}
@@ -204,15 +299,15 @@ function Profil() {
                                     </div>
 
                                     <div className="form-grup">
-                                        <label htmlFor="surname">
-                                            <FaUser className="input-ikon" />
+                                        <label htmlFor="lastName">
+                                            <User className="input-ikon" size={16} />
                                             Soyad
                                         </label>
                                         <input
                                             type="text"
-                                            id="surname"
-                                            name="surname"
-                                            value={userData.surname}
+                                            id="lastName"
+                                            name="lastName"
+                                            value={userData.lastName}
                                             onChange={handleInputChange}
                                             disabled={!editMode}
                                             className={editMode ? "edit-mode" : ""}
@@ -222,19 +317,17 @@ function Profil() {
 
                                 <div className="form-satir">
                                     <div className="form-grup">
-                                        <label htmlFor="tcKimlik">
-                                            <FaIdCard className="input-ikon" />
+                                        <label htmlFor="tcknMasked">
+                                            <CreditCard className="input-ikon" size={16} />
                                             TC Kimlik No
                                         </label>
                                         <input
                                             type="text"
-                                            id="tcKimlik"
-                                            name="tcKimlik"
-                                            value={userData.tcKimlik}
-                                            onChange={handleInputChange}
-                                            disabled={!editMode}
-                                            className={editMode ? "edit-mode" : ""}
-                                            maxLength="11"
+                                            id="tcknMasked"
+                                            name="tcknMasked"
+                                            value={userData.tcknMasked}
+                                            disabled={true} 
+                                            style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
                                         />
                                     </div>
                                 </div>
@@ -242,7 +335,7 @@ function Profil() {
                                 <div className="form-satir">
                                     <div className="form-grup">
                                         <label htmlFor="phone">
-                                            <FaPhone className="input-ikon" />
+                                            <Phone className="input-ikon" size={16} />
                                             Telefon
                                         </label>
                                         <input
@@ -258,7 +351,7 @@ function Profil() {
 
                                     <div className="form-grup">
                                         <label htmlFor="email">
-                                            <FaEnvelope className="input-ikon" />
+                                            <Mail className="input-ikon" size={16} />
                                             E-posta
                                         </label>
                                         <input
@@ -277,14 +370,14 @@ function Profil() {
                             {editMode && (
                                 <div className="profil-aksiyonlar">
                                     <button className="kaydet-butonu" onClick={handleSave}>
-                                        <FaSave style={{ marginRight: "8px" }} />
+                                        <Save size={18} />
                                         Değişiklikleri Kaydet
                                     </button>
                                 </div>
                             )}
                         </div>
 
-                        {/* ek bilgiler */}
+                        {/* Ek Bilgiler */}
                         <div className="profil-ek-bilgiler">
                             <div className="ek-bilgi-kart">
                                 <h3>ℹ️ Hesap Bilgileri</h3>
@@ -294,12 +387,8 @@ function Profil() {
                                         <span className="bilgi-deger">Standart</span>
                                     </div>
                                     <div className="ek-bilgi-oge">
-                                        <span className="bilgi-etiket">Üyelik Tarihi:</span>
-                                        <span className="bilgi-deger">15 Ocak 2024</span>
-                                    </div>
-                                    <div className="ek-bilgi-oge">
-                                        <span className="bilgi-etiket">Son Giriş:</span>
-                                        <span className="bilgi-deger">Bugün, 14:30</span>
+                                        <span className="bilgi-etiket">Giriş Durumu:</span>
+                                        <span className="bilgi-deger">Aktif</span>
                                     </div>
                                 </div>
                             </div>

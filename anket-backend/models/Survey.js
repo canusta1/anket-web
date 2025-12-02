@@ -39,6 +39,7 @@ const SurveySchema = new mongoose.Schema({
   // Hedef kitle kriterleri
   hedefKitleKriterleri: {
     mail: { type: Boolean, default: false },
+    mailUzantisi: { type: String, default: "" },
     tcNo: { type: Boolean, default: false },
     konum: { type: Boolean, default: false },
     kimlikDogrulama: { type: Boolean, default: false }

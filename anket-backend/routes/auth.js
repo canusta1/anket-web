@@ -1,4 +1,3 @@
-// anket-web/anket-backend/routes/auth.js
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -46,11 +45,45 @@ router.post("/login", async (req, res) => {
   res.json({ token, user: u.safeJSON() });
 });
 
-// Oturum sahibi
+// Oturum sahibi bilgilerini GETİR (Mevcut kodun)
 router.get("/me", auth(true), async (req, res) => {
   const u = await User.findById(req.user._id);
   if (!u) return res.status(404).json({ error: "Kullanıcı yok" });
   res.json(u.safeJSON());
+});
+
+// --- YENİ EKLENEN KISIM: Oturum sahibi bilgilerini GÜNCELLE ---
+router.put("/me", auth(true), async (req, res) => {
+  try {
+    const { firstName, lastName, phone, email } = req.body;
+    
+    // Güncellenecek alanları belirle (TCKN ve Şifre buradan güncellenmez)
+    const updates = {};
+    if (firstName) updates.firstName = firstName;
+    if (lastName) updates.lastName = lastName;
+    if (phone) updates.phone = phone;
+    if (email) updates.email = email;
+
+    // MongoDB güncelleme işlemi
+    // new: true -> güncellenmiş veriyi döndürür
+    // runValidators: true -> modeldeki zorunlulukları (örn email formatı) kontrol eder
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+
+    res.json({ message: "Güncellendi", user: updatedUser.safeJSON() });
+
+  } catch (e) {
+    // E-posta veya telefon başkasında varsa hata verir (duplicate key error)
+    if (e.code === 11000) {
+      return res.status(400).json({ error: "Bu e-posta veya telefon numarası zaten kullanımda." });
+    }
+    res.status(400).json({ error: e.message });
+  }
 });
 
 module.exports = router;

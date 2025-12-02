@@ -1,11 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AnketOlustur.css";
-import { FaBars, FaUser, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner } from "react-icons/fa";
+import { FaBars, FaUser, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaHome } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 function AnketOlustur() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [titleText, setTitleText] = useState("");
+  const [charIndex, setCharIndex] = useState(0);
   const navigate = useNavigate();
+
+  const fullTitle = "Nasıl bir anket oluşturmak istiyorsunuz?";
+
+  // Yazı animasyonu
+  useEffect(() => {
+    if (charIndex < fullTitle.length) {
+      const timer = setTimeout(() => {
+        setTitleText(fullTitle.slice(0, charIndex + 1));
+        setCharIndex(charIndex + 1);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [charIndex, fullTitle]);
 
   const handleLogout = () => navigate("/giris");
 
@@ -14,19 +29,16 @@ function AnketOlustur() {
     navigate("/sifirdan-anket");
   };
 
-  // 2. YAPAY ZEKA (Yönlendirme - SORUN BURADAYDI, DÜZELDİ)
+  // 2. YAPAY ZEKA (Yönlendirme)
   const handleYapayZeka = () => {
-    // Eski kod: setAiFormMode(true); -> YANLIŞ (Sayfa içinde açıyordu)
-    // Yeni kod: navigate("/ai-ile-anket"); -> DOĞRU (Hazırladığımız sayfaya gider)
     navigate("/ai-ile-anket");
   };
 
-  // --- Yeni state'ler: şablon modu ve şablon listesi ---
+  // 3. KOPYALA - Şablon modu ve şablon listesi
   const [templateMode, setTemplateMode] = useState(false);
   const [templates, setTemplates] = useState([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
 
-  // Diğer butonlar (Henüz hazır olmayanlar)
   const handleKopyala = async () => {
     setTemplateMode(true);
     setTemplatesLoading(true);
@@ -76,13 +88,17 @@ function AnketOlustur() {
     navigate("/sifirdan-anket", { state: { template: convertedTemplate } });
   };
 
-  // <--- EKLE: Yapıştırma fonksiyonu tanımı (ESLint hatasını giderir)
+  // 4. YAPISTIR - Geçici fonksiyon
   const handleYapistir = () => {
-    // Geçici: özellik henüz hazır değilse kullanıcıyı bilgilendir
-    // İstersen burayı paste modal'ı açacak veya başka bir route'a yönlendirecek şekilde değiştir.
     alert("Soruları yapıştırma özelliği yakında gelecek!");
   };
-  
+
+  const handleProfil = () => navigate("/profil");
+  const handleAnaSayfa = () => navigate("/");
+
+  // Menüyü kapatma
+  const closeMenu = () => setMenuOpen(false);
+
   // --- Eğer templateMode aktifse liste ekranını göster ---
   if (templateMode) {
     return (
@@ -151,9 +167,7 @@ function AnketOlustur() {
         </main>
       </div>
     );
-  }
-
-  return (
+  }  return (
     <div className="panel-container">
       {/* Navbar */}
       <nav className="panel-navbar">
@@ -163,51 +177,75 @@ function AnketOlustur() {
         </div>
 
         <div className="nav-right">
-          <a href="/">Ana Sayfa</a>
+          <button className="nav-link" onClick={handleAnaSayfa}>
+            <FaHome className="nav-icon" /> Ana Sayfa
+          </button>
           <button className="btn-white">Anket Oluştur</button>
         </div>
       </nav>
 
       {/* Sidebar */}
       <div className={`sidebar ${menuOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
+        </div>
         <ul>
-          <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
+          <li onClick={handleProfil}><FaUser className="icon" /> Profil</li>
           <li><FaClipboardList className="icon" /> Anket Oluştur</li>
           <li><FaChartBar className="icon" /> Sonuçları Gör</li>
           <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
         </ul>
       </div>
 
+      {/* Overlay */}
+      {menuOpen && <div className="sidebar-overlay" onClick={closeMenu}></div>}
+
       {/* İçerik */}
       <main className="anket-main">
-        <h1>Nasıl bir anket oluşturmak istiyorsunuz?</h1>
-        <div className="anket-grid">
+        <div className="title-container">
+          <h1 className="animated-title">
+            {titleText}
+            <span className="cursor">|</span>
+          </h1>
+          <div className="title-decoration">
+            <div className="decoration-line"></div>
+            <div className="decoration-dots">•••</div>
+            <div className="decoration-line"></div>
+          </div>
+        </div>
 
+        <div className="anket-grid">
           {/* SIFIRDAN ANKET KARTI */}
-          <div className="anket-card" onClick={handleSifirdanAnket}>
-            <img src="https://img.icons8.com/color/96/000000/survey.png" alt="Sıfırdan" />
+          <div className="anket-olustur-card" onClick={handleSifirdanAnket}>
+            <div className="card-icon">✏️</div>
             <h3>Sıfırdan Anket Oluştur</h3>
             <p>Boş bir sayfadan başlayarak kendi sorularınızı oluşturun.</p>
+            <div className="card-hover-effect"></div>
           </div>
 
-          {/* YAPAY ZEKA KARTI - Artık direkt AI sayfasına atar */}
-          <div className="anket-card" onClick={handleYapayZeka}>
-            <img src="https://img.icons8.com/color/96/000000/artificial-intelligence.png" alt="Yapay Zeka" />
-            <h3>Yapay Zeka ile Anket Oluştur</h3>
+          {/* YAPAY ZEKA KARTI */}
+          <div className="anket-olustur-card ai-olustur-card" onClick={handleYapayZeka}>
+            <div className="card-icon">🤖</div>
+            <h3>Yapay Zeka ile Oluştur</h3>
             <p>Kısa bir açıklama girin, yapay zeka sizin için anket tasarlasın.</p>
+            <div className="card-hover-effect"></div>
+            <div className="ai-glow"></div>
           </div>
 
           {/* DİĞER KARTLAR */}
-          <div className="anket-card" onClick={handleKopyala}>
-            <img src="https://img.icons8.com/color/96/000000/copy.png" alt="Kopyala" />
-            <h3>Daha Önceki Anketi Kopyalayın</h3>
+          <div className="anket-olustur-card" onClick={handleKopyala}>
+            <div className="card-icon">📋</div>
+            <h3>Anketi Kopyala</h3>
             <p>Mevcut anketlerinizi temel alarak yeni bir sürüm oluşturun.</p>
+            <div className="card-hover-effect"></div>
           </div>
 
-          <div className="anket-card" onClick={handleYapistir}>
-            <img src="https://img.icons8.com/color/96/000000/paste.png" alt="Soruları Yapıştır" />
-            <h3>Soruları Yapıştırarak Oluştur</h3>
+          <div className="anket-olustur-card" onClick={handleYapistir}>
+            <div className="card-icon">📝</div>
+            <h3>Soruları Yapıştır</h3>
             <p>Elinizdeki soruları yapıştırın, sistem otomatik olarak anketi oluştursun.</p>
+            <div className="card-hover-effect"></div>
           </div>
         </div>
       </main>
