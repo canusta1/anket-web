@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Panel.css";
-import { FaBars, FaUser, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt } from "react-icons/fa";
+import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
 function Panel() {
@@ -139,7 +139,7 @@ function Panel() {
         </div>
 
         <div className="nav-right">
-          <Link to="/" className="nav-link">Ana Sayfa</Link>
+          <Link to="/" className="nav-link"><FaHome /> Ana Sayfa</Link>
           <button className="btn-white" onClick={handleAnketOlustur}>
             Anket Oluştur
           </button>

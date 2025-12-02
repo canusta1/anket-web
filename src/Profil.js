@@ -17,6 +17,7 @@ import {
     PieChart,       // FaPoll
     Mail,           // FaEnvelope
     Phone,          // FaPhone
+    Home,           // FaHome
     CreditCard      // FaIdCard
 } from "lucide-react";
 
@@ -36,9 +37,9 @@ function Profil() {
         phone: "",
         email: ""
     });
-    
+
     const [originalData, setOriginalData] = useState({});
-    
+
     // İstatistikler state'i (Başlangıçta 0)
     const [stats, setStats] = useState({
         totalSurveys: 0,
@@ -74,7 +75,7 @@ function Profil() {
                     const userState = {
                         firstName: userDataRes.firstName || "",
                         lastName: userDataRes.lastName || "",
-                        tcknMasked: userDataRes.tcknMasked || "", 
+                        tcknMasked: userDataRes.tcknMasked || "",
                         phone: userDataRes.phone || "",
                         email: userDataRes.email || ""
                     };
@@ -95,7 +96,7 @@ function Profil() {
 
                 if (surveyResponse.ok) {
                     const surveyResData = await surveyResponse.json();
-                    
+
                     // surveys.js'den dönen yapı: { success: true, data: [...] }
                     if (surveyResData.success && Array.isArray(surveyResData.data)) {
                         const surveys = surveyResData.data;
@@ -139,7 +140,7 @@ function Profil() {
     const handleSave = async () => {
         try {
             const token = localStorage.getItem("token");
-            
+
             const response = await fetch(`${BASE_API_URL}/auth/me`, {
                 method: "PUT",
                 headers: {
@@ -182,13 +183,13 @@ function Profil() {
         localStorage.removeItem("token");
         navigate("/giris");
     };
-    
+
     const handleGeriDon = () => navigate("/");
     const handleAnketOlustur = () => navigate("/anket-olustur");
     const handleProfil = () => setMenuOpen(false);
     const handleSonuclariGor = () => setMenuOpen(false);
 
-    if (loading) return <div style={{display:'flex', justifyContent:'center', marginTop:'50px'}}>Yükleniyor...</div>;
+    if (loading) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>Yükleniyor...</div>;
 
     return (
         <div className="panel-container">
@@ -201,7 +202,7 @@ function Profil() {
                 </div>
 
                 <div className="nav-right">
-                    <Link to="/" className="nav-link">Ana Sayfa</Link>
+                    <Link to="/panel" className="nav-link"><Home /> Ana Sayfa</Link>
                     <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
                 </div>
             </nav>
@@ -326,7 +327,7 @@ function Profil() {
                                             id="tcknMasked"
                                             name="tcknMasked"
                                             value={userData.tcknMasked}
-                                            disabled={true} 
+                                            disabled={true}
                                             style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
                                         />
                                     </div>

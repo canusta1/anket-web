@@ -22,3 +22,14 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Ana Sayfa butonu yazı rengi siyah - Global */
+a[href="/panel"],
+.nav-right>a {
+  color: #000 !important;
+}
+
+a[href="/panel"]:hover,
+.nav-right>a:hover {
+  color: #333 !important;
+}

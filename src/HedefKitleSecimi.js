@@ -15,7 +15,8 @@ import {
     FaCheckCircle,
     FaMobileAlt,
     FaSpinner,
-    FaCopy
+    FaCopy,
+    FaHome
 } from "react-icons/fa";
 
 function HedefKitleSecimi() {
@@ -124,7 +125,7 @@ function HedefKitleSecimi() {
                     <span className="panel-logo">AnketApp</span>
                 </div>
                 <div className="nav-right">
-                    <Link to="/" className="nav-link">Ana Sayfa</Link>
+                    <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
                     <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
                 </div>
             </nav>
