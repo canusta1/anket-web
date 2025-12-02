@@ -54,44 +54,6 @@ const SoruSchema = new mongoose.Schema(
         message: "Çoktan seçmeli sorular için en az bir seçenek eklenmelidir."
       }
     },
-const SoruSchema = new mongoose.Schema(
-  {
-    _id: {
-      type: mongoose.Schema.Types.ObjectId,
-      auto: true
-    },
-    soruMetni: {
-      type: String,
-      required: [true, "Soru metni boş geçilemez"]
-    },
-    soruTipi: {
-      type: String,
-      enum: [
-        "acik-uclu",        // Açık uçlu (textarea)
-        "coktan-tek",       // Çoktan seçmeli - tek seçim (radio)
-        "coktan-coklu",     // Çok seçmeli - birden fazla seçim (checkbox)
-        "slider",           // Slider (opsiyonel - şimdilik desteklenmez)
-        "coktan-secmeli",   // Eski format uyumluluğu için
-        "cok-secmeli"       // Eski format uyumluluğu için
-      ],
-      default: "acik-uclu"
-    },
-    // Seçenekler - Sadece array şekilde
-    secenekler: {
-      type: [SecenekSchema],
-      default: [],
-      validate: {
-        validator: function (val) {
-          // Seçenekli soru tipleri için seçenek zorunlu
-          const secenekliTipler = ["coktan-tek", "coktan-coklu", "coktan-secmeli", "cok-secmeli"];
-          if (secenekliTipler.includes(this.soruTipi)) {
-            return Array.isArray(val) && val.length > 0;
-          }
-          return true;
-        },
-        message: "Çoktan seçmeli sorular için en az bir seçenek eklenmelidir."
-      }
-    },
     siraNo: {
       type: Number,
       default: 1

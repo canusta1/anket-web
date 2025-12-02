@@ -212,9 +212,18 @@
   color: #000000;
   font-weight: 900;
 }
+
 @keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .title-decoration {
@@ -361,8 +370,15 @@
 }
 
 @keyframes glow {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* Responsive */
@@ -375,7 +391,8 @@
     gap: 10px;
   }
 
-  .nav-link, .btn-white {
+  .nav-link,
+  .btn-white {
     padding: 8px 16px;
     font-size: 0.9rem;
   }
@@ -408,11 +425,11 @@
   .animated-title {
     font-size: 1.6rem;
   }
-  
+
   .anket-olustur-card h3 {
     font-size: 1.2rem;
   }
-  
+
   .anket-olustur-card .card-icon {
     font-size: 2.5rem;
   }

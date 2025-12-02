@@ -77,13 +77,13 @@ function AnketOlustur() {
         id: Math.random(),
         metin: soru.soruMetni || soru.metin || soru.soru || '',
         tip: soru.soruTipi || soru.tip || 'acik-uclu',
-        secenekler: (soru.secenekler || []).map(sec => 
+        secenekler: (soru.secenekler || []).map(sec =>
           typeof sec === 'string' ? sec : sec.metin || ''
         ),
         zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : false
       }))
     };
-    
+
     console.log("✅ Dönüştürülen Template:", convertedTemplate);
     navigate("/sifirdan-anket", { state: { template: convertedTemplate } });
   };
@@ -167,7 +167,7 @@ function AnketOlustur() {
         </main>
       </div>
     );
-  }  return (
+  } return (
     <div className="panel-container">
       {/* Navbar */}
       <nav className="panel-navbar">
