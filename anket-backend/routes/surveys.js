@@ -1,5 +1,3 @@
-// anket-backend/routes/surveys.js
-
 const router = require("express").Router();
 const Survey = require("../models/Survey");
 const SurveyLink = require("../models/SurveyLink");
@@ -13,7 +11,6 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:51900";
 // VERİ TEMIZLEME FONKSİYONU
 // ============================================
 function temizleSorular(sorular) {
-  // Soru tipi haritası - Frontend formatından Backend formatına
   const tipiHaritas = {
     "acik-uclu": "acik-uclu",
     "coktan-tek": "coktan-tek",
@@ -27,34 +24,22 @@ function temizleSorular(sorular) {
   return (sorular || []).map((soru, index) => {
     let secenekler = soru.secenekler || [];
 
-    // Eğer seçenekler string ise (virgülü ayırılmış), diziye çevir
     if (typeof secenekler === "string") {
-      secenekler = secenekler
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+      secenekler = secenekler.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
     }
-
-    // Eğer dizi değilse, boş array yap
     if (!Array.isArray(secenekler)) {
       secenekler = [];
     }
 
-    // Seçenekleri standart formata çevir { metni: string }
     const formatlıSecenekler = secenekler
       .map((opt) => {
         if (typeof opt === "object" && opt !== null) {
-          // Obje ise metni/metin alanını al
-          const metinDegeri = opt.metni || opt.metin || opt.text || '';
-          return { metni: metinDegeri };
-        } else if (typeof opt === "string") {
-          return { metni: opt };
+          return { metni: opt.metni || opt.metin || opt.text || '' };
         }
         return { metni: String(opt) };
       })
-      .filter((opt) => opt.metni && opt.metni.trim().length > 0); // Boş seçenekleri filtrele
+      .filter((opt) => opt.metni && opt.metni.trim().length > 0);
 
-    // Soru tipini normalize et - soruTipi veya tip alanını kontrol et
     let normalizedTipi = soru.soruTipi || soru.tip || "acik-uclu";
     if (tipiHaritas[normalizedTipi]) {
       normalizedTipi = tipiHaritas[normalizedTipi];
@@ -65,54 +50,53 @@ function temizleSorular(sorular) {
       soruTipi: normalizedTipi,
       secenekler: formatlıSecenekler,
       siraNo: soru.siraNo || (index + 1),
+      minDegeri: soru.minDegeri,
+      maxDegeri: soru.maxDegeri,
+      minEtiket: soru.minEtiket,
+      maxEtiket: soru.maxEtiket,
       zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : true
     };
   });
 }
 
 // ============================================
-// ⭐ ÖNEMLI: by-link ROUTE'U İLK YAZILMALI ⭐
+// HAVERSINE MESAFE FORMÜLÜ (METRE CİNSİNDEN)
 // ============================================
-// 4. ANKETİ KATILIMCIYA GETİR (LİNK KODU İLE) - PUBLIC ROUTE
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Dünya yarıçapı (metre)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// ============================================
+// 1. ANKETİ KATILIMCIYA GETİR (LİNK KODU İLE)
 // ============================================
 router.get("/by-link/:linkKodu", async (req, res) => {
   try {
     const { linkKodu } = req.params;
-
     console.log("🔍 Link kodu aranıyor:", linkKodu);
 
-    // Link kontrol et
     const link = await SurveyLink.findOne({ linkKodu, aktif: true });
-
     if (!link) {
       console.log("❌ Link bulunamadı");
-      return res.status(404).json({
-        success: false,
-        error: "Geçersiz veya süresi dolmuş anket linki."
-      });
+      return res.status(404).json({ success: false, error: "Geçersiz veya süresi dolmuş anket linki." });
     }
 
-    console.log("✅ Link bulundu:", link._id);
-
-    // Tıklanma istatistiğini güncelle
     link.tiklanmaSayisi += 1;
     link.sonTiklanmaTarihi = new Date();
     await link.save();
 
-    // Anketi getir
     const anket = await Survey.findById(link.anketId);
-
     if (!anket || anket.durum !== "aktif") {
-      console.log("❌ Anket bulunamadı veya pasif");
-      return res.status(404).json({
-        success: false,
-        error: "Bu anket yayından kaldırılmış."
-      });
+      return res.status(404).json({ success: false, error: "Bu anket yayından kaldırılmış." });
     }
 
-    console.log("✅ Anket bulundu, katılımcıya gönderiliyor");
-
-    // Katılımcıya döndür
     res.json({
       success: true,
       data: {
@@ -120,7 +104,7 @@ router.get("/by-link/:linkKodu", async (req, res) => {
         anketBaslik: anket.anketBaslik,
         anketAciklama: anket.anketAciklama,
         sorular: anket.sorular,
-        hedefKitleKriterleri: anket.hedefKitleKriterleri,
+        hedefKitleKriterleri: anket.hedefKitleKriterleri, // KonumHedefi burada frontende gider
         paylasimLinki: link.tamLink
       }
     });
@@ -131,7 +115,7 @@ router.get("/by-link/:linkKodu", async (req, res) => {
 });
 
 // ============================================
-// 1. ANKET OLUŞTUR
+// 2. ANKET OLUŞTUR (POST /)
 // ============================================
 router.post("/", auth(true), async (req, res) => {
   try {
@@ -143,16 +127,11 @@ router.post("/", auth(true), async (req, res) => {
       aiIleOlusturuldu
     } = req.body;
 
-    console.log("📝 Gelen Sorular (Ham):", JSON.stringify(sorular, null, 2));
+    console.log("📝 Gelen Hedef Kitle Kriterleri:", JSON.stringify(hedefKitleKriterleri, null, 2));
 
-    // Soruları temizle ve standardize et
     const islenmisSorular = temizleSorular(sorular);
-
-    console.log("✅ İşlenmiş Sorular:", JSON.stringify(islenmisSorular, null, 2));
-
-    // Link kodunu oluştur
     const linkKodu = Math.random().toString(36).substring(2, 10).toUpperCase();
-    
+
     // Request'in geldikği origin'den URL al (localhost vs IP)
     const requestOrigin = req.get('origin') || req.get('referer') || `http://${req.get('host')}`;
     const baseUrl = requestOrigin.split('/').slice(0, 3).join('/'); // Protocol + Host + Port
@@ -161,19 +140,52 @@ router.post("/", auth(true), async (req, res) => {
     console.log("🌐 Request Origin:", requestOrigin);
     console.log("🔗 Oluşturulan Link:", tamLink);
 
-    // Anketi oluştur
+    // --- KONUM KISITLAMASı ENTEGRASYONU ---
+    const konumKisitlamasi = (hedefKitleKriterleri?.konum && hedefKitleKriterleri?.konumHedefi)
+      ? {
+        tip: hedefKitleKriterleri.konumHedefi.tip || null,
+        radiusMetre: hedefKitleKriterleri.konumHedefi.radius || null,
+        anketKoordinatlari: {
+          latitude: hedefKitleKriterleri.konumHedefi.hedef?.lat || null,
+          longitude: hedefKitleKriterleri.konumHedefi.hedef?.lng || null
+        },
+        adres: hedefKitleKriterleri.konumHedefi.aciklama || "",
+        mahalle: hedefKitleKriterleri.konumHedefi.hedef?.mahalle || "",
+        ilce: hedefKitleKriterleri.konumHedefi.hedef?.ilce || "",
+        sehir: hedefKitleKriterleri.konumHedefi.hedef?.il || ""
+      }
+      : {
+        tip: null,
+        radiusMetre: null,
+        anketKoordinatlari: { latitude: null, longitude: null },
+        adres: "",
+        mahalle: "",
+        ilce: "",
+        sehir: ""
+      };
+
+    console.log("📍 Konum Kısıtlaması Mapping:", JSON.stringify(konumKisitlamasi, null, 2));
+
+    const yeniKriterler = {
+      mail: hedefKitleKriterleri?.mail || false,
+      mailUzantisi: hedefKitleKriterleri?.mailUzantisi || "",
+      tcNo: hedefKitleKriterleri?.tcNo || false,
+      kimlikDogrulama: hedefKitleKriterleri?.kimlikDogrulama || false,
+      konum: hedefKitleKriterleri?.konum || false,
+      konumKisitlamasi: konumKisitlamasi
+    };
+
     const newSurvey = new Survey({
       kullaniciId: req.user._id,
       anketBaslik,
       anketAciklama,
       sorular: islenmisSorular,
-      hedefKitleKriterleri,
+      hedefKitleKriterleri: yeniKriterler,
       aiIleOlusturuldu: aiIleOlusturuldu || false,
       durum: "aktif",
       paylasimLinki: tamLink
     });
 
-    // SurveyLink kaydı oluştur
     await SurveyLink.create({
       anketId: newSurvey._id,
       kullaniciId: req.user._id,
@@ -183,9 +195,7 @@ router.post("/", auth(true), async (req, res) => {
       tiklanmaSayisi: 0
     });
 
-    // Anketi kaydet
     const savedSurvey = await newSurvey.save();
-
     console.log("✅ Anket Oluşturuldu. Link:", tamLink);
 
     res.status(201).json({
@@ -200,15 +210,13 @@ router.post("/", auth(true), async (req, res) => {
 });
 
 // ============================================
-// 2. KULLANICININ ANKETLERİNİ LİSTELE
+// 3. KULLANICININ ANKETLERİNİ LİSTELE
 // ============================================
 router.get("/", auth(true), async (req, res) => {
   try {
     const items = await Survey.find({ kullaniciId: req.user._id })
       .sort({ createdAt: -1 })
-      .select(
-        "anketBaslik anketAciklama sorular durum toplamCevapSayisi createdAt paylasimLinki aiIleOlusturuldu"
-      );
+      .select("anketBaslik anketAciklama sorular durum toplamCevapSayisi createdAt paylasimLinki aiIleOlusturuldu");
 
     // Her anket için SurveyLink'ten tamLink'i al
     const itemsWithLinks = await Promise.all(
@@ -228,20 +236,15 @@ router.get("/", auth(true), async (req, res) => {
 });
 
 // ============================================
-// 3. TEK ANKET DETAYI (YÖNETİCİ İÇİN)
+// 4. TEK ANKET DETAYI
 // ============================================
 router.get("/:id", auth(true), async (req, res) => {
   try {
     const item = await Survey.findById(req.params.id);
-    if (!item)
-      return res.status(404).json({ success: false, error: "Anket bulunamadı" });
+    if (!item) return res.status(404).json({ success: false, error: "Anket bulunamadı" });
 
-    // Güvenlik kontrolü
     if (item.kullaniciId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        error: "Bu anketi görüntüleme yetkiniz yok"
-      });
+      return res.status(403).json({ success: false, error: "Bu anketi görüntüleme yetkiniz yok" });
     }
 
     res.json({ success: true, data: item });
@@ -251,32 +254,86 @@ router.get("/:id", auth(true), async (req, res) => {
 });
 
 // ============================================
-// 5. CEVAPLARI KAYDET (SUBMIT) - PUBLIC ROUTE
+// 5. CEVAPLARI KAYDET (SUBMIT) - GEOFENCING KONTROLÜ
 // ============================================
 router.post("/submit", async (req, res) => {
   try {
-    const { anketId, cevaplar, katilimciBilgileri } = req.body;
+    const { anketId, cevaplar, katilimciBilgileri, dogrulamaBilgileri } = req.body;
+    const birlestirilenBilgiler = { ...katilimciBilgileri, ...dogrulamaBilgileri };
 
     if (!anketId || !cevaplar) {
-      return res.status(400).json({
-        success: false,
-        error: "anketId ve cevaplar zorunludur"
-      });
+      return res.status(400).json({ success: false, error: "anketId ve cevaplar zorunludur" });
     }
 
-    // Anketi bul
     const anket = await Survey.findById(anketId);
     if (!anket) {
-      return res.status(404).json({
-        success: false,
-        error: "Anket bulunamadı"
-      });
+      return res.status(404).json({ success: false, error: "Anket bulunamadı" });
     }
 
-    // Yeni cevabı kaydet
+    // --- KONUM FİLTRESİ KONTROLÜ (YENİ) ---
+    const kriterler = anket.hedefKitleKriterleri;
+
+    // Eğer konum kriteri aktifse ve bir hedef tanımlanmışsa kontrol et
+    if (kriterler.konum && kriterler.konumHedefi && kriterler.konumHedefi.tip) {
+
+      const hedef = kriterler.konumHedefi; // DB'deki hedef { tip: 'radius', hedef: { lat... } }
+      const kullanici = dogrulamaBilgileri; // Kullanıcıdan gelen { konumLat, konumLng, il, ilce... }
+
+      let filtreGecti = false;
+      console.log(`[Submit] Konum Kontrolü: Tip=${hedef.tip}`);
+
+      // 1. Radius (Mesafe) Kontrolü
+      if (hedef.tip === "radius") {
+        if (hedef.hedef?.lat && hedef.hedef?.lng && kullanici?.konumLat && kullanici?.konumLng) {
+          const mesafe = haversineDistance(
+            kullanici.konumLat,
+            kullanici.konumLng,
+            hedef.hedef.lat,
+            hedef.hedef.lng
+          );
+
+          const maxMesafe = hedef.radius || 50;
+          filtreGecti = mesafe <= maxMesafe;
+          console.log(`[Submit] Mesafe: ${Math.round(mesafe)}m, Limit: ${maxMesafe}m -> ${filtreGecti ? 'GEÇTİ' : 'KALDI'}`);
+        } else {
+          console.log('[Submit] Radius kontrolü için gerekli koordinatlar eksik.');
+        }
+      }
+
+      // 2. Bölge Kontrolü (String Karşılaştırma)
+      else if (hedef.tip === "sehir") {
+        const hedefSehir = hedef.hedef?.il?.toLowerCase().trim();
+        const kulSehir = kullanici?.sehir?.toLowerCase().trim();
+        filtreGecti = hedefSehir && kulSehir && kulSehir.includes(hedefSehir);
+      }
+      else if (hedef.tip === "ilce") {
+        const hedefIlce = hedef.hedef?.ilce?.toLowerCase().trim();
+        const kulIlce = kullanici?.ilce?.toLowerCase().trim();
+        filtreGecti = hedefIlce && kulIlce && kulIlce.includes(hedefIlce);
+      }
+      else if (hedef.tip === "mahalle") {
+        const hedefMah = hedef.hedef?.mahalle?.toLowerCase().trim();
+        const kulMah = kullanici?.mahalle?.toLowerCase().trim();
+
+        // Mahalle isimlerinde "Mahallesi" eki farklılık gösterebilir
+        if (hedefMah && kulMah) {
+          const temizHedef = hedefMah.replace(' mahallesi', '').replace(' mah.', '').trim();
+          filtreGecti = kulMah.includes(temizHedef);
+        }
+      }
+
+      if (!filtreGecti) {
+        return res.status(403).json({
+          success: false,
+          error: `Konumunuz bu anketin hedef bölgesinde (${hedef.aciklama}) bulunmamaktadır.`
+        });
+      }
+    }
+
+    // Cevabı Kaydet
     const yeniCevap = new SurveyResponse({
       anketId: anketId,
-      katilimciBilgileri: katilimciBilgileri || {},
+      katilimciBilgileri: birlestirilenBilgiler,
       cevaplar: cevaplar
     });
 
@@ -290,15 +347,12 @@ router.post("/submit", async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Cevaplarınız başarıyla kaydedildi.",
+      message: "Cevabınız başarıyla kaydedildi.",
       data: kaydedilenCevap
     });
   } catch (e) {
     console.error("❌ Cevap Kayıt Hatası:", e);
-    res.status(400).json({
-      success: false,
-      error: e.message
-    });
+    res.status(400).json({ success: false, error: e.message });
   }
 });
 
@@ -308,18 +362,13 @@ router.post("/submit", async (req, res) => {
 router.delete("/:id", auth(true), async (req, res) => {
   try {
     const anket = await Survey.findById(req.params.id);
-    if (!anket)
-      return res.status(404).json({ success: false, error: "Bulunamadı" });
+    if (!anket) return res.status(404).json({ success: false, error: "Bulunamadı" });
 
-    // Güvenlik kontrolü
     if (anket.kullaniciId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, error: "Yetkiniz yok" });
     }
 
-    // İlişkili linkleri sil
     await SurveyLink.deleteMany({ anketId: req.params.id });
-
-    // Anketi sil
     await Survey.findByIdAndDelete(req.params.id);
 
     res.status(204).end();
@@ -329,27 +378,133 @@ router.delete("/:id", auth(true), async (req, res) => {
 });
 
 // ============================================
-// 7. CEVAPLARI GÖRÜNTÜLE (YÖNETİCİ İÇİN)
+// 6. KONUM DOĞRULAMA KONTROL
+// ============================================
+router.post("/check-location/:anketId", async (req, res) => {
+  try {
+    const { anketId } = req.params;
+    const { latitude, longitude, mahalle, ilce, sehir } = req.body;
+
+    // Anketi bul
+    const anket = await Survey.findById(anketId);
+    if (!anket) {
+      return res.status(404).json({ success: false, error: "Anket bulunamadı" });
+    }
+
+    // Konum kriteri var mı kontrol et
+    if (!anket.hedefKitleKriterleri?.konum) {
+      return res.json({ success: true, passed: true, message: "Bu anket için konum kriteri yok" });
+    }
+
+    const konumKisitlamasi = anket.hedefKitleKriterleri.konumKisitlamasi;
+    if (!konumKisitlamasi || !konumKisitlamasi.tip) {
+      return res.json({ success: true, passed: true, message: "Konum kriteri tanımlanmamış" });
+    }
+
+    console.log("[Konum Doğrulama] Anket Konum Kriteri:", konumKisitlamasi.tip);
+    console.log("[Konum Doğrulama] Kullanıcı Koordinatları:", { latitude, longitude });
+    console.log("[Konum Doğrulama] Anket Koordinatları:", konumKisitlamasi.anketKoordinatlari);
+
+    let passed = false;
+
+    // Radius kontrol
+    if (konumKisitlamasi.tip === "radius") {
+      if (!latitude || !longitude || !konumKisitlamasi.anketKoordinatlari.latitude || !konumKisitlamasi.anketKoordinatlari.longitude) {
+        return res.status(400).json({
+          success: false,
+          error: "Konum bilgileri eksik. Lütfen konumunuzu doğrulayınız.",
+          passed: false
+        });
+      }
+
+      const mesafeMetre = haversineDistance(
+        latitude,
+        longitude,
+        konumKisitlamasi.anketKoordinatlari.latitude,
+        konumKisitlamasi.anketKoordinatlari.longitude
+      );
+
+      passed = mesafeMetre <= konumKisitlamasi.radiusMetre;
+
+      console.log(`[Konum Doğrulama] Radius: ${Math.round(mesafeMetre)}m <= ${konumKisitlamasi.radiusMetre}m = ${passed}`);
+
+      if (!passed) {
+        return res.json({
+          success: true,
+          passed: false,
+          error: `Konumunuz bu anketin hedef bölgesinde değildir. (${Math.round(mesafeMetre)}m uzaklık, izin verilen: ${konumKisitlamasi.radiusMetre}m)`
+        });
+      }
+    }
+    // Mahalle kontrol
+    else if (konumKisitlamasi.tip === "mahalle") {
+      const userMahalle = mahalle?.toLowerCase()?.trim();
+      const targetMahalle = konumKisitlamasi.mahalle?.toLowerCase()?.trim();
+      passed = userMahalle === targetMahalle;
+
+      console.log(`[Konum Doğrulama] Mahalle: "${userMahalle}" === "${targetMahalle}" = ${passed}`);
+
+      if (!passed) {
+        return res.json({
+          success: true,
+          passed: false,
+          error: `Sadece ${konumKisitlamasi.mahalle} mahallesindeki katılımcılar bu ankete katılabilir.`
+        });
+      }
+    }
+    // İlçe kontrol
+    else if (konumKisitlamasi.tip === "ilce") {
+      const userIlce = ilce?.toLowerCase()?.trim();
+      const targetIlce = konumKisitlamasi.ilce?.toLowerCase()?.trim();
+      passed = userIlce === targetIlce;
+
+      console.log(`[Konum Doğrulama] İlçe: "${userIlce}" === "${targetIlce}" = ${passed}`);
+
+      if (!passed) {
+        return res.json({
+          success: true,
+          passed: false,
+          error: `Sadece ${konumKisitlamasi.ilce} ilçesindeki katılımcılar bu ankete katılabilir.`
+        });
+      }
+    }
+    // Şehir kontrol
+    else if (konumKisitlamasi.tip === "sehir") {
+      const userSehir = sehir?.toLowerCase()?.trim();
+      const targetSehir = konumKisitlamasi.sehir?.toLowerCase()?.trim();
+      passed = userSehir === targetSehir;
+
+      console.log(`[Konum Doğrulama] Şehir: "${userSehir}" === "${targetSehir}" = ${passed}`);
+
+      if (!passed) {
+        return res.json({
+          success: true,
+          passed: false,
+          error: `Sadece ${konumKisitlamasi.sehir} şehrindeki katılımcılar bu ankete katılabilir.`
+        });
+      }
+    }
+
+    return res.json({ success: true, passed: true, message: "Konum kriteri sağlandı" });
+
+  } catch (e) {
+    console.error("❌ Konum Doğrulama Hatası:", e);
+    res.status(400).json({ success: false, error: e.message });
+  }
+});
+
+// ============================================
+// 7. CEVAPLARI GÖRÜNTÜLE
 // ============================================
 router.get("/:id/responses", auth(true), async (req, res) => {
   try {
-    // Güvenlik kontrolü
     const anket = await Survey.findById(req.params.id);
-    if (!anket) {
-      return res.status(404).json({
-        success: false,
-        error: "Anket bulunamadı"
-      });
-    }
+    if (!anket) return res.status(404).json({ success: false, error: "Anket bulunamadı" });
 
     if (anket.kullaniciId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        error: "Bu anketi görüntüleme yetkiniz yok"
-      });
+      return res.status(403).json({ success: false, error: "Bu anketi görüntüleme yetkiniz yok" });
     }
 
-    // Cevapları getir
     const cevaplar = await SurveyResponse.find({ anketId: req.params.id })
       .sort({ olusturulmaTarihi: -1 });
 
@@ -359,10 +514,7 @@ router.get("/:id/responses", auth(true), async (req, res) => {
       toplam: cevaplar.length
     });
   } catch (e) {
-    res.status(400).json({
-      success: false,
-      error: e.message
-    });
+    res.status(400).json({ success: false, error: e.message });
   }
 });
 

@@ -1,0 +1,313 @@
+/* ÜYE OL SAYFASI CSS - İKİ SÜTUN LAYOUT */
+
+/* ------------------------------
+   GENEL GÖRÜNÜM
+------------------------------ */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #134e42 0%, #00b067 100%);
+    padding: 20px;
+}
+
+.auth-box {
+    background: #fff;
+    width: 500px;
+    padding: 45px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+/* ------------------------------
+   BAŞLIK VE AÇIKLAMA
+------------------------------ */
+.auth-box h2 {
+    color: #134e42;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.auth-box p {
+    font-size: 0.95rem;
+    color: #444;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.auth-box a {
+    color: #00b067;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-box a:hover {
+    text-decoration: underline;
+}
+
+/* ------------------------------
+   FORM ELEMANLARI - İKİ SÜTUN LAYOUT
+------------------------------ */
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    text-align: left;
+}
+
+label {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #333333;
+    display: block;
+}
+
+.form-group label {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: #333333;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    width: 100%;
+    box-sizing: border-box;
+    transition: 0.2s ease;
+    color: #222;
+    font-weight: 500;
+}
+
+input:focus {
+    border-color: #00b067;
+    box-shadow: 0 0 0 3px rgba(0, 176, 103, 0.15);
+    outline: none;
+}
+
+/* FULL WIDTH ALANLAR */
+.form-group-full {
+    grid-column: 1 / -1;
+}
+
+.form-group-full input {
+    width: 100%;
+}
+
+/* İKİ SÜTUN ALANLAR (AD/SOYAD, EMAIL/PHONE, etc) */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ------------------------------
+   BUTONLAR
+------------------------------ */
+.btn-green {
+    background: linear-gradient(135deg, #00b067, #007f4f);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+    transition: 0.3s ease;
+    grid-column: 1 / -1;
+    margin-top: 10px;
+}
+
+.btn-green:hover {
+    background: linear-gradient(135deg, #00c878, #02965a);
+    transform: scale(1.02);
+}
+
+/* ------------------------------
+   CHECKBOX ALANI
+------------------------------ */
+.checkbox-group {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.checkbox-group label {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #333333;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.checkbox-group label:last-child {
+    margin-bottom: 0;
+}
+
+/* ------------------------------
+   SOSYAL GİRİŞ BUTONLARI
+------------------------------ */
+.social-login {
+    grid-column: 1 / -1;
+    margin-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    transition: 0.3s ease;
+    flex: 1 1 30%;
+    min-width: 100px;
+}
+
+.social-btn.microsoft {
+    background-color: #2f2f2f;
+}
+
+.social-btn.facebook {
+    background-color: #1877f2;
+}
+
+.social-btn.linkedin {
+    background-color: #0a66c2;
+}
+
+.social-btn.google {
+    background-color: #ea4335;
+}
+
+.social-btn.apple {
+    background-color: #000;
+}
+
+.social-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* ------------------------------
+   BÖLÜCÜ ÇİZGİ (divider)
+------------------------------ */
+.divider {
+    grid-column: 1 / -1;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #888;
+    font-size: 0.9rem;
+    position: relative;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #ddd;
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+/* ------------------------------
+   RESPONSIVE TASARIM
+------------------------------ */
+@media (max-width: 600px) {
+    .auth-box {
+        width: 100%;
+        padding: 30px 20px;
+    }
+
+    form {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .form-group-full {
+        grid-column: 1;
+    }
+
+    .social-btn {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+}
+
+/* TABLET GÖRÜNÜMÜ */
+@media (max-width: 768px) {
+    .auth-box {
+        width: 95%;
+        max-width: 450px;
+    }
+}
+
+/* MASAÜSTÜ - GENİŞ EKRAN */
+@media (min-width: 1200px) {
+    .auth-box {
+        width: 550px;
+    }
+}
+
+/* ------------------------------
+   UX DOKUNUŞLARI
+------------------------------ */
+.btn-green:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.error-text {
+    color: #c62828;
+    font-size: 0.85rem;
+    margin: 4px 0 0 2px;
+    grid-column: 1 / -1;
+}
+
+/* BAŞARILI DURUM */
+input.success {
+    border-color: #4caf50;
+    background-color: #f1f8f4;
+}
+
+/* HATA DURUMU */
+input.error {
+    border-color: #c62828;
+    background-color: #ffebee;
+}

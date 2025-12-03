@@ -1,0 +1,338 @@
+/* GIRIS SAYFASI CSS */
+
+/* ------------------------------
+   GENEL GÖRÜNÜM
+------------------------------ */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #134e42 0%, #00b067 100%);
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+}
+
+.auth-box {
+    background: #fff;
+    width: 400px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ------------------------------
+   BAŞLIK VE AÇIKLAMA
+------------------------------ */
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h2 {
+    color: #134e42;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.auth-header p {
+    font-size: 0.95rem;
+    color: #666;
+    margin: 0;
+}
+
+/* FOOTER LINK ALANI */
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-footer p {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0;
+}
+
+.link-primary {
+    color: #00b067;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.link-primary:hover {
+    color: #00885a;
+    text-decoration: underline;
+}
+
+/* ALERT MESAJLARI */
+.alert {
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-error {
+    background-color: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #c62828;
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+}
+
+/* ------------------------------
+   FORM ELEMANLARI
+------------------------------ */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #333333;
+    display: block;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
+    padding: 11px 13px;
+    border-radius: 8px;
+    border: 1.5px solid #ddd;
+    font-size: 0.95rem;
+    transition: 0.2s ease;
+    background-color: #fafafa;
+    color: #222;
+    font-weight: 500;
+}
+
+input:focus {
+    border-color: #00b067;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 176, 103, 0.1);
+    outline: none;
+}
+
+input:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* PLACEHOLDER STİL */
+input::placeholder {
+    color: #999;
+    font-weight: 500;
+}
+
+/* ------------------------------
+   BUTONLAR
+------------------------------ */
+.btn-green {
+    background: linear-gradient(135deg, #00b067, #007f4f);
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+    transition: 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+}
+
+.btn-green:hover:not(:disabled) {
+    background: linear-gradient(135deg, #00c878, #02965a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 176, 103, 0.3);
+}
+
+.btn-green:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-green:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* SPINNER */
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* BÖLÜCİ ÇİZGİ */
+.auth-divider {
+    position: relative;
+    text-align: center;
+    margin: 24px 0;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background: #ddd;
+}
+
+.auth-divider::before {
+    left: 0;
+}
+
+.auth-divider::after {
+    right: 0;
+}
+
+/* SOSYAL GİRİŞ */
+.social-login {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.social-btn {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 11px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: white;
+    transition: 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+}
+
+.social-btn.google {
+    background-color: #ea4335;
+    border-color: #ea4335;
+}
+
+.social-btn.google:hover:not(:disabled) {
+    background-color: #d33425;
+    border-color: #d33425;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+}
+
+.social-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+    .auth-box {
+        width: 100%;
+        padding: 30px 20px;
+    }
+
+    .auth-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .auth-container {
+        padding: 16px;
+    }
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+    .auth-box {
+        width: 95%;
+        max-width: 400px;
+    }
+}
+
+/* DARK MODE DESTEK (Gelecek) */
+@media (prefers-color-scheme: dark) {
+    .auth-box {
+        background: #1e1e1e;
+        color: #e0e0e0;
+    }
+
+    .auth-header h2,
+    .form-group label {
+        color: #e0e0e0;
+    }
+
+    input {
+        background-color: #2a2a2a;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+
+    input::placeholder {
+        color: #888;
+    }
+}
