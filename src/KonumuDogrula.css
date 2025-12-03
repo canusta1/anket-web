@@ -1,0 +1,425 @@
+/* Konum Doğrula Wrapper */
+.konum-dogrula-wrapper {
+    width: 100%;
+}
+
+.konum-input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    /* Yükseklikleri eşitler */
+    margin-bottom: 8px;
+    margin-top: 8px;
+}
+
+.konum-input-wrapper .form-input {
+    flex: 1;
+    /* Kalan boşluğu doldur */
+    padding: 10px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    cursor: not-allowed;
+    color: #666;
+    transition: all 0.3s ease;
+    height: 44px;
+    /* Sabit yükseklik */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+.konum-input-wrapper .form-input.error {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.konum-input-wrapper .form-input.success {
+    border-color: #28a745;
+    background-color: #f0fff4;
+}
+
+.btn-konum {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 20px;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    /* Metnin alt satıra geçmesini engeller */
+    flex-shrink: 0;
+    /* Butonun sıkışmasını engeller */
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
+    height: 44px;
+    /* Input ile aynı yükseklik */
+}
+
+.btn-konum:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 86, 179, 0.35);
+}
+
+.btn-konum:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);
+}
+
+.btn-konum:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-konum.active {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.25);
+}
+
+.btn-konum.active:hover:not(:disabled) {
+    background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.35);
+}
+
+.konum-icon {
+    font-size: 18px;
+}
+
+/* Modal Overlay */
+.konum-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+/* Modal */
+.konum-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.konum-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.konum-modal-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.btn-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.konum-modal-content {
+    padding: 24px;
+}
+
+.konum-description {
+    font-size: 15px;
+    color: #555;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+/* Konum Başarılı Info */
+.konum-success-info {
+    background: #f0fff4;
+    border-left: 4px solid #28a745;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.konum-success-text {
+    font-size: 13px;
+    color: #28a745;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+}
+
+.konum-adres {
+    font-size: 14px;
+    color: #333;
+    margin: 0;
+    word-break: break-word;
+}
+
+.btn-konum-bul {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.spinner-small {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Info Box */
+.konum-info-box {
+    background: #e7f3ff;
+    border-left: 4px solid #007bff;
+    padding: 14px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.konum-info-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #007bff;
+    margin: 0 0 8px 0;
+}
+
+.konum-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.konum-info-list li {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.konum-info-list li:last-child {
+    margin-bottom: 0;
+}
+
+.konum-info-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Adres Bileşenleri */
+.adres-bilesenleri {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+    .adres-bilesenleri {
+        grid-template-columns: 1fr;
+    }
+}
+
+.adres-grup {
+    display: flex;
+    flex-direction: column;
+}
+
+.adres-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.adres-input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.adres-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.adres-input::placeholder {
+    color: #999;
+}
+
+/* Tam Adres Önizlemesi */
+.adres-tam {
+    grid-column: 1 / -1;
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid #007bff;
+}
+
+.adres-tam-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    margin: 0 0 6px 0;
+}
+
+.adres-tam-text {
+    font-size: 14px;
+    color: #333;
+    margin: 0;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+.konum-modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background-color: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+.btn-secondary {
+    padding: 10px 20px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(90, 98, 104, 0.3);
+}
+
+/* Error State */
+.error-text {
+    display: block;
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+
+    /* Mobil için değişiklikler: 
+       flex-direction: column yerine row yapıldı veya silindi.
+       böylece input ve buton yan yana kalır.
+    */
+    .konum-input-wrapper {
+        flex-direction: row;
+        /* Yan yana olması için */
+        gap: 8px;
+    }
+
+    .btn-konum {
+        width: auto;
+        /* Tam genişlik yerine içeriği kadar yer kaplasın */
+        justify-content: center;
+        padding: 0 12px;
+        /* Mobilde biraz daha az padding */
+        font-size: 13px;
+        /* Yazı biraz küçülebilir */
+    }
+
+    .konum-input-wrapper .form-input {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .konum-modal {
+        width: 95%;
+        max-width: none;
+    }
+
+    .konum-modal-header h4 {
+        font-size: 16px;
+    }
+
+    .konum-modal-content {
+        padding: 16px;
+    }
+
+    .konum-modal-footer {
+        padding: 12px 16px;
+    }
+}

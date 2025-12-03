@@ -6,6 +6,7 @@ const SurveyLink = require("../models/SurveyLink");
 const SurveyResponse = require("../models/SurveyResponse");
 const auth = require("../middleware/auth");
 
+
 // Frontend'in çalıştığı adres
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:51900";
 
@@ -186,7 +187,7 @@ router.post("/", auth(true), async (req, res) => {
     // Anketi kaydet
     const savedSurvey = await newSurvey.save();
 
-    console.log("✅ Anket Oluşturuldu. DB'ye Link Kayıt Türü Değiştirildi. Link:", tamLink);
+    console.log("✅ Anket Oluşturuldu. Link:", tamLink);
 
     res.status(201).json({
       success: true,
@@ -255,7 +256,17 @@ router.get("/:id", auth(true), async (req, res) => {
 // ============================================
 router.post("/submit", async (req, res) => {
   try {
-    const { anketId, cevaplar, katilimciBilgileri } = req.body;
+    const { anketId, cevaplar, katilimciBilgileri, dogrulamaBilgileri } = req.body;
+
+    // Katılımcı bilgilerini birleştir
+    const birlestirilenBilgiler = {
+      ...katilimciBilgileri,
+      ...dogrulamaBilgileri
+    };
+
+    console.log('[Submit] Gelen katilimciBilgileri:', JSON.stringify(katilimciBilgileri, null, 2));
+    console.log('[Submit] Gelen dogrulamaBilgileri:', JSON.stringify(dogrulamaBilgileri, null, 2));
+    console.log('[Submit] Birleştirilen bilgiler:', JSON.stringify(birlestirilenBilgiler, null, 2));
 
     if (!anketId || !cevaplar) {
       return res.status(400).json({
@@ -276,7 +287,7 @@ router.post("/submit", async (req, res) => {
     // Yeni cevabı kaydet
     const yeniCevap = new SurveyResponse({
       anketId: anketId,
-      katilimciBilgileri: katilimciBilgileri || {},
+      katilimciBilgileri: birlestirilenBilgiler,
       cevaplar: cevaplar
     });
 
@@ -287,6 +298,7 @@ router.post("/submit", async (req, res) => {
     await anket.save();
 
     console.log("✅ Cevaplar Kaydedildi. ID:", kaydedilenCevap._id);
+    console.log("[Submit] Kaydedilen katilimciBilgileri:", JSON.stringify(kaydedilenCevap.katilimciBilgileri, null, 2));
 
     res.status(201).json({
       success: true,

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import KonumuDogrula from './KonumuDogrula';
 import './AnketCoz.css';
 
 const AnketCoz = () => {
-  // URL'den link kodunu al
   const pathParts = window.location.pathname.split('/').filter(p => p);
   const linkKodu = pathParts[pathParts.length - 1];
 
-  // State tanımlamaları
   const [anket, setAnket] = useState(null);
   const [cevaplar, setCevaplar] = useState({});
   const [katilimciBilgileri, setKatilimciBilgileri] = useState({ ad: '', soyad: '' });
@@ -82,6 +81,15 @@ const AnketCoz = () => {
     }
   };
 
+  // Konum doğrulama callback'i
+  const handleKonumDogrulandi = (konumBilgisi) => {
+    // Konum bilgisini doğrulama bilgilerine ekle
+    setDogrulamaBilgileri(prev => ({
+      ...prev,
+      konum: konumBilgisi.tamAdres || konumBilgisi.adres
+    }));
+  };
+
   const handleAnswerChange = (soruId, value) => {
     setCevaplar(prev => ({ ...prev, [soruId]: value }));
   };
@@ -110,8 +118,10 @@ const AnketCoz = () => {
     }
 
     Object.keys(dogrulamaBilgileri).forEach(key => {
-      if (!dogrulamaBilgileri[key].trim()) {
-        errors[key] = `${key} alanı zorunludur`;
+      if (key !== 'konumLat' && key !== 'konumLng' && key !== 'konumZamani') {
+        if (!dogrulamaBilgileri[key].trim()) {
+          errors[key] = `${key} alanı zorunludur`;
+        }
       }
     });
 
@@ -151,6 +161,7 @@ const AnketCoz = () => {
         body: JSON.stringify({
           anketId: anket._id,
           katilimciBilgileri,
+          dogrulamaBilgileri,
           cevaplar
         })
       });
@@ -285,15 +296,25 @@ const AnketCoz = () => {
                   </h3>
                   {Object.keys(dogrulamaBilgileri).map(key => (
                     <div key={key} className="form-group">
-                      <label className="form-label">{key} *</label>
-                      <input
-                        type="text"
-                        className={`form-input ${hatalar[key] ? 'error' : ''}`}
-                        value={dogrulamaBilgileri[key]}
-                        onChange={(e) => handleKriterChange(key, e.target.value)}
-                        placeholder={`${key} giriniz`}
-                      />
-                      {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
+                      {key === 'konum' ? (
+                        <KonumuDogrula
+                          onKonumDogrulandi={handleKonumDogrulandi}
+                          hatalar={hatalar}
+                          setHatalar={setHatalar}
+                        />
+                      ) : (
+                        <>
+                          <label className="form-label">{key} *</label>
+                          <input
+                            type="text"
+                            className={`form-input ${hatalar[key] ? 'error' : ''}`}
+                            value={dogrulamaBilgileri[key]}
+                            onChange={(e) => handleKriterChange(key, e.target.value)}
+                            placeholder={`${key} giriniz`}
+                          />
+                          {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
