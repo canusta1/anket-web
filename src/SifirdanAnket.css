@@ -137,8 +137,9 @@
    =========================== */
 .anket-main {
     padding: 2rem;
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .sifirdan-anket-container {
@@ -331,9 +332,10 @@
    SORU OLUŞTURMA EKRANI
    =========================== */
 .sifirdan-soru-olusturma-ekrani {
-    padding: 2rem;
+    padding: 1.5rem 2rem 2rem 2rem;
     overflow-y: auto;
     max-height: calc(100vh - 220px);
+    width: 100%;
 }
 
 .sifirdan-soru-listesi-header {

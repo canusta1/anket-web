@@ -196,4 +196,27 @@ const analyzeSurveyResponses = async (anketData, cevaplar) => {
 module.exports = {
     generateSurveyQuestions,
     analyzeSurveyResponses,
+    analyzeWithGroq: async (prompt) => {
+        if (!client) {
+            throw new Error("Groq client not initialized - GROQ_API_KEY is missing");
+        }
+
+        try {
+            console.log('📤 Groq Analiz isteği gönderiliyor...');
+
+            const resp = await client.chat.completions.create({
+                model: GROQ_MODEL,
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 1000,
+                temperature: 0.7,
+            });
+
+            const text = resp.choices[0].message.content;
+            console.log('📝 AI Analiz Yanıtı:', text);
+            return text;
+        } catch (error) {
+            console.error("❌ AI Analiz Hatası (Groq):", error);
+            throw new Error(`Analiz yapılamadı: ${error.message}`);
+        }
+    }
 };
