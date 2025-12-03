@@ -8,6 +8,9 @@ function AnketKopyala() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Backend URL tanımlaması (Diğer sayfalardaki mantıkla aynı)
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+
   useEffect(() => {
     loadTemplates();
   }, []);
@@ -21,13 +24,21 @@ function AnketKopyala() {
         return;
       }
 
-      const res = await fetch('/api/surveys', {
+      // DÜZELTME BURADA: URL'in başına apiUrl eklendi
+      const res = await fetch(`${apiUrl}/api/surveys`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
 
-      if (!res.ok) throw new Error('Anketler yüklenemedi');
+      // Eğer backend HTML dönerse veya 404 verirse yakalamak için kontrol
+      const contentType = res.headers.get("content-type");
+      if (!res.ok) {
+        throw new Error('Anketler yüklenemedi');
+      }
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new TypeError("Sunucudan JSON gelmedi (Muhtemelen HTML geldi, API adresi hatalı).");
+      }
 
       const payload = await res.json();
       const items = payload?.data ?? [];
@@ -35,7 +46,8 @@ function AnketKopyala() {
       console.log('✅ Şablonlar yüklendi:', items);
     } catch (err) {
       console.error('❌ Şablon yükleme hatası:', err);
-      alert('Anketler yüklenirken hata oluştu.');
+      // Hata mesajını kullanıcıya daha net gösterelim
+      alert(`Anketler yüklenirken hata oluştu: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -47,7 +59,7 @@ function AnketKopyala() {
       sorular: (template.sorular || []).map((soru) => {
         // Seçenekleri düzgün çek
         let secenekler = [];
-        
+
         if (soru.secenekler && Array.isArray(soru.secenekler)) {
           secenekler = soru.secenekler.map(sec => {
             if (typeof sec === 'string') {
@@ -79,8 +91,8 @@ function AnketKopyala() {
     <div className="anket-kopyala-container">
       {/* Header */}
       <div className="ak-header">
-        <button 
-          className="ak-btn-back" 
+        <button
+          className="ak-btn-back"
           onClick={() => navigate('/anket-olustur')}
         >
           <FaArrowLeft /> Geri Dön
@@ -101,7 +113,7 @@ function AnketKopyala() {
           <FaClipboardList className="empty-icon" />
           <h2>Henüz Anket Oluşturmadınız</h2>
           <p>Yeni bir anket oluşturmaya başlayın</p>
-          <button 
+          <button
             className="ak-btn-new"
             onClick={() => navigate('/sifirdan-anket')}
           >
@@ -122,7 +134,7 @@ function AnketKopyala() {
                 {template.anketAciklama && (
                   <p className="ak-description">{template.anketAciklama}</p>
                 )}
-                
+
                 <div className="ak-stats">
                   <div className="ak-stat">
                     <span className="stat-label">Sorular</span>
