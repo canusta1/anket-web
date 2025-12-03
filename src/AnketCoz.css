@@ -1,4 +1,4 @@
-/* AnketCoz.css - Sadece AnketCoz sayfasına özel */
+/* AnketCoz.css - Tam ve Düzenlenmiş Hali */
 
 .anket-coz-page {
     min-height: 100vh;
@@ -16,6 +16,14 @@
 .anket-coz-page .anket-container {
     max-width: 800px;
     margin: 0 auto;
+}
+
+/* ==================== FORM YAPISI (DÜZENLEME) ==================== */
+/* Form içeriğinin ve butonların alt alta düzgün durmasını sağlar */
+.anket-coz-page .form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 /* ==================== LOADING ==================== */
@@ -101,18 +109,18 @@
 }
 
 /* ==================== HEADER ==================== */
-.anket-coz-page .card-header {
+.anket-coz-page .section-header {
     margin-bottom: 30px;
 }
 
-.anket-coz-page .card-header h1 {
+.anket-coz-page .section-header h1 {
     font-size: 24px;
     color: #2d3748;
     margin-bottom: 10px;
     font-weight: 600;
 }
 
-.anket-coz-page .card-header p {
+.anket-coz-page .section-header p {
     font-size: 15px;
     color: #718096;
     line-height: 1.5;
@@ -388,30 +396,46 @@
     border-radius: 4px;
 }
 
-/* ==================== BUTTONS ==================== */
+/* ==================== BUTTONS (DÜZENLENDİ) ==================== */
+/* Butonları kapsayan alan */
 .anket-coz-page .form-actions {
     display: flex;
-    gap: 10px;
+    flex-direction: row;
+    /* Yan yana dizilim */
+    justify-content: space-between;
+    /* Aralarına boşluk koy */
+    align-items: center;
+    width: 100%;
+    /* Sayfa genişliğini kapla */
+    gap: 15px;
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #e2e8f0;
 }
 
+/* Butonların kendisi */
 .anket-coz-page .btn-primary,
 .anket-coz-page .btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 12px 24px;
+    height: 48px;
+    /* Sabit yükseklik: Dikey sünmeyi engeller */
     border: none;
     border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex: 1;
+    /* Mevcut alanı eşit paylaş */
+    min-width: 120px;
 }
 
 .anket-coz-page .btn-primary {
     background: #667eea;
     color: white;
-    flex: 1;
 }
 
 .anket-coz-page .btn-primary:hover:not(:disabled) {
@@ -427,18 +451,13 @@
 .anket-coz-page .btn-secondary {
     background: #e2e8f0;
     color: #2d3748;
-    flex: 1;
 }
 
 .anket-coz-page .btn-secondary:hover {
     background: #cbd5e0;
 }
 
-.anket-coz-page .full-width {
-    width: 100%;
-}
-
-/* ==================== ERROR CARD ==================== */
+/* ==================== ERROR & SUCCESS CARDS ==================== */
 .anket-coz-page .error-card {
     text-align: center;
 }
@@ -461,7 +480,6 @@
     line-height: 1.5;
 }
 
-/* ==================== SUCCESS CARD ==================== */
 .anket-coz-page .success-card {
     text-align: center;
 }
@@ -507,10 +525,6 @@
     .anket-coz-page .form-row {
         grid-template-columns: 1fr;
     }
-
-    .anket-coz-page .form-actions {
-        flex-direction: column;
-    }
 }
 
 @media (max-width: 480px) {
@@ -521,11 +535,21 @@
         padding: 20px;
     }
 
-    .anket-coz-page .card-header h1 {
+    .anket-coz-page .section-header h1 {
         font-size: 20px;
     }
 
     .anket-coz-page .soru-text {
         font-size: 13px;
+    }
+
+    /* Mobilde butonlar alt alta geçsin (kullanıcı deneyimi için) */
+    .anket-coz-page .form-actions {
+        flex-direction: column;
+    }
+
+    .anket-coz-page .btn-primary,
+    .anket-coz-page .btn-secondary {
+        width: 100%;
     }
 }

@@ -448,7 +448,7 @@ const AnketCoz = () => {
               )}
 
               <div className="form-actions">
-                <button type="submit" className="btn-primary full-width">
+                <button type="submit" className="btn-primary">
                   Devam Et →
                 </button>
               </div>
