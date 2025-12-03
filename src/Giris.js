@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Auth.css"; // Eğer css dosyanın adı farklıysa düzelt
+import "./Giris.css";
 import { Link, useNavigate } from "react-router-dom";
 
 function Giris() {
