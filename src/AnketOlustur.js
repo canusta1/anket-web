@@ -34,38 +34,11 @@ function AnketOlustur() {
     navigate("/ai-ile-anket");
   };
 
-  // 3. KOPYALA - Şablon modu ve şablon listesi
-  const [templateMode, setTemplateMode] = useState(false);
-  const [templates, setTemplates] = useState([]);
-  const [templatesLoading, setTemplatesLoading] = useState(false);
+  // Sifirdan anket yaratma
+  const [mode, setMode] = useState("main"); // main, sifirdan, ai
 
-  const handleKopyala = async () => {
-    setTemplateMode(true);
-    setTemplatesLoading(true);
-
-    try {
-      const token = localStorage.getItem("token");
-      console.log("🔑 Token:", token ? "Var" : "Yok");
-
-      const res = await fetch("/api/surveys", {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : ""
-        }
-      });
-
-      console.log("📡 Response status:", res.status);
-      const payload = await res.json();
-      const items = payload?.data ?? [];
-
-      setTemplates(items);
-      console.log("✅ Şablonlar yüklendi:", items);
-    } catch (err) {
-      console.error("❌ Şablon yükleme hatası:", err);
-      alert("Anketler yüklenirken hata oluştu.");
-      setTemplates([]);
-    } finally {
-      setTemplatesLoading(false);
-    }
+  const handleKopyala = () => {
+    navigate('/anket-kopyala');
   };
 
   // Şablon seçildiğinde düzenleme ekranına yönlendir (state ile)
@@ -95,79 +68,15 @@ function AnketOlustur() {
 
   const handleProfil = () => navigate("/profil");
   const handleAnaSayfa = () => navigate("/panel");
+  const handleSonuclariGor = () => {
+    setMenuOpen(false);
+    navigate("/anket-sonuclari");
+  };
 
   // Menüyü kapatma
   const closeMenu = () => setMenuOpen(false);
 
-  // --- Eğer templateMode aktifse liste ekranını göster ---
-  if (templateMode) {
-    return (
-      <div className="panel-container">
-        <nav className="panel-navbar">
-          <div className="nav-left">
-            <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-            <span className="panel-logo">AnketApp</span>
-          </div>
-          <div className="nav-right">
-            <a href="/panel">Ana Sayfa</a>
-            <button className="btn-white" onClick={() => setTemplateMode(false)}>Geri</button>
-          </div>
-        </nav>
-
-        <div className={`sidebar ${menuOpen ? "open" : ""}`}>
-          <ul>
-            <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
-            <li><FaClipboardList className="icon" /> Anket Oluştur</li>
-            <li><FaChartBar className="icon" /> Sonuçları Gör</li>
-            <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
-          </ul>
-        </div>
-
-        <main className="anket-main" style={{ padding: 40 }}>
-          <h2>📋 Daha Önce Oluşturduğunuz Anketler</h2>
-
-          {templatesLoading ? (
-            <div style={{ textAlign: "center", padding: 40 }}>
-              <FaSpinner style={{ animation: "spin 1s linear infinite", fontSize: 36 }} />
-              <p>Anketler yükleniyor...</p>
-            </div>
-          ) : templates.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 40, color: "#666" }}>
-              <p>Henüz oluşturduğunuz bir anket yok.</p>
-              <button className="sifirdan-birincil-buton" onClick={() => setTemplateMode(false)}>Geri Dön</button>
-            </div>
-          ) : (
-            <div style={{ display: "grid", gap: 16 }}>
-              {templates.map((t) => (
-                <div key={t._id} style={{ padding: 16, border: "1px solid #ddd", borderRadius: 8, background: "#fafafa" }}>
-                  <h3 style={{ margin: "0 0 8px" }}>{t.anketBaslik || t.name}</h3>
-                  <p style={{ margin: 0, color: "#666" }}>{(t.sorular || []).length} soru</p>
-                  <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-                    <button
-                      onClick={() => handleTemplateSelect(t)}
-                      style={{ padding: "8px 12px", background: "#667eea", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
-                    >
-                      Kopyala ve Düzenle
-                    </button>
-                    <button
-                      onClick={() => window.open(t.paylasimLinki || "#", "_blank")}
-                      style={{ padding: "8px 12px", background: "#fff", border: "1px solid #ccc", borderRadius: 6, cursor: "pointer" }}
-                    >
-                      Linki Aç
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <style>{`
-            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-          `}</style>
-        </main>
-      </div>
-    );
-  } return (
+  return (
     <div className="panel-container">
       {/* Navbar */}
       <nav className="panel-navbar">
@@ -193,7 +102,7 @@ function AnketOlustur() {
         <ul>
           <li onClick={handleProfil}><FaUser className="icon" /> Profil</li>
           <li><FaClipboardList className="icon" /> Anket Oluştur</li>
-          <li><FaChartBar className="icon" /> Sonuçları Gör</li>
+          <li onClick={handleSonuclariGor}><FaChartBar className="icon" /> Sonuçları Gör</li>
           <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
         </ul>
       </div>

@@ -187,7 +187,10 @@ function Profil() {
     const handleGeriDon = () => navigate("/");
     const handleAnketOlustur = () => navigate("/anket-olustur");
     const handleProfil = () => setMenuOpen(false);
-    const handleSonuclariGor = () => setMenuOpen(false);
+    const handleSonuclariGor = () => {
+        setMenuOpen(false);
+        navigate("/anket-sonuclari");
+    };
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>Yükleniyor...</div>;
 

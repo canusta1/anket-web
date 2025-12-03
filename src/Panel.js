@@ -25,6 +25,10 @@ function Panel() {
     navigate("/profil");
   };
 
+  const handleSonuclariGor = () => {
+    navigate("/anket-sonuclari");
+  };
+
   // Menüyü kapatma fonksiyonu
   const closeMenu = () => {
     setMenuOpen(false);
@@ -159,7 +163,9 @@ function Panel() {
           <li onClick={handleAnketOlustur}>
             <FaClipboardList className="icon" /> Anket Oluştur
           </li>
-          <li><FaChartBar className="icon" /> Sonuçları Gör</li>
+          <li onClick={handleSonuclariGor}>
+            <FaChartBar className="icon" /> Sonuçları Gör
+          </li>
           <li onClick={handleLogout}>
             <FaSignOutAlt className="icon" /> Çıkış Yap
           </li>

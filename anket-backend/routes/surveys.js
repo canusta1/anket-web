@@ -517,5 +517,386 @@ router.get("/:id/responses", auth(true), async (req, res) => {
     res.status(400).json({ success: false, error: e.message });
   }
 });
+// ============================================
+// 8. ANKET DETAYLI SONUÇLARI (İSTATİSTİKLER + KATILIMCILAR)
+// Bu route'u surveys.js dosyasının SONUNA ekle (module.exports'tan ÖNCE)
+// ============================================
+router.get("/:id/results", auth(true), async (req, res) => {
+  try {
+    const anketId = req.params.id;
+
+    // Anketi kontrol et - sadece sahibi görebilir
+    const anket = await Survey.findById(anketId);
+    if (!anket) {
+      return res.status(404).json({
+        success: false,
+        error: "Anket bulunamadı"
+      });
+    }
+
+    // Güvenlik kontrolü
+    if (anket.kullaniciId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: "Bu anketin sonuçlarını görüntüleme yetkiniz yok"
+      });
+    }
+
+    // Bu ankete verilen tüm cevapları getir
+    const cevaplar = await SurveyResponse.find({ anketId: anketId })
+      .sort({ olusturulmaTarihi: -1 });
+
+    console.log(`📊 Anket: ${anket.anketBaslik} - Toplam ${cevaplar.length} cevap bulundu`);
+
+    // İstatistikleri hesapla
+    const istatistikler = {
+      toplamKatilimci: cevaplar.length,
+      sorular: []
+    };
+
+    // Her soru için istatistik oluştur
+    anket.sorular.forEach((soru, idx) => {
+      const soruId = soru._id.toString();
+      
+      console.log(`\n📊 Soru ${idx + 1}: ${soru.soruMetni}`);
+      console.log(`   Soru ID: ${soruId}`);
+      console.log(`   Soru Tipi: ${soru.soruTipi}`);
+      
+      const soruStat = {
+        soruId: soruId,
+        soruMetni: soru.soruMetni,
+        soruTipi: soru.soruTipi,
+        secenekler: soru.secenekler || [],
+        toplamCevap: 0,
+        cevaplar: [] // Açık uçlu sorular için
+      };
+
+      // Bu soruya verilen tüm cevapları topla
+      const soruCevaplari = [];
+      cevaplar.forEach((response, ridx) => {
+        const cevap = response.cevaplar[soruId];
+        if (cevap !== undefined && cevap !== null && cevap !== "") {
+          soruCevaplari.push(cevap);
+          if (ridx === 0) console.log(`   ✅ 1. Cevap Format: ${JSON.stringify(cevap)}`);
+        }
+      });
+
+      console.log(`   📥 Toplam ${soruCevaplari.length} cevap bulundu`);
+      soruStat.toplamCevap = soruCevaplari.length;
+
+      // Soru tipine göre istatistik hesapla
+      if (["coktan-tek", "coktan-coklu", "coktan-secmeli", "cok-secmeli"].includes(soru.soruTipi)) {
+        // Çoktan seçmeli sorular için dağılım
+        soruStat.dagilim = {};
+
+        // Her seçenek için sayaç başlat
+        soru.secenekler.forEach((secenek) => {
+          const secenekId = secenek._id.toString();
+          const secenekMetni = typeof secenek === 'string' ? secenek : (secenek.metni || secenek.metin || '');
+          
+          soruStat.dagilim[secenekId] = {
+            secenekId: secenekId,
+            metin: secenekMetni,
+            sayi: 0,
+            yuzde: 0
+          };
+        });
+
+        // Cevapları say - Seçenek METNİ ile eşleştir (ID değil)
+        soruCevaplari.forEach((cevap) => {
+          if (Array.isArray(cevap)) {
+            // Çoklu seçim (checkbox) - Her bir metni bul
+            cevap.forEach((secenekMetni) => {
+              // Seçenek metnine göre ID'sini bul ve artır
+              const secenekEntry = Object.values(soruStat.dagilim).find(
+                s => s.metin === secenekMetni || s.metin.trim() === String(secenekMetni).trim()
+              );
+              if (secenekEntry) {
+                secenekEntry.sayi++;
+              }
+            });
+          } else {
+            // Tek seçim (radio) - Metni eşleştir
+            const secenekEntry = Object.values(soruStat.dagilim).find(
+              s => s.metin === cevap || s.metin.trim() === String(cevap).trim()
+            );
+            if (secenekEntry) {
+              secenekEntry.sayi++;
+            }
+          }
+        });
+
+        // Yüzdeleri hesapla
+        Object.keys(soruStat.dagilim).forEach((secenekId) => {
+          if (soruStat.toplamCevap > 0) {
+            const yuzde = (soruStat.dagilim[secenekId].sayi / soruStat.toplamCevap) * 100;
+            soruStat.dagilim[secenekId].yuzde = parseFloat(yuzde.toFixed(1));
+          }
+        });
+
+        // Dağılımı array'e çevir (frontend için daha kolay)
+        soruStat.dagilimArray = Object.values(soruStat.dagilim);
+
+      } else if (soru.soruTipi === "acik-uclu") {
+        // Açık uçlu sorular için tüm cevapları ekle
+        soruStat.cevaplar = soruCevaplari.filter(c => c && c.trim().length > 0);
+      } else if (soru.soruTipi === "slider") {
+        // Slider sorular için sayı dağılımını hesapla
+        soruStat.dagilim = {};
+        
+        // Tüm cevapları sayıya çevir ve dağılımı oluştur
+        soruCevaplari.forEach((cevap) => {
+          const sayi = parseInt(cevap) || 0;
+          if (!soruStat.dagilim[sayi]) {
+            soruStat.dagilim[sayi] = {
+              sayi: sayi,
+              sayi_cevap: 0,
+              yuzde: 0
+            };
+          }
+          soruStat.dagilim[sayi].sayi_cevap++;
+        });
+        
+        // Yüzdeleri hesapla
+        Object.keys(soruStat.dagilim).forEach((key) => {
+          if (soruStat.toplamCevap > 0) {
+            const yuzde = (soruStat.dagilim[key].sayi_cevap / soruStat.toplamCevap) * 100;
+            soruStat.dagilim[key].yuzde = parseFloat(yuzde.toFixed(1));
+          }
+        });
+        
+        // Dağılımı array'e çevir
+        soruStat.dagilimArray = Object.values(soruStat.dagilim).sort((a, b) => a.sayi - b.sayi);
+      }
+
+      istatistikler.sorular.push(soruStat);
+    });
+
+    // Katılımcı listesi
+    const katilimcilar = cevaplar.map((response) => ({
+      _id: response._id,
+      olusturulmaTarihi: response.olusturulmaTarihi,
+      katilimciBilgileri: response.katilimciBilgileri || {},
+      cevaplar: response.cevaplar
+    }));
+
+    // Sonucu döndür
+    res.json({
+      success: true,
+      data: {
+        anket: {
+          _id: anket._id,
+          anketBaslik: anket.anketBaslik,
+          anketAciklama: anket.anketAciklama,
+          durum: anket.durum,
+          olusturulmaTarihi: anket.createdAt,
+          sorular: anket.sorular
+        },
+        istatistikler,
+        katilimcilar
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Anket sonuçları getirme hatası:", error);
+    res.status(500).json({
+      success: false,
+      error: "Sonuçlar getirilirken bir hata oluştu",
+      message: error.message
+    });
+  }
+});
+
+// ============================================
+// ANKET YANIT ANALİZİ (AI İLE)
+// ============================================
+router.get("/:id/ai-analysis", auth(true), async (req, res) => {
+  try {
+    const anketId = req.params.id;
+
+    // Anketi kontrol et
+    const anket = await Survey.findById(anketId);
+    if (!anket) {
+      return res.status(404).json({
+        success: false,
+        error: "Anket bulunamadı"
+      });
+    }
+
+    // Güvenlik kontrolü
+    if (anket.kullaniciId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        error: "Bu anketin analizini görüntüleme yetkiniz yok"
+      });
+    }
+
+    // Cevapları getir
+    const cevaplar = await SurveyResponse.find({ anketId: anketId });
+
+    if (cevaplar.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          analiz: "Henüz cevap yok",
+          duygu: "neutral",
+          puan: 5,
+          ozet: "Anket henüz cevaplandırılmamıştır"
+        }
+      });
+    }
+
+    // Cevapları metin formatına çevir
+    const analizedTexts = cevaplar.map((response) => {
+      const cevapMetinler = [];
+      
+      anket.sorular.forEach((soru) => {
+        const cevap = response.cevaplar[soru._id.toString()];
+        if (cevap) {
+          const soruTipi = soru.soruTipi;
+          let cevapText = "";
+          
+          if (Array.isArray(cevap)) {
+            cevapText = cevap.join(", ");
+          } else {
+            cevapText = String(cevap);
+          }
+          
+          cevapMetinler.push(`Soru: ${soru.soruMetni}\nCevap: ${cevapText}`);
+        }
+      });
+      
+      return cevapMetinler.join("\n");
+    }).join("\n\n---\n\n");
+
+    // Groq API ile analiz yap
+    const aiService = require("../aiService");
+
+    // Soruları ve cevapları organize et - her soru için cevaplar
+    let soruCevapAnalizi = {};
+    
+    anket.sorular.forEach((soru) => {
+      soruCevapAnalizi[soru._id.toString()] = {
+        soruMetni: soru.soruMetni,
+        soruTipi: soru.soruTipi,
+        cevaplar: []
+      };
+    });
+
+    // Her cevabı organize et
+    cevaplar.forEach((response) => {
+      Object.keys(response.cevaplar).forEach((soruId) => {
+        if (soruCevapAnalizi[soruId]) {
+          const cevap = response.cevaplar[soruId];
+          let cevapText = "";
+          
+          if (Array.isArray(cevap)) {
+            cevapText = cevap.join(", ");
+          } else {
+            cevapText = String(cevap);
+          }
+          
+          soruCevapAnalizi[soruId].cevaplar.push(cevapText);
+        }
+      });
+    });
+
+    // Format soruları analiz için
+    let formattedAnalysis = `ANKET: ${anket.anketBaslik}\nTOPLAM KATILIMCI: ${cevaplar.length}\n\n`;
+    formattedAnalysis += `SORULAR VE CEVAPLAR:\n`;
+    formattedAnalysis += `${'='.repeat(80)}\n\n`;
+
+    Object.values(soruCevapAnalizi).forEach((soruData, idx) => {
+      formattedAnalysis += `SORU ${idx + 1}: ${soruData.soruMetni}\n`;
+      formattedAnalysis += `Soru Tipi: ${soruData.soruTipi}\n`;
+      formattedAnalysis += `Cevaplar (${soruData.cevaplar.length} kişi):\n`;
+      
+      // Cevapları sayı ile göster
+      soruData.cevaplar.forEach((cevap, cidx) => {
+        formattedAnalysis += `  ${cidx + 1}. ${cevap}\n`;
+      });
+      
+      formattedAnalysis += `\n`;
+    });
+
+    const analysisPrompt = `
+Sen bir profesyonel restoran/işletme müşteri memnuniyeti danışmanısın. 
+
+Aşağıda verilen ankete katılımcıların GERÇEK cevaplarını oku ve DETAYLı bir analiz yap.
+
+${formattedAnalysis}
+
+KURALLAR:
+1. ÖNEMLİ: Sadece sorularda olanları yorumla. Eğer soruda yemek yoksa yemekten bahsetme!
+2. Her sorunun cevaplarını dikkatlice analiz et
+3. Tekrarlanan konuları belirle
+4. Puanlu sorularda (slider, 1-10) ortalamasını hesapla
+5. Olumlu ve olumsuz yönleri dengeli anlat
+6. Genel duyguyu belirle (pozitif/negatif/nötr)
+7. 1-10 arası puan ver (ortalama puanlara ve olumlu yorumlara göre)
+
+ÖZETİ YAZARKEN:
+- Her sorudan bahset eğer önemliyse
+- Tekrarlanan problemleri vurgula
+- Müşteri beklentilerini karşılayıp karşılamadığını belirle
+- 3-4 cümlelik açık ve net bir özet yaz
+
+KESINLIKLE TÜRKÇE VE SADECE ŞÖYLE GÖNDERİ:
+
+{
+  "duygu": "pozitif",
+  "puan": 8,
+  "ozet": "Bu ankete göre yapılan analiz. Her soruyu dikkate alarak yazılmış. Örneğin: X sorusuna katılımcılar böyle cevap verdi, Y sorusunda böyle bulgular çıktı. Genel olarak sonuç şu.",
+  "temel_tematiclar": ["Tema1: Açıklama", "Tema2: Açıklama"]
+}
+
+Başka hiçbir şey yazma, SADECE bu JSON'u gönder!
+    `;
+
+    console.log("📊 AI Analiz Prompt gönderiliyor...");
+    const completion = await aiService.analyzeWithGroq(analysisPrompt);
+    
+    let analysisData = {
+      duygu: "nötr",
+      puan: 5,
+      ozet: "Analiz yapılamadı",
+      temel_tematiclar: []
+    };
+
+    try {
+      // JSON'u çıkart - daha sağlam bir yöntem
+      const cleanText = completion.trim();
+      const jsonStart = cleanText.indexOf('{');
+      const jsonEnd = cleanText.lastIndexOf('}');
+      
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        const jsonStr = cleanText.substring(jsonStart, jsonEnd + 1);
+        analysisData = JSON.parse(jsonStr);
+        console.log("✅ AI Analiz başarılı:", analysisData);
+      } else {
+        console.warn("⚠️ JSON bulunamadı. Yanıt:", cleanText);
+      }
+    } catch (parseError) {
+      console.error("❌ JSON parse hatası:", parseError.message);
+      console.error("Yanıt:", completion);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        analiz: analysisData,
+        toplam_cevap: cevaplar.length
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ AI analiz hatası:", error);
+    res.status(500).json({
+      success: false,
+      error: "Analiz yapılırken bir hata oluştu",
+      message: error.message
+    });
+  }
+});
 
 module.exports = router;
