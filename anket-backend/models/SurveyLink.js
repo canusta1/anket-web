@@ -17,7 +17,8 @@ const SurveyLinkSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    uppercase: true
+    uppercase: true,
+    index: true
   },
   tamLink: {
     type: String,
@@ -56,10 +57,5 @@ const SurveyLinkSchema = new mongoose.Schema({
     type: Date
   }
 }, { timestamps: true });
-
-// İndeksler
-SurveyLinkSchema.index({ linkKodu: 1 }, { unique: true });
-SurveyLinkSchema.index({ anketId: 1 });
-SurveyLinkSchema.index({ aktif: 1 });
 
 module.exports = mongoose.model("SurveyLink", SurveyLinkSchema);
