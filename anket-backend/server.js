@@ -30,7 +30,12 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", require("./routes/auth"));           // kayıt / giriş / me
 app.use("/api/surveys", require("./routes/surveys"));     // anket CRUD
 app.use("/api/responses", require("./routes/responses")); // yanıt + istatistik
-app.use("/api", require("./routes/geocoding"));           // Geocoding API
+app.use("/api", require("./routes/geocoding"));           // Geocoding API (Mevcut)
+
+// --- YENİ EKLENEN ---
+app.use("/api/places", require("./routes/places"));       // Google Places API (Autocomplete için)
+// --------------------
+
 app.use("/api/ai", aiRoutes);                             // AI anket oluşturma
 
 // 404

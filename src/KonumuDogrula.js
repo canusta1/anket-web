@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './KonumuDogrula.css';
 
-const KonumuDogrula = ({ onKonumDogrulandi, hatalar, setHatalar }) => {
+const KonumuDogrula = ({ onKonumDogrulandi }) => {
     const [konumAcik, setKonumAcik] = useState(false);
     const [konumYukleniyor, setKonumYukleniyor] = useState(false);
     const [konumAdres, setKonumAdres] = useState('');
@@ -12,7 +12,9 @@ const KonumuDogrula = ({ onKonumDogrulandi, hatalar, setHatalar }) => {
         sokak: '',
         ilce: '',
         sehir: '',
-        tam: ''
+        tam: '',
+        latitude: null,
+        longitude: null
     });
 
     const handleKonumBul = async () => {
@@ -46,14 +48,14 @@ const KonumuDogrula = ({ onKonumDogrulandi, hatalar, setHatalar }) => {
                             if (data.success) {
                                 // Adres bileşenlerini parse et
                                 const adres = parseAdres(data);
-                                setAdresBilgisi(adres);
+                                // Latitude ve longitude'u ekle
+                                setAdresBilgisi({
+                                    ...adres,
+                                    latitude: latitude,
+                                    longitude: longitude
+                                });
                                 setKonumAdres(data.adres);
                                 setKonumYukleniyor(false);
-
-                                // Hata varsa temizle
-                                if (hatalar.konum) {
-                                    setHatalar(prev => ({ ...prev, konum: '' }));
-                                }
 
                                 alert('✓ Konumunuz başarıyla doğrulandı!');
                             } else {
@@ -139,13 +141,29 @@ const KonumuDogrula = ({ onKonumDogrulandi, hatalar, setHatalar }) => {
             return;
         }
 
+        console.log('handleOnayla çağrıldı, gönderilen veri:', {
+            tamAdres: adresBilgisi.tam,
+            adres: adresBilgisi,
+            mahalle: adresBilgisi.mahalle,
+            ilce: adresBilgisi.ilce,
+            sehir: adresBilgisi.sehir,
+            sokak: adresBilgisi.sokak,
+            konumLat: adresBilgisi.latitude,
+            konumLng: adresBilgisi.longitude
+        });
+
         onKonumDogrulandi({
             tamAdres: adresBilgisi.tam,
-            adres: adresBilgisi
+            adres: adresBilgisi,
+            mahalle: adresBilgisi.mahalle,
+            ilce: adresBilgisi.ilce,
+            sehir: adresBilgisi.sehir,
+            sokak: adresBilgisi.sokak,
+            konumLat: adresBilgisi.latitude,
+            konumLng: adresBilgisi.longitude
         });
 
         setKonumAcik(false);
-        alert('✓ Adres bilgileri kaydedildi!');
     };
 
     return (
@@ -155,7 +173,7 @@ const KonumuDogrula = ({ onKonumDogrulandi, hatalar, setHatalar }) => {
             <div className="konum-input-wrapper">
                 <input
                     type="text"
-                    className={`form-input konum-input ${hatalar?.konum ? 'error' : ''} ${konumAdres ? 'success' : ''}`}
+                    className={`form-input konum-input ${konumAdres ? 'success' : ''}`}
                     value={konumAdres}
                     disabled
                     placeholder="Konumunuzu doğrulamak için butona tıklayınız"
@@ -303,10 +321,6 @@ const KonumuDogrula = ({ onKonumDogrulandi, hatalar, setHatalar }) => {
                         </div>
                     </div>
                 </div>
-            )}
-
-            {hatalar?.konum && (
-                <span className="error-text">{hatalar.konum}</span>
             )}
         </div>
     );

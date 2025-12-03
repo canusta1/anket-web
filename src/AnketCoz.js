@@ -36,27 +36,122 @@ const AnketCoz = () => {
         }
 
         const result = await response.json();
-        setAnket(result.data);
+        const anketData = result.data;
+        setAnket(anketData);
 
-        // Cevapları initialize et
-        const initialAnswers = {};
-        result.data.sorular.forEach(soru => {
-          initialAnswers[soru._id] = soru.soruTipi === 'coktan-coklu' ? [] : '';
-        });
-        setCevaplar(initialAnswers);
+        // Eğer konum kriteri varsa, konum doğrulama yap
+        if (anketData.hedefKitleKriterleri?.konum) {
+          console.log("📍 Konum kriteri bulundu, doğrulama başlanıyor...");
 
-        // Doğrulama bilgilerini initialize et
-        if (result.data.hedefKitleKriterleri) {
-          const kriterler = {};
-          Object.keys(result.data.hedefKitleKriterleri).forEach(key => {
-            if (result.data.hedefKitleKriterleri[key]) {
-              kriterler[key] = '';
-            }
+          // Kullanıcının konumunu al
+          if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+              async (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log("📍 Kullanıcı Konumu:", { latitude, longitude });
+
+                try {
+                  // Backend'den adres bilgisini al
+                  const geocodeResponse = await fetch(`${apiUrl}/api/geocode`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ latitude, longitude })
+                  });
+
+                  const geocodeData = await geocodeResponse.json();
+                  console.log("📍 Adres Bilgisi:", geocodeData);
+
+                  // Konum doğrulama endpoint'ine gönder
+                  const checkLocationResponse = await fetch(`${apiUrl}/api/surveys/check-location/${anketData._id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      latitude,
+                      longitude,
+                      mahalle: geocodeData.mahalle,
+                      ilce: geocodeData.ilce,
+                      sehir: geocodeData.sehir
+                    })
+                  });
+
+                  const locationCheck = await checkLocationResponse.json();
+                  console.log("📍 Konum Doğrulama Sonucu:", locationCheck);
+
+                  if (locationCheck.passed === false) {
+                    setError(`🚫 ${locationCheck.error}`);
+                    setLoading(false);
+                    return;
+                  }
+
+                  // Cevapları initialize et
+                  const initialAnswers = {};
+                  anketData.sorular.forEach(soru => {
+                    initialAnswers[soru._id] = soru.soruTipi === 'coktan-coklu' ? [] : '';
+                  });
+                  setCevaplar(initialAnswers);
+
+                  // Doğrulama bilgilerini initialize et
+                  if (anketData.hedefKitleKriterleri) {
+                    const kriterler = {};
+                    if (anketData.hedefKitleKriterleri.mail === true) {
+                      kriterler.mail = '';
+                    }
+                    if (anketData.hedefKitleKriterleri.tcNo === true) {
+                      kriterler.tcNo = '';
+                    }
+                    if (anketData.hedefKitleKriterleri.konum === true) {
+                      kriterler.konum = '';
+                    }
+                    if (anketData.hedefKitleKriterleri.kimlikDogrulama === true) {
+                      kriterler.kimlikDogrulama = '';
+                    }
+                    setDogrulamaBilgileri(kriterler);
+                  }
+
+                  setLoading(false);
+                } catch (err) {
+                  console.error("❌ Konum doğrulama hatası:", err);
+                  setError(`Konum doğrulanırken hata oluştu: ${err.message}`);
+                  setLoading(false);
+                }
+              },
+              (err) => {
+                console.error("❌ Geolocation hatası:", err);
+                setError("Konumunuza erişilemiyor. Lütfen tarayıcı ayarlarından konum izni verdiğinizi kontrol ediniz.");
+                setLoading(false);
+              }
+            );
+          } else {
+            setError("Tarayıcınız konum hizmetini desteklemiyor.");
+            setLoading(false);
+          }
+        } else {
+          // Konum kriteri yok, normal yükle
+          const initialAnswers = {};
+          anketData.sorular.forEach(soru => {
+            initialAnswers[soru._id] = soru.soruTipi === 'coktan-coklu' ? [] : '';
           });
-          setDogrulamaBilgileri(kriterler);
-        }
+          setCevaplar(initialAnswers);
 
-        setLoading(false);
+          if (anketData.hedefKitleKriterleri) {
+            const kriterler = {};
+            if (anketData.hedefKitleKriterleri.mail === true) {
+              kriterler.mail = '';
+            }
+            if (anketData.hedefKitleKriterleri.tcNo === true) {
+              kriterler.tcNo = '';
+            }
+            if (anketData.hedefKitleKriterleri.konum === true) {
+              kriterler.konum = '';
+            }
+            if (anketData.hedefKitleKriterleri.kimlikDogrulama === true) {
+              kriterler.kimlikDogrulama = '';
+            }
+            setDogrulamaBilgileri(kriterler);
+          }
+
+          setLoading(false);
+        }
       } catch (err) {
         setError(err.message);
         setLoading(false);
@@ -83,10 +178,12 @@ const AnketCoz = () => {
 
   // Konum doğrulama callback'i
   const handleKonumDogrulandi = (konumBilgisi) => {
-    // Konum bilgisini doğrulama bilgilerine ekle
+    // Sadece konum adresi ekle (tam adres string'i)
     setDogrulamaBilgileri(prev => ({
       ...prev,
-      konum: konumBilgisi.tamAdres || konumBilgisi.adres
+      konum: konumBilgisi.tamAdres || konumBilgisi.adres || '',
+      // Koordinatlar sadece backend'e gönderilmek üzere tutulacak
+
     }));
   };
 
@@ -118,8 +215,16 @@ const AnketCoz = () => {
     }
 
     Object.keys(dogrulamaBilgileri).forEach(key => {
-      if (key !== 'konumLat' && key !== 'konumLng' && key !== 'konumZamani') {
-        if (!dogrulamaBilgileri[key].trim()) {
+      // Konum için özel kontrol (KonumuDogrula component'i handle ediyor)
+      if (key === 'konum') {
+        const konumValue = dogrulamaBilgileri[key];
+        if (!konumValue || (typeof konumValue === 'string' && !konumValue.trim())) {
+          errors[key] = 'Konumunuzu doğrulamak için butona tıklayınız';
+        }
+      } else {
+        // Diğer alanlar için standart kontrol
+        const fieldValue = dogrulamaBilgileri[key];
+        if (!fieldValue || (typeof fieldValue === 'string' && !fieldValue.trim())) {
           errors[key] = `${key} alanı zorunludur`;
         }
       }
@@ -155,18 +260,28 @@ const AnketCoz = () => {
 
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+
+      const submitData = {
+        anketId: anket._id,
+        katilimciBilgileri,
+        dogrulamaBilgileri,
+        cevaplar
+      };
+
+      console.log('📤 Submit etmeden önce dogrulamaBilgileri:', dogrulamaBilgileri);
+      console.log('📤 Tam gönderilen veri:', submitData);
+
       const response = await fetch(`${apiUrl}/api/surveys/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          anketId: anket._id,
-          katilimciBilgileri,
-          dogrulamaBilgileri,
-          cevaplar
-        })
+        body: JSON.stringify(submitData)
       });
 
-      if (!response.ok) throw new Error('Gönderim başarısız');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Submit hatası:', errorData);
+        throw new Error(errorData.error || 'Gönderim başarısız');
+      }
 
       setSubmitted(true);
     } catch (err) {
@@ -297,20 +412,32 @@ const AnketCoz = () => {
                   {Object.keys(dogrulamaBilgileri).map(key => (
                     <div key={key} className="form-group">
                       {key === 'konum' ? (
-                        <KonumuDogrula
-                          onKonumDogrulandi={handleKonumDogrulandi}
-                          hatalar={hatalar}
-                          setHatalar={setHatalar}
-                        />
+                        <div className="konum-container">
+                          <KonumuDogrula
+                            onKonumDogrulandi={handleKonumDogrulandi}
+                          />
+                          {hatalar.konum && <span className="error-text">{hatalar.konum}</span>}
+                        </div>
                       ) : (
                         <>
-                          <label className="form-label">{key} *</label>
+                          <label className="form-label">
+                            {key === 'mail' && '📧 Email Adres'}
+                            {key === 'tcNo' && '🆔 T.C. Kimlik No'}
+                            {key === 'kimlikDogrulama' && '✅ Kimlik Doğrulama'}
+                            {!['mail', 'tcNo', 'kimlikDogrulama'].includes(key) && key}
+                            {' *'}
+                          </label>
                           <input
-                            type="text"
+                            type={key === 'mail' ? 'email' : 'text'}
                             className={`form-input ${hatalar[key] ? 'error' : ''}`}
                             value={dogrulamaBilgileri[key]}
                             onChange={(e) => handleKriterChange(key, e.target.value)}
-                            placeholder={`${key} giriniz`}
+                            placeholder={
+                              key === 'mail' ? 'Email adresinizi giriniz' :
+                                key === 'tcNo' ? 'T.C. kimlik numaranızı giriniz' :
+                                  key === 'kimlikDogrulama' ? 'Kimlik doğrulama kodunuzu giriniz' :
+                                    `${key} giriniz`
+                            }
                           />
                           {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
                         </>
