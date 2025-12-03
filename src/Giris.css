@@ -1,7 +1,7 @@
-/* GIRIS SAYFASI CSS */
+﻿/* GIRIS SAYFASI CSS */
 
 /* ------------------------------
-   GENEL GÖRÜNÜM
+   GENEL G├ûR├£N├£M
 ------------------------------ */
 .auth-container {
     display: flex;
@@ -37,7 +37,7 @@
 }
 
 /* ------------------------------
-   BAŞLIK VE AÇIKLAMA
+   BA┼ŞLIK VE A├çIKLAMA
 ------------------------------ */
 .auth-header {
     text-align: center;
@@ -164,7 +164,7 @@ input:disabled {
     cursor: not-allowed;
 }
 
-/* PLACEHOLDER STİL */
+/* PLACEHOLDER ST─░L */
 input::placeholder {
     color: #999;
     font-weight: 500;
@@ -222,7 +222,7 @@ input::placeholder {
     }
 }
 
-/* BÖLÜCİ ÇİZGİ */
+/* B├ûL├£C─░ ├ç─░ZG─░ */
 .auth-divider {
     position: relative;
     text-align: center;
@@ -249,7 +249,7 @@ input::placeholder {
     right: 0;
 }
 
-/* SOSYAL GİRİŞ */
+/* SOSYAL G─░R─░┼Ş */
 .social-login {
     display: flex;
     flex-direction: column;

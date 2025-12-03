@@ -1,7 +1,7 @@
-/* ÜYE OL SAYFASI CSS - İKİ SÜTUN LAYOUT */
+﻿/* ├£YE OL SAYFASI CSS - ─░K─░ S├£TUN LAYOUT */
 
 /* ------------------------------
-   GENEL GÖRÜNÜM
+   GENEL G├ûR├£N├£M
 ------------------------------ */
 .auth-container {
     display: flex;
@@ -27,7 +27,7 @@
 }
 
 /* ------------------------------
-   BAŞLIK VE AÇIKLAMA
+   BA┼ŞLIK VE A├çIKLAMA
 ------------------------------ */
 .auth-box h2 {
     color: #134e42;
@@ -55,7 +55,7 @@
 }
 
 /* ------------------------------
-   FORM ELEMANLARI - İKİ SÜTUN LAYOUT
+   FORM ELEMANLARI - ─░K─░ S├£TUN LAYOUT
 ------------------------------ */
 form {
     display: grid;
@@ -108,7 +108,7 @@ input:focus {
     width: 100%;
 }
 
-/* İKİ SÜTUN ALANLAR (AD/SOYAD, EMAIL/PHONE, etc) */
+/* ─░K─░ S├£TUN ALANLAR (AD/SOYAD, EMAIL/PHONE, etc) */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -165,7 +165,7 @@ input:focus {
 }
 
 /* ------------------------------
-   SOSYAL GİRİŞ BUTONLARI
+   SOSYAL G─░R─░┼Ş BUTONLARI
 ------------------------------ */
 .social-login {
     grid-column: 1 / -1;
@@ -215,7 +215,7 @@ input:focus {
 }
 
 /* ------------------------------
-   BÖLÜCÜ ÇİZGİ (divider)
+   B├ûL├£C├£ ├ç─░ZG─░ (divider)
 ------------------------------ */
 .divider {
     grid-column: 1 / -1;
@@ -270,7 +270,7 @@ input:focus {
     }
 }
 
-/* TABLET GÖRÜNÜMÜ */
+/* TABLET G├ûR├£N├£M├£ */
 @media (max-width: 768px) {
     .auth-box {
         width: 95%;
@@ -278,7 +278,7 @@ input:focus {
     }
 }
 
-/* MASAÜSTÜ - GENİŞ EKRAN */
+/* MASA├£ST├£ - GEN─░┼Ş EKRAN */
 @media (min-width: 1200px) {
     .auth-box {
         width: 550px;
@@ -286,7 +286,7 @@ input:focus {
 }
 
 /* ------------------------------
-   UX DOKUNUŞLARI
+   UX DOKUNU┼ŞLARI
 ------------------------------ */
 .btn-green:disabled {
     opacity: 0.7;
@@ -300,7 +300,7 @@ input:focus {
     grid-column: 1 / -1;
 }
 
-/* BAŞARILI DURUM */
+/* BA┼ŞARILI DURUM */
 input.success {
     border-color: #4caf50;
     background-color: #f1f8f4;
