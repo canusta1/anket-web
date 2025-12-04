@@ -65,13 +65,18 @@
 }
 
 .menu-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 14px 18px;
-  border-radius: 12px;
+  padding: 16px 20px;
+  border-radius: 14px;
   transition: var(--transition);
   background: var(--primary-light);
+  min-width: 60px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-icon:hover {
