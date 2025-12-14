@@ -30,6 +30,7 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", require("./routes/auth"));           // kayıt / giriş / me
 app.use("/api/surveys", require("./routes/surveys"));     // anket CRUD
 app.use("/api/responses", require("./routes/responses")); // yanıt + istatistik
+app.use("/api/verification", require("./routes/verification")); // Email doğrulama
 app.use("/api", require("./routes/geocoding"));           // Geocoding API (Mevcut)
 
 // --- YENİ EKLENEN ---
