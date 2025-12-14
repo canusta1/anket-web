@@ -434,125 +434,8 @@ const AnketCoz = () => {
     );
   }
 
-  // STEP 1: Katılımcı Bilgileri
+  // STEP 1: Katılımcı Bilgileri (Email doğrulama entegre)
   if (currentStep === 1) {
-    // Eğer anketin email doğrulama kriteri varsa ve henüz doğrulanmadıysa
-    if (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified') {
-      return (
-        <div className="anket-coz-page">
-          <div className="anket-container">
-            <div className="anket-wrapper">
-              <div className="section-header">
-                <h1>📧 E-posta Doğrulaması</h1>
-                <p>Bu ankete katılabilmek için lütfen e-posta adresinizi doğrulayın.</p>
-              </div>
-
-              {emailVerificationStep === null && (
-                <form onSubmit={handleSendVerificationCode} className="verification-form">
-                  <div className="form-group">
-                    <label htmlFor="email">📧 E-posta Adresi</label>
-                    <div className="email-input-group">
-                      <input
-                        id="email"
-                        type="email"
-                        value={emailInput}
-                        onChange={(e) => {
-                          setEmailInput(e.target.value);
-                          setVerificationError('');
-                        }}
-                        placeholder="Örn: ad@trakya.edu.tr"
-                        required
-                      />
-                      <button
-                        type="submit"
-                        disabled={verificationLoading}
-                        className="btn-send-code"
-                      >
-                        {verificationLoading ? '⏳ Gönderiliyor...' : '✓ Kod Gönder'}
-                      </button>
-                    </div>
-                  </div>
-
-                  {verificationError && (
-                    <div className="error-message">
-                      ⚠️ {verificationError}
-                    </div>
-                  )}
-                </form>
-              )}
-
-              {emailVerificationStep === 'code' && (
-                <form onSubmit={handleVerifyCode} className="verification-form">
-                  <div className="verification-info">
-                    <p>✓ Doğrulama kodı <strong>{emailInput}</strong> adresine gönderildi.</p>
-                    <p style={{ fontSize: '0.9rem', color: '#666' }}>Lütfen e-postanızı kontrol edin ve aşağıya kodu girin.</p>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="code">Doğrulama Kodu (6 haneli)</label>
-                    <input
-                      id="code"
-                      type="text"
-                      value={codeInput}
-                      onChange={(e) => {
-                        setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6));
-                        setVerificationError('');
-                      }}
-                      placeholder="000000"
-                      maxLength="6"
-                      required
-                      style={{ letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
-                    />
-                  </div>
-
-                  {verificationError && (
-                    <div className="error-message">
-                      ⚠️ {verificationError}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={verificationLoading || codeInput.length !== 6}
-                    className="btn-primary full-width"
-                  >
-                    {verificationLoading ? 'Doğrulanıyor...' : 'Kodu Doğrula'}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmailVerificationStep(null);
-                      setCodeInput('');
-                      setVerificationError('');
-                    }}
-                    className="btn-secondary full-width"
-                    style={{ marginTop: '10px' }}
-                  >
-                    Geri Dön
-                  </button>
-                </form>
-              )}
-
-              {emailVerificationStep === 'verified' && (
-                <div className="verification-success">
-                  <div className="success-icon">✓</div>
-                  <h2>E-posta Doğrulandı!</h2>
-                  <p>Anket çözüme devam edebilirsiniz.</p>
-                  <button
-                    onClick={() => setCurrentStep(1)}
-                    className="btn-primary full-width"
-                  >
-                    Ankete Başla
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     return (
       <div className="anket-coz-page">
         <div className="anket-container">
@@ -569,6 +452,7 @@ const AnketCoz = () => {
             </div>
 
             <form onSubmit={handleStep1Submit} className="form">
+              {/* AD - SOYAD */}
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Ad *</label>
@@ -595,7 +479,158 @@ const AnketCoz = () => {
                 </div>
               </div>
 
-              {Object.keys(dogrulamaBilgileri).length > 0 && (
+              {/* EMAIL DOĞRULAMA BÖLÜMÜ - Ad/Soyadın altında */}
+              {anket.hedefKitleKriterleri?.mail === true && (
+                <div className="email-verification-section">
+                  <div className="email-section-header">
+                    <h3>📧 E-posta Doğrulaması</h3>
+                    <p>Ankete katılabilmek için lütfen e-posta adresinizi doğrulayın</p>
+                  </div>
+
+                  {emailVerificationStep === null && (
+                    <div className="verification-form-group">
+                      <label htmlFor="email">E-posta Adresi</label>
+                      <div className="email-input-group">
+                        <input
+                          id="email"
+                          type="email"
+                          value={emailInput}
+                          onChange={(e) => {
+                            setEmailInput(e.target.value);
+                            setVerificationError('');
+                          }}
+                          placeholder="Örn: ad@trakya.edu.tr"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendVerificationCode}
+                          disabled={verificationLoading}
+                          className="btn-send-code"
+                        >
+                          {verificationLoading ? '⏳ Gönderiliyor...' : '✓ Kod Gönder'}
+                        </button>
+                      </div>
+                      {verificationError && (
+                        <div className="error-message">⚠️ {verificationError}</div>
+                      )}
+                    </div>
+                  )}
+
+                  {emailVerificationStep === 'code' && (
+                    <div className="verification-form-group">
+                      <div className="verification-info">
+                        <p>✓ Doğrulama kodı <strong>{emailInput}</strong> adresine gönderildi.</p>
+                        <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '8px' }}>
+                          Lütfen e-postanızı kontrol edin ve aşağıya kodu girin.
+                        </p>
+                      </div>
+
+                      <label htmlFor="code" style={{ marginTop: '16px' }}>Doğrulama Kodu (6 haneli)</label>
+                      <div className="code-input-group">
+                        <input
+                          id="code"
+                          type="text"
+                          value={codeInput}
+                          onChange={(e) => {
+                            setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6));
+                            setVerificationError('');
+                          }}
+                          placeholder="000000"
+                          maxLength="6"
+                          required
+                          style={{ letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyCode}
+                          disabled={verificationLoading || codeInput.length !== 6}
+                          className="btn-verify-code"
+                        >
+                          {verificationLoading ? '⏳' : '✓'} {verificationLoading ? 'Doğrulanıyor...' : 'Doğrula'}
+                        </button>
+                      </div>
+
+                      {verificationError && (
+                        <div className="error-message">⚠️ {verificationError}</div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmailVerificationStep(null);
+                          setCodeInput('');
+                          setVerificationError('');
+                        }}
+                        className="btn-back-email"
+                      >
+                        ← Geri Dön
+                      </button>
+                    </div>
+                  )}
+
+                  {emailVerificationStep === 'verified' && (
+                    <>
+                      <div className="email-verification-status">
+                        <div className="verification-checkmark">✅ Doğrulandı</div>
+                        <p className="verified-email">{emailInput}</p>
+                      </div>
+                      <hr className="form-divider" />
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* EK DOĞRULAMA BİLGİLERİ - Mail kriteri varsa ve diğer kriterler varsa VEYA mail kriteri yok ama başka kriterler varsa */}
+              {(
+                (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep === 'verified' && Object.keys(dogrulamaBilgileri).length > 1) ||
+                (anket.hedefKitleKriterleri?.mail !== true && Object.keys(dogrulamaBilgileri).length > 0)
+              ) && (
+                <div className="criteria-section">
+                  <h3 className="criteria-title">
+                    <span style={{ fontSize: '22px' }}>🔐</span> Ek Doğrulama Bilgileri
+                  </h3>
+                  {Object.keys(dogrulamaBilgileri).map(key => (
+                    (key === 'mail') ? null : (
+                      <div key={key} className="form-group">
+                        {key === 'konum' ? (
+                          <div className="konum-container">
+                            <KonumuDogrula
+                              onKonumDogrulandi={handleKonumDogrulandi}
+                            />
+                            {hatalar.konum && <span className="error-text">{hatalar.konum}</span>}
+                          </div>
+                        ) : (
+                          <>
+                            <label className="form-label">
+                              {key === 'tcNo' && '🆔 T.C. Kimlik No'}
+                              {key === 'kimlikDogrulama' && '✅ Kimlik Doğrulama'}
+                              {!['tcNo', 'kimlikDogrulama'].includes(key) && key}
+                              {' *'}
+                            </label>
+                            <input
+                              type={key === 'mail' ? 'email' : 'text'}
+                              className={`form-input ${hatalar[key] ? 'error' : ''}`}
+                              value={dogrulamaBilgileri[key]}
+                              onChange={(e) => handleKriterChange(key, e.target.value)}
+                              placeholder={
+                                key === 'mail' ? 'Email adresinizi giriniz' :
+                                  key === 'tcNo' ? 'T.C. kimlik numaranızı giriniz' :
+                                    key === 'kimlikDogrulama' ? 'Kimlik doğrulama kodunuzu giriniz' :
+                                      `${key} giriniz`
+                              }
+                            />
+                            {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
+                          </>
+                        )}
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+
+              {/* EK DOĞRULAMA BİLGİLERİ - Mail kriteri olmadığı durumlar için */}
+              {anket.hedefKitleKriterleri?.mail !== true && Object.keys(dogrulamaBilgileri).length > 0 && (
                 <div className="criteria-section">
                   <h3 className="criteria-title">
                     <span style={{ fontSize: '22px' }}>🔐</span> Ek Doğrulama Bilgileri
@@ -639,7 +674,11 @@ const AnketCoz = () => {
               )}
 
               <div className="form-actions">
-                <button type="submit" className="btn-primary">
+                <button 
+                  type="submit" 
+                  className="btn-primary"
+                  disabled={anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified'}
+                >
                   Devam Et →
                 </button>
               </div>
