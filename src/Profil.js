@@ -21,7 +21,7 @@ import {
     CreditCard      // FaIdCard
 } from "lucide-react";
 
-const BASE_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+const BASE_API_URL = process.env.REACT_APP_API_URL + "/api" || 'http://localhost:4000' + '/api';
 
 function Profil() {
     const [menuOpen, setMenuOpen] = useState(false);
