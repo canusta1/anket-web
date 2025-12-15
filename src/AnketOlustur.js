@@ -17,7 +17,7 @@ function AnketOlustur() {
       const timer = setTimeout(() => {
         setTitleText(fullTitle.slice(0, charIndex + 1));
         setCharIndex(charIndex + 1);
-      }, 50);
+      }, 25);
       return () => clearTimeout(timer);
     }
   }, [charIndex, fullTitle]);

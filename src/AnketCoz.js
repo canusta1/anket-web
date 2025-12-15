@@ -24,6 +24,14 @@ const AnketCoz = () => {
   const [verificationError, setVerificationError] = useState('');
   const [verificationLoading, setVerificationLoading] = useState(false);
   const [verificationToken, setVerificationToken] = useState(null);
+  
+  // SMS doğrulama için state'ler
+  const [phoneVerificationStep, setPhoneVerificationStep] = useState(null); // 'phone', 'code', 'verified'
+  const [phoneCodeInput, setPhoneCodeInput] = useState('');
+  const [phoneVerificationError, setPhoneVerificationError] = useState('');
+  const [phoneVerificationLoading, setPhoneVerificationLoading] = useState(false);
+  const [phoneVerificationToken, setPhoneVerificationToken] = useState(null);
+  const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState(''); // Doğrulama için gönderilen telefon numarası
 
   // Anket verilerini çek
   useEffect(() => {
@@ -107,6 +115,9 @@ const AnketCoz = () => {
                     if (anketData.hedefKitleKriterleri.tcNo === true) {
                       kriterler.tcNo = '';
                     }
+                    if (anketData.hedefKitleKriterleri.telefonNumarasi === true) {
+                      kriterler.telefonNumarasi = '0';
+                    }
                     if (anketData.hedefKitleKriterleri.konum === true) {
                       kriterler.konum = '';
                     }
@@ -148,6 +159,9 @@ const AnketCoz = () => {
             }
             if (anketData.hedefKitleKriterleri.tcNo === true) {
               kriterler.tcNo = '';
+            }
+            if (anketData.hedefKitleKriterleri.telefonNumarasi === true) {
+              kriterler.telefonNumarasi = '0';
             }
             if (anketData.hedefKitleKriterleri.konum === true) {
               kriterler.konum = '';
@@ -212,7 +226,8 @@ const AnketCoz = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           surveyId: anket._id,
-          email: emailInput
+          contactInfo: emailInput,
+          type: 'email'
         })
       });
 
@@ -243,7 +258,7 @@ const AnketCoz = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           surveyId: anket._id,
-          email: emailInput,
+          contactInfo: emailInput,
           code: codeInput
         })
       });
@@ -262,6 +277,81 @@ const AnketCoz = () => {
       setVerificationError(err.message);
     } finally {
       setVerificationLoading(false);
+    }
+  };
+
+  // SMS doğrulama kodu gönder
+  const handleSendPhoneVerificationCode = async (e) => {
+    e.preventDefault();
+    setPhoneVerificationError('');
+    setPhoneVerificationLoading(true);
+
+    try {
+      const phoneNumber = dogrulamaBilgileri.telefonNumarasi;
+      
+      // Telefon numarası validasyonu
+      if (!phoneNumber || phoneNumber.length !== 11 || !phoneNumber.startsWith('0')) {
+        throw new Error('Geçerli bir telefon numarası girin (0 ile başlayan 11 haneli)');
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+      const response = await fetch(`${apiUrl}/api/verification/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          surveyId: anket._id,
+          contactInfo: phoneNumber,
+          type: 'sms'
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'SMS kodu gönderilemedi');
+      }
+
+      setVerifiedPhoneNumber(phoneNumber); // Telefon numarasını sakla
+      setPhoneVerificationStep('code');
+      setPhoneVerificationError('');
+    } catch (err) {
+      setPhoneVerificationError(err.message);
+    } finally {
+      setPhoneVerificationLoading(false);
+    }
+  };
+
+  // SMS doğrulama kodunu kontrol et
+  const handleVerifyPhoneCode = async (e) => {
+    e.preventDefault();
+    setPhoneVerificationError('');
+    setPhoneVerificationLoading(true);
+
+    try {
+      const phoneNumber = dogrulamaBilgileri.telefonNumarasi;
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+      const response = await fetch(`${apiUrl}/api/verification/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          surveyId: anket._id,
+          contactInfo: phoneNumber,
+          code: phoneCodeInput
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'SMS kodu doğrulanamadı');
+      }
+
+      // Doğrulama başarılı
+      setPhoneVerificationToken(data.verificationToken);
+      setPhoneVerificationStep('verified');
+      setPhoneVerificationError('');
+    } catch (err) {
+      setPhoneVerificationError(err.message);
+    } finally {
+      setPhoneVerificationLoading(false);
     }
   };
 
@@ -295,8 +385,20 @@ const AnketCoz = () => {
         if (!konumValue || (typeof konumValue === 'string' && !konumValue.trim())) {
           errors[key] = 'Konumunuzu doğrulamak için butona tıklayınız';
         }
-      } else {
-        // Diğer alanlar için standart kontrol
+      } 
+      // Telefon numarası için özel kontrol
+      else if (key === 'telefonNumarasi') {
+        const telValue = dogrulamaBilgileri[key];
+        if (!telValue || telValue.trim() === '') {
+          errors[key] = 'Telefon numarası zorunludur';
+        } else if (telValue.length !== 11) {
+          errors[key] = 'Telefon numarası 11 hane olmalıdır (0 + 10 hane)';
+        } else if (!telValue.startsWith('0')) {
+          errors[key] = 'Telefon numarası 0 ile başlamalıdır';
+        }
+      }
+      // Diğer alanlar için standart kontrol
+      else {
         const fieldValue = dogrulamaBilgileri[key];
         if (!fieldValue || (typeof fieldValue === 'string' && !fieldValue.trim())) {
           errors[key] = `${key} alanı zorunludur`;
@@ -581,17 +683,126 @@ const AnketCoz = () => {
                 </div>
               )}
 
-              {/* EK DOĞRULAMA BİLGİLERİ - Mail kriteri varsa ve diğer kriterler varsa VEYA mail kriteri yok ama başka kriterler varsa */}
-              {(
-                (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep === 'verified' && Object.keys(dogrulamaBilgileri).length > 1) ||
-                (anket.hedefKitleKriterleri?.mail !== true && Object.keys(dogrulamaBilgileri).length > 0)
-              ) && (
+              {/* SMS DOĞRULAMA BÖLÜMÜ - Telefon numarası için */}
+              {anket.hedefKitleKriterleri?.telefonNumarasi === true && (
+                <div className="email-verification-section">
+                  <div className="email-section-header">
+                    <h3>📱 Telefon Numarası Doğrulaması</h3>
+                    <p>Ankete katılabilmek için lütfen telefon numaranızı doğrulayın</p>
+                  </div>
+
+                  {phoneVerificationStep === null && (
+                    <div className="verification-form-group">
+                      <label htmlFor="phone">Telefon Numarası</label>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ 
+                          padding: '12px 15px', 
+                          background: '#e9ecef', 
+                          border: '2px solid #cbd5e0', 
+                          borderRight: 'none',
+                          borderRadius: '8px 0 0 8px',
+                          fontWeight: 600,
+                          color: '#495057'
+                        }}>0</span>
+                        <input
+                          id="phone"
+                          type="tel"
+                          className={`form-input ${hatalar.telefonNumarasi ? 'error' : ''}`}
+                          value={dogrulamaBilgileri.telefonNumarasi?.replace(/^0/, '') || ''}
+                          onChange={(e) => {
+                            let value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                            handleKriterChange('telefonNumarasi', '0' + value);
+                            setPhoneVerificationError('');
+                          }}
+                          placeholder="5XX XXX XX XX"
+                          maxLength="10"
+                          style={{ borderRadius: '0 8px 8px 0', flex: 1 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendPhoneVerificationCode}
+                          disabled={phoneVerificationLoading || !dogrulamaBilgileri.telefonNumarasi || dogrulamaBilgileri.telefonNumarasi.length !== 11}
+                          className="btn-send-code"
+                          style={{ marginLeft: '8px' }}
+                        >
+                          {phoneVerificationLoading ? '⏳ Gönderiliyor...' : '✓ Kod Gönder'}
+                        </button>
+                      </div>
+                      {phoneVerificationError && (
+                        <div className="error-message">⚠️ {phoneVerificationError}</div>
+                      )}
+                    </div>
+                  )}
+
+                  {phoneVerificationStep === 'code' && (
+                    <div className="verification-form-group">
+                      <div className="verification-info">
+                        <p>✓ Doğrulama kodu <strong>{verifiedPhoneNumber}</strong> numarasına gönderildi.</p>
+                      </div>
+
+                      <label htmlFor="phone-code" style={{ marginTop: '16px' }}>SMS Doğrulama Kodu (6 haneli)</label>
+                      <div className="code-input-group">
+                        <input
+                          id="phone-code"
+                          type="text"
+                          value={phoneCodeInput}
+                          onChange={(e) => {
+                            setPhoneCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6));
+                            setPhoneVerificationError('');
+                          }}
+                          placeholder="000000"
+                          maxLength="6"
+                          required
+                          style={{ letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyPhoneCode}
+                          disabled={phoneVerificationLoading || phoneCodeInput.length !== 6}
+                          className="btn-verify-code"
+                        >
+                          {phoneVerificationLoading ? '⏳' : '✓'} {phoneVerificationLoading ? 'Doğrulanıyor...' : 'Doğrula'}
+                        </button>
+                      </div>
+
+                      {phoneVerificationError && (
+                        <div className="error-message">⚠️ {phoneVerificationError}</div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhoneVerificationStep(null);
+                          setPhoneCodeInput('');
+                          setPhoneVerificationError('');
+                        }}
+                        className="btn-back-email"
+                      >
+                        ← Geri Dön
+                      </button>
+                    </div>
+                  )}
+
+                  {phoneVerificationStep === 'verified' && (
+                    <>
+                      <div className="email-verification-status">
+                        <div className="verification-checkmark">✅ Doğrulandı</div>
+                        <p className="verified-email">{verifiedPhoneNumber}</p>
+                      </div>
+                      <hr className="form-divider" />
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* EK DOĞRULAMA BİLGİLERİ - Mail ve telefon hariç diğer kriterler varsa göster */}
+              {Object.keys(dogrulamaBilgileri).filter(k => k !== 'mail' && k !== 'telefonNumarasi').length > 0 && (
                 <div className="criteria-section">
                   <h3 className="criteria-title">
                     <span style={{ fontSize: '22px' }}>🔐</span> Ek Doğrulama Bilgileri
                   </h3>
                   {Object.keys(dogrulamaBilgileri).map(key => (
-                    (key === 'mail') ? null : (
+                    (key === 'mail' || key === 'telefonNumarasi') ? null : (
                       <div key={key} className="form-group">
                         {key === 'konum' ? (
                           <div className="konum-container">
@@ -629,55 +840,14 @@ const AnketCoz = () => {
                 </div>
               )}
 
-              {/* EK DOĞRULAMA BİLGİLERİ - Mail kriteri olmadığı durumlar için */}
-              {anket.hedefKitleKriterleri?.mail !== true && Object.keys(dogrulamaBilgileri).length > 0 && (
-                <div className="criteria-section">
-                  <h3 className="criteria-title">
-                    <span style={{ fontSize: '22px' }}>🔐</span> Ek Doğrulama Bilgileri
-                  </h3>
-                  {Object.keys(dogrulamaBilgileri).map(key => (
-                    <div key={key} className="form-group">
-                      {key === 'konum' ? (
-                        <div className="konum-container">
-                          <KonumuDogrula
-                            onKonumDogrulandi={handleKonumDogrulandi}
-                          />
-                          {hatalar.konum && <span className="error-text">{hatalar.konum}</span>}
-                        </div>
-                      ) : (
-                        <>
-                          <label className="form-label">
-                            {key === 'mail' && '📧 Email Adres'}
-                            {key === 'tcNo' && '🆔 T.C. Kimlik No'}
-                            {key === 'kimlikDogrulama' && '✅ Kimlik Doğrulama'}
-                            {!['mail', 'tcNo', 'kimlikDogrulama'].includes(key) && key}
-                            {' *'}
-                          </label>
-                          <input
-                            type={key === 'mail' ? 'email' : 'text'}
-                            className={`form-input ${hatalar[key] ? 'error' : ''}`}
-                            value={dogrulamaBilgileri[key]}
-                            onChange={(e) => handleKriterChange(key, e.target.value)}
-                            placeholder={
-                              key === 'mail' ? 'Email adresinizi giriniz' :
-                                key === 'tcNo' ? 'T.C. kimlik numaranızı giriniz' :
-                                  key === 'kimlikDogrulama' ? 'Kimlik doğrulama kodunuzu giriniz' :
-                                    `${key} giriniz`
-                            }
-                          />
-                          {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
               <div className="form-actions">
                 <button 
                   type="submit" 
                   className="btn-primary"
-                  disabled={anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified'}
+                  disabled={
+                    (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified') ||
+                    (anket.hedefKitleKriterleri?.telefonNumarasi === true && phoneVerificationStep !== 'verified')
+                  }
                 >
                   Devam Et →
                 </button>

@@ -45,7 +45,8 @@ function HedefKitleSecimi() {
         mail: false,
         tcNo: false,
         konum: false,
-        kimlikDogrulama: false
+        kimlikDogrulama: false,
+        telefonNumarasi: false
     });
 
     const [mailUzantisi, setMailUzantisi] = useState("");
@@ -216,6 +217,9 @@ function HedefKitleSecimi() {
                 konumHedefi: secilenKriterler.konum ? kayitliKonumKriteri : null
             }
         };
+
+        console.log("🚀 Frontend'den gönderilen secilenKriterler:", secilenKriterler);
+        console.log("🚀 Frontend'den gönderilen finalVeri:", finalVeri);
 
         try {
             const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
@@ -436,22 +440,6 @@ function HedefKitleSecimi() {
                     </div>
 
                     {/* ZORUNLU KRİTER */}
-                    <div style={{ background: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)", borderRadius: "16px", padding: "25px", marginBottom: "30px", boxShadow: "0 6px 20px rgba(231, 76, 60, 0.3)", border: "3px solid #c0392b" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                            <div style={{ background: "white", borderRadius: "12px", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <FaMobileAlt style={{ fontSize: "1.8em", color: "#e74c3c" }} />
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "5px" }}>
-                                    <h3 style={{ fontSize: "1.4em", color: "white", margin: 0 }}>Cep Telefonu</h3>
-                                    <span style={{ background: "rgba(255,255,255,0.25)", color: "white", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75em", fontWeight: 700, letterSpacing: "0.5px" }}>ZORUNLU</span>
-                                </div>
-                                <p style={{ color: "rgba(255,255,255,0.9)", margin: 0, fontSize: "0.95em" }}>Tüm katılımcılardan cep telefonu numarası istenecek</p>
-                            </div>
-                            <FaCheckCircle style={{ fontSize: "2em", color: "white" }} />
-                        </div>
-                    </div>
-
                     {/* SEÇİLEBİLİR KRİTERLER */}
                     <div className="guvenli-alan" style={{ background: "white", borderRadius: "16px", padding: "30px", marginBottom: "25px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
@@ -487,6 +475,16 @@ function HedefKitleSecimi() {
                                     <span style={{ fontWeight: 600, color: "#2c3e50", fontSize: "1.05em" }}>TC Kimlik No</span>
                                 </div>
                                 <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Katılımcıdan TC kimlik numarası istenecek</p>
+                            </div>
+
+                            {/* TELEFON NUMARASI KRİTERİ */}
+                            <div onClick={() => handleKriterToggle("telefonNumarasi")} style={{ background: secilenKriterler.telefonNumarasi ? "#ebf5fb" : "#f8f9fa", border: `2px solid ${secilenKriterler.telefonNumarasi ? "#3498db" : "#e0e0e0"}`, borderRadius: "12px", padding: "20px", cursor: "pointer", transition: "all 0.3s", boxShadow: secilenKriterler.telefonNumarasi ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                    <input type="checkbox" checked={secilenKriterler.telefonNumarasi} onChange={() => { }} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
+                                    <FaMobileAlt style={{ fontSize: "1.3em", color: "#3498db" }} />
+                                    <span style={{ fontWeight: 600, color: "#2c3e50", fontSize: "1.05em" }}>Telefon Numarası</span>
+                                </div>
+                                <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Katılımcıdan telefon numarası istenecek</p>
                             </div>
 
                             {/* KONUM KRİTERİ (Google Maps Entegreli) */}
@@ -553,6 +551,7 @@ function HedefKitleSecimi() {
                                 <div style={{ marginTop: "8px", color: "#1b5e20" }}>
                                     {secilenKriterler.mail && <div>• E-Mail Adresi {mailUzantisi && `(${mailUzantisi})`}</div>}
                                     {secilenKriterler.tcNo && <div>• TC Kimlik No</div>}
+                                    {secilenKriterler.telefonNumarasi && <div>• Telefon Numarası</div>}
                                     {secilenKriterler.konum && <div>• Bölge Kısıtlaması: {kayitliKonumKriteri ? `${kayitliKonumKriteri.aciklama}` : '(Seçim bekleniyor)'}</div>}
                                     {secilenKriterler.kimlikDogrulama && <div>• Kimlik Belgesi</div>}
                                 </div>

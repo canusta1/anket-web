@@ -128,6 +128,7 @@ router.post("/", auth(true), async (req, res) => {
     } = req.body;
 
     console.log("📝 Gelen Hedef Kitle Kriterleri:", JSON.stringify(hedefKitleKriterleri, null, 2));
+    console.log("🔍 telefonNumarasi değeri:", hedefKitleKriterleri?.telefonNumarasi);
 
     const islenmisSorular = temizleSorular(sorular);
     const linkKodu = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -171,9 +172,12 @@ router.post("/", auth(true), async (req, res) => {
       mailUzantisi: hedefKitleKriterleri?.mailUzantisi || "",
       tcNo: hedefKitleKriterleri?.tcNo || false,
       kimlikDogrulama: hedefKitleKriterleri?.kimlikDogrulama || false,
+      telefonNumarasi: hedefKitleKriterleri?.telefonNumarasi || false,
       konum: hedefKitleKriterleri?.konum || false,
       konumKisitlamasi: konumKisitlamasi
     };
+
+    console.log("💾 DB'ye kaydedilecek kriterler:", JSON.stringify(yeniKriterler, null, 2));
 
     const newSurvey = new Survey({
       kullaniciId: req.user._id,
