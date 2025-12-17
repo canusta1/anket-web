@@ -1,13 +1,7 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Gmail transporter konfigürasyonu (Uygulama Şifresi ile)
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, // Gmail Uygulama Şifresi
-  }
-});
+// Resend'i başlat (API Key'i .env dosyasından alacak)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * 6 haneli rastgele doğrulama kodu oluştur
@@ -21,11 +15,12 @@ function generateVerificationCode() {
  */
 async function sendVerificationCode(userEmail, verificationCode, surveyTitle) {
   try {
-    console.log(`📧 Mail gönderiliyor: ${userEmail}`);
-    
-    const mailOptions = {
-      from: process.env.EMAIL_USER, // Gönderen
-      to: userEmail,
+    console.log(`📧 Resend ile mail gönderiliyor: ${userEmail}`);
+
+    // Resend ile gönderim işlemi
+    const { data, error } = await resend.emails.send({
+      from: 'onboarding@resend.dev', // DİKKAT: Domain doğrulaması yapana kadar burası böyle kalmalı
+      to: userEmail,                 // Test aşamasında sadece kendi mailine gönderebilirsin
       subject: `Anket Doğrulama Kodu - ${surveyTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
@@ -49,14 +44,18 @@ async function sendVerificationCode(userEmail, verificationCode, surveyTitle) {
           </div>
         </div>
       `,
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Doğrulama kodu başarıyla gönderildi. ID:', info.messageId);
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log('✅ Doğrulama kodu başarıyla gönderildi. ID:', data.id);
     return true;
+
   } catch (error) {
-    console.error('❌ Mail Hatası Detayı:');
-    console.error(error);
+    console.error('❌ Mail Hatası Detayı:', error);
+    // Hata mesajını frontend'e düzgün iletmek için fırlatıyoruz
     throw new Error(`Mail gönderilemedi: ${error.message}`);
   }
 }
