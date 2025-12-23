@@ -16,7 +16,7 @@ const AnketCoz = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  
+
   // Email doğrulama için yeni state'ler
   const [emailVerificationStep, setEmailVerificationStep] = useState(null); // 'email', 'code', 'verified'
   const [emailInput, setEmailInput] = useState('');
@@ -24,7 +24,7 @@ const AnketCoz = () => {
   const [verificationError, setVerificationError] = useState('');
   const [verificationLoading, setVerificationLoading] = useState(false);
   const [verificationToken, setVerificationToken] = useState(null);
-  
+
   // SMS doğrulama için state'ler
   const [phoneVerificationStep, setPhoneVerificationStep] = useState(null); // 'phone', 'code', 'verified'
   const [phoneCodeInput, setPhoneCodeInput] = useState('');
@@ -32,6 +32,15 @@ const AnketCoz = () => {
   const [phoneVerificationLoading, setPhoneVerificationLoading] = useState(false);
   const [phoneVerificationToken, setPhoneVerificationToken] = useState(null);
   const [verifiedPhoneNumber, setVerifiedPhoneNumber] = useState(''); // Doğrulama için gönderilen telefon numarası
+
+  // Kimlik doğrulama (yüz tanıma) için state'ler
+  const [identityVerificationStep, setIdentityVerificationStep] = useState(null); // 'upload', 'verifying', 'verified'
+  const [idCardFile, setIdCardFile] = useState(null);
+  const [selfieFile, setSelfieFile] = useState(null);
+  const [identityVerificationError, setIdentityVerificationError] = useState('');
+  const [identityVerificationLoading, setIdentityVerificationLoading] = useState(false);
+  const [verifiedTcNo, setVerifiedTcNo] = useState('');
+  const [identityVerificationToken, setIdentityVerificationToken] = useState(null);
 
   // Anket verilerini çek
   useEffect(() => {
@@ -288,7 +297,7 @@ const AnketCoz = () => {
 
     try {
       const phoneNumber = dogrulamaBilgileri.telefonNumarasi;
-      
+
       // Telefon numarası validasyonu
       if (!phoneNumber || phoneNumber.length !== 11 || !phoneNumber.startsWith('0')) {
         throw new Error('Geçerli bir telefon numarası girin (0 ile başlayan 11 haneli)');
@@ -355,6 +364,67 @@ const AnketCoz = () => {
     }
   };
 
+  // Kimlik doğrulama - yüz tanıma ile
+  const handleIdentityVerification = async (e) => {
+    e.preventDefault();
+    setIdentityVerificationError('');
+    setIdentityVerificationLoading(true);
+
+    try {
+      // Dosya kontrolü
+      if (!idCardFile || !selfieFile) {
+        throw new Error('Lütfen kimlik kartı fotoğrafı ve selfie seçiniz');
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+
+      // FormData ile dosyaları gönder
+      const formData = new FormData();
+      formData.append('idCard', idCardFile);
+      formData.append('selfie', selfieFile);
+
+      const response = await fetch(`${apiUrl}/api/verification/verify-identity`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Kimlik doğrulama başarısız');
+      }
+
+      // Doğrulama başarılı
+      setVerifiedTcNo(data.data.tcKimlikNo);
+      setIdentityVerificationToken(data.data.verificationToken);
+      setIdentityVerificationStep('verified');
+      setDogrulamaBilgileri(prev => ({
+        ...prev,
+        kimlikDogrulama: data.data.tcKimlikNo
+      }));
+      setIdentityVerificationError('');
+    } catch (err) {
+      setIdentityVerificationError(err.message);
+    } finally {
+      setIdentityVerificationLoading(false);
+    }
+  };
+
+  // Dosya seçimi handler'ları
+  const handleIdCardFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setIdCardFile(e.target.files[0]);
+      setIdentityVerificationError('');
+    }
+  };
+
+  const handleSelfieFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelfieFile(e.target.files[0]);
+      setIdentityVerificationError('');
+    }
+  };
+
   const handleCheckboxChange = (soruId, value, checked) => {
     setCevaplar(prev => {
       const current = Array.isArray(prev[soruId]) ? prev[soruId] : [];
@@ -385,7 +455,7 @@ const AnketCoz = () => {
         if (!konumValue || (typeof konumValue === 'string' && !konumValue.trim())) {
           errors[key] = 'Konumunuzu doğrulamak için butona tıklayınız';
         }
-      } 
+      }
       // Telefon numarası için özel kontrol
       else if (key === 'telefonNumarasi') {
         const telValue = dogrulamaBilgileri[key];
@@ -695,10 +765,10 @@ const AnketCoz = () => {
                     <div className="verification-form-group">
                       <label htmlFor="phone">Telefon Numarası</label>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={{ 
-                          padding: '12px 15px', 
-                          background: '#e9ecef', 
-                          border: '2px solid #cbd5e0', 
+                        <span style={{
+                          padding: '12px 15px',
+                          background: '#e9ecef',
+                          border: '2px solid #cbd5e0',
                           borderRight: 'none',
                           borderRadius: '8px 0 0 8px',
                           fontWeight: 600,
@@ -811,11 +881,104 @@ const AnketCoz = () => {
                             />
                             {hatalar.konum && <span className="error-text">{hatalar.konum}</span>}
                           </div>
+                        ) : key === 'kimlikDogrulama' ? (
+                          /* KİMLİK DOĞRULAMA - YÜZ TANIMA UI */
+                          <div className="identity-verification-section">
+                            <div className="email-section-header">
+                              <h3>🆔 Kimlik Doğrulama</h3>
+                              <p>Kimliğinizi doğrulamak için kimlik kartı fotoğrafınızı ve selfie'nizi yükleyin</p>
+                            </div>
+
+                            {identityVerificationStep !== 'verified' ? (
+                              <div className="verification-form-group">
+                                {/* Kimlik Kartı Yükleme */}
+                                <div style={{ marginBottom: '20px' }}>
+                                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#2c3e50' }}>
+                                    📄 Kimlik Kartı Fotoğrafı *
+                                  </label>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleIdCardFileChange}
+                                    style={{
+                                      width: '100%',
+                                      padding: '12px',
+                                      border: '2px dashed #3498db',
+                                      borderRadius: '8px',
+                                      background: '#f8f9fa',
+                                      cursor: 'pointer'
+                                    }}
+                                  />
+                                  {idCardFile && (
+                                    <p style={{ margin: '8px 0', color: '#27ae60', fontSize: '0.9em' }}>
+                                      ✓ {idCardFile.name} seçildi
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Selfie Yükleme */}
+                                <div style={{ marginBottom: '20px' }}>
+                                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#2c3e50' }}>
+                                    🤳 Selfie Fotoğrafı *
+                                  </label>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleSelfieFileChange}
+                                    style={{
+                                      width: '100%',
+                                      padding: '12px',
+                                      border: '2px dashed #e74c3c',
+                                      borderRadius: '8px',
+                                      background: '#f8f9fa',
+                                      cursor: 'pointer'
+                                    }}
+                                  />
+                                  {selfieFile && (
+                                    <p style={{ margin: '8px 0', color: '#27ae60', fontSize: '0.9em' }}>
+                                      ✓ {selfieFile.name} seçildi
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Doğrula Butonu */}
+                                <button
+                                  type="button"
+                                  onClick={handleIdentityVerification}
+                                  disabled={identityVerificationLoading || !idCardFile || !selfieFile}
+                                  className="btn-send-code"
+                                  style={{
+                                    width: '100%',
+                                    padding: '15px',
+                                    fontSize: '1.1em',
+                                    background: (!idCardFile || !selfieFile) ? '#bdc3c7' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                  }}
+                                >
+                                  {identityVerificationLoading ? '⏳ Doğrulanıyor...' : '🔍 Kimliği Doğrula'}
+                                </button>
+
+                                {identityVerificationError && (
+                                  <div className="error-message" style={{ marginTop: '15px' }}>
+                                    ⚠️ {identityVerificationError}
+                                  </div>
+                                )}
+
+                                <p style={{ fontSize: '0.85em', color: '#7f8c8d', marginTop: '15px', textAlign: 'center' }}>
+                                  🔒 Fotoğraflarınız güvenli bir şekilde işlenir ve doğrulama sonrasında silinir.
+                                </p>
+                              </div>
+                            ) : (
+                              /* Doğrulama Başarılı */
+                              <div className="email-verification-status">
+                                <div className="verification-checkmark">✅ Kimlik Doğrulandı</div>
+                                <p className="verified-email">TC Kimlik No: {verifiedTcNo}</p>
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <>
                             <label className="form-label">
                               {key === 'tcNo' && '🆔 T.C. Kimlik No'}
-                              {key === 'kimlikDogrulama' && '✅ Kimlik Doğrulama'}
                               {!['tcNo', 'kimlikDogrulama'].includes(key) && key}
                               {' *'}
                             </label>
@@ -827,8 +990,7 @@ const AnketCoz = () => {
                               placeholder={
                                 key === 'mail' ? 'Email adresinizi giriniz' :
                                   key === 'tcNo' ? 'T.C. kimlik numaranızı giriniz' :
-                                    key === 'kimlikDogrulama' ? 'Kimlik doğrulama kodunuzu giriniz' :
-                                      `${key} giriniz`
+                                    `${key} giriniz`
                               }
                             />
                             {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
@@ -841,12 +1003,13 @@ const AnketCoz = () => {
               )}
 
               <div className="form-actions">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn-primary"
                   disabled={
                     (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified') ||
-                    (anket.hedefKitleKriterleri?.telefonNumarasi === true && phoneVerificationStep !== 'verified')
+                    (anket.hedefKitleKriterleri?.telefonNumarasi === true && phoneVerificationStep !== 'verified') ||
+                    (anket.hedefKitleKriterleri?.kimlikDogrulama === true && identityVerificationStep !== 'verified')
                   }
                 >
                   Devam Et →

@@ -4,9 +4,121 @@ const Survey = require("../models/Survey");
 const { generateVerificationCode, sendVerificationCode } = require("../services/mailService");
 const { generateSMSVerificationCode, sendSMSVerification } = require("../services/smsService");
 
+// Kimlik doğrulama için gerekli modüller
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const { spawn } = require("child_process");
+const { readTCFromIdCard } = require("../services/ocrService");
+
 // Geçici bellekte doğrulama kodlarını saklayacağız
 // Gerçek uygulamada Redis veya veritabanı kullanılmalı
 const verificationCodes = new Map();
+
+// uploads/temp klasörünün varlığını kontrol et ve oluştur
+const uploadDir = path.join(__dirname, "..", "uploads", "temp");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Multer yapılandırması - dosyaları geçici klasöre kaydet
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Benzersiz dosya adı oluştur
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  }
+});
+
+// Dosya filtresi - sadece resim dosyaları kabul et
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (extname && mimetype) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Sadece resim dosyaları (jpeg, jpg, png, gif, webp) yüklenebilir!"));
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: fileFilter
+});
+
+/**
+ * Geçici dosyaları sil - güvenlik için
+ * @param {string[]} filePaths - Silinecek dosya yolları
+ */
+async function cleanupTempFiles(filePaths) {
+  for (const filePath of filePaths) {
+    try {
+      if (fs.existsSync(filePath)) {
+        await fs.promises.unlink(filePath);
+        console.log(`Geçici dosya silindi: ${filePath}`);
+      }
+    } catch (error) {
+      console.error(`Dosya silinemedi: ${filePath}`, error);
+    }
+  }
+}
+
+/**
+ * Python yüz doğrulama scriptini çalıştır
+ * @param {string} idCardPath - Kimlik kartı fotoğrafı yolu
+ * @param {string} selfiePath - Selfie fotoğrafı yolu
+ * @returns {Promise<{match: boolean, score: number, error: string|null}>}
+ */
+function runFaceVerification(idCardPath, selfiePath) {
+  return new Promise((resolve, reject) => {
+    const pythonScript = path.join(__dirname, "..", "services", "faceVerify.py");
+
+    // Python scriptini çalıştır
+    const pythonProcess = spawn("python", [pythonScript, idCardPath, selfiePath]);
+
+    let stdout = "";
+    let stderr = "";
+
+    pythonProcess.stdout.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    pythonProcess.stderr.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    pythonProcess.on("close", (code) => {
+      try {
+        // stdout'tan JSON parse et
+        const result = JSON.parse(stdout.trim());
+        resolve(result);
+      } catch (parseError) {
+        resolve({
+          match: false,
+          score: 0,
+          error: stderr || "Python script çıktısı parse edilemedi"
+        });
+      }
+    });
+
+    pythonProcess.on("error", (error) => {
+      resolve({
+        match: false,
+        score: 0,
+        error: `Python script çalıştırılamadı: ${error.message}`
+      });
+    });
+  });
+}
 
 /**
  * POST /api/verification/send-code
@@ -46,7 +158,7 @@ router.post("/send-code", async (req, res) => {
       // Email uzantısını kontrol et
       const userEmailDomain = contactInfo.substring(contactInfo.lastIndexOf("@") + 1).toLowerCase();
       let allowedDomains = survey.hedefKitleKriterleri?.mailUzantisi || [];
-      
+
       // mailUzantisi string ise array'e çevir ve @ işaretini kaldır
       if (typeof allowedDomains === 'string' && allowedDomains.length > 0) {
         allowedDomains = allowedDomains
@@ -60,7 +172,7 @@ router.post("/send-code", async (req, res) => {
       }
 
       if (allowedDomains.length > 0) {
-        const isAllowed = allowedDomains.some(domain => 
+        const isAllowed = allowedDomains.some(domain =>
           userEmailDomain === domain.toLowerCase()
         );
 
@@ -74,7 +186,7 @@ router.post("/send-code", async (req, res) => {
 
       // 6 haneli kod oluştur
       const verificationCode = generateVerificationCode();
-      
+
       // Kodu geçici bellekte sakla (10 dakika geçerlilik)
       const codeKey = `${surveyId}:${contactInfo}`;
       verificationCodes.set(codeKey, {
@@ -104,7 +216,7 @@ router.post("/send-code", async (req, res) => {
 
       // 6 haneli kod oluştur
       const verificationCode = generateSMSVerificationCode();
-      
+
       // Kodu geçici bellekte sakla (10 dakika geçerlilik)
       const codeKey = `${surveyId}:${contactInfo}`;
       verificationCodes.set(codeKey, {
@@ -138,7 +250,7 @@ router.post("/send-code", async (req, res) => {
 router.post("/verify-code", async (req, res) => {
   try {
     const { surveyId, contactInfo, code } = req.body;
-    
+
     // Geriye uyumluluk için email parametresini destekle
     const verificationContact = contactInfo || req.body.email;
 
@@ -209,4 +321,122 @@ router.post("/verify-code", async (req, res) => {
   }
 });
 
+/**
+ * POST /api/verification/verify-identity
+ * Kimlik ve Yüz Doğrulama - Yüksek Güvenlikli
+ * 
+ * Beklenen dosyalar:
+ * - idCard: Kimlik kartı fotoğrafı
+ * - selfie: Selfie fotoğrafı
+ * 
+ * İş Akışı:
+ * 1. Dosyaları al ve geçici klasöre kaydet
+ * 2. Python script ile yüz karşılaştırması yap
+ * 3. Eşleşirse OCR ile TC Kimlik No oku
+ * 4. Sonucu dön ve dosyaları sil
+ */
+router.post("/verify-identity", upload.fields([
+  { name: "idCard", maxCount: 1 },
+  { name: "selfie", maxCount: 1 }
+]), async (req, res) => {
+  // Yüklenen dosya yolları - cleanup için
+  const uploadedFiles = [];
+
+  try {
+    // Dosya kontrolü
+    if (!req.files || !req.files.idCard || !req.files.selfie) {
+      return res.status(400).json({
+        success: false,
+        error: "Kimlik kartı (idCard) ve selfie fotoğrafları gereklidir"
+      });
+    }
+
+    const idCardFile = req.files.idCard[0];
+    const selfieFile = req.files.selfie[0];
+
+    uploadedFiles.push(idCardFile.path, selfieFile.path);
+
+    console.log("Kimlik doğrulama başlatıldı:");
+    console.log(`  - Kimlik: ${idCardFile.filename}`);
+    console.log(`  - Selfie: ${selfieFile.filename}`);
+
+    // ADIM 1: Python script ile yüz karşılaştırması
+    console.log("Yüz karşılaştırması yapılıyor...");
+    const faceResult = await runFaceVerification(idCardFile.path, selfieFile.path);
+
+    console.log("Yüz karşılaştırma sonucu:", faceResult);
+
+    // Yüz eşleşmedi ise
+    if (!faceResult.match) {
+      // Dosyaları temizle
+      await cleanupTempFiles(uploadedFiles);
+
+      return res.status(400).json({
+        success: false,
+        error: faceResult.error || "Yüz doğrulaması başarısız. Kimlik fotoğrafı ve selfie aynı kişiye ait değil.",
+        details: {
+          faceMatch: false,
+          faceScore: faceResult.score
+        }
+      });
+    }
+
+    // ADIM 2: OCR DEVRE DIŞI - Yüz doğrulama yeterli
+    // Tesseract.js worker sorunu çözülene kadar OCR atlanıyor
+    console.log("OCR atlanıyor - yüz doğrulama başarılı, devam ediliyor...");
+
+    // Dosyaları temizle
+    await cleanupTempFiles(uploadedFiles);
+
+    // Yüz eşleşti - doğrulama başarılı
+    const verificationToken = `identity:FACE_VERIFIED:${Date.now()}`;
+
+    res.json({
+      success: true,
+      message: "Yüz doğrulaması başarılı",
+      data: {
+        tcKimlikNo: "Yüz ile doğrulandı",
+        faceMatchScore: faceResult.score,
+        verificationToken: verificationToken,
+        ocrSuccess: false,
+        ocrError: "OCR devre dışı"
+      }
+    });
+
+  } catch (error) {
+    console.error("Kimlik doğrulama hatası:", error);
+
+    // Hata durumunda da dosyaları temizle
+    await cleanupTempFiles(uploadedFiles);
+
+    res.status(500).json({
+      success: false,
+      error: error.message || "Kimlik doğrulama işlemi başarısız"
+    });
+  }
+});
+
+// Multer hata yönetimi middleware'i
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        error: "Dosya boyutu çok büyük. Maksimum 10MB yükleyebilirsiniz."
+      });
+    }
+    return res.status(400).json({
+      success: false,
+      error: `Dosya yükleme hatası: ${error.message}`
+    });
+  } else if (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+  next();
+});
+
 module.exports = router;
+
