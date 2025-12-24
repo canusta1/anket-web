@@ -651,356 +651,357 @@ const AnketCoz = () => {
                 </div>
               </div>
 
-              {/* EMAIL DOĞRULAMA BÖLÜMÜ - Ad/Soyadın altında */}
-              {anket.hedefKitleKriterleri?.mail === true && (
-                <div className="email-verification-section">
-                  <div className="email-section-header">
-                    <h3>📧 E-posta Doğrulaması</h3>
-                    <p>Ankete katılabilmek için lütfen e-posta adresinizi doğrulayın</p>
-                  </div>
-
-                  {emailVerificationStep === null && (
-                    <div className="verification-form-group">
-                      <label htmlFor="email">E-posta Adresi</label>
-                      <div className="email-input-group">
-                        <input
-                          id="email"
-                          type="email"
-                          value={emailInput}
-                          onChange={(e) => {
-                            setEmailInput(e.target.value);
-                            setVerificationError('');
-                          }}
-                          placeholder="Örn: ad@trakya.edu.tr"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={handleSendVerificationCode}
-                          disabled={verificationLoading}
-                          className="btn-send-code"
-                        >
-                          {verificationLoading ? '⏳ Gönderiliyor...' : '✓ Kod Gönder'}
-                        </button>
+              {/* TÜM DOĞRULAMA BİLGİLERİ - TEK BÜTÜNLEŞİK KART */}
+              {(anket.hedefKitleKriterleri?.mail === true ||
+                anket.hedefKitleKriterleri?.telefonNumarasi === true ||
+                Object.keys(dogrulamaBilgileri).filter(k => k !== 'mail' && k !== 'telefonNumarasi').length > 0) && (
+                  <div className="ek-dogrulama-wrapper-card">
+                    {/* Kart Başlığı */}
+                    <div className="ek-dogrulama-header">
+                      <span className="ek-dogrulama-icon">🔐</span>
+                      <div className="ek-dogrulama-title">
+                        <h3>Doğrulama Bilgileri</h3>
+                        <p>Ankete katılım için aşağıdaki doğrulamaları tamamlayınız</p>
                       </div>
-                      {verificationError && (
-                        <div className="error-message">⚠️ {verificationError}</div>
-                      )}
                     </div>
-                  )}
 
-                  {emailVerificationStep === 'code' && (
-                    <div className="verification-form-group">
-                      <div className="verification-info">
-                        <p>✓ Doğrulama kodı <strong>{emailInput}</strong> adresine gönderildi.</p>
-                        <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '8px' }}>
-                          Lütfen e-postanızı kontrol edin ve aşağıya kodu girin.
-                        </p>
-                      </div>
+                    {/* Doğrulama Bölümleri */}
+                    <div className="ek-dogrulama-content">
 
-                      <label htmlFor="code" style={{ marginTop: '16px' }}>Doğrulama Kodu (6 haneli)</label>
-                      <div className="code-input-group">
-                        <input
-                          id="code"
-                          type="text"
-                          value={codeInput}
-                          onChange={(e) => {
-                            setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6));
-                            setVerificationError('');
-                          }}
-                          placeholder="000000"
-                          maxLength="6"
-                          required
-                          style={{ letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleVerifyCode}
-                          disabled={verificationLoading || codeInput.length !== 6}
-                          className="btn-verify-code"
-                        >
-                          {verificationLoading ? '⏳' : '✓'} {verificationLoading ? 'Doğrulanıyor...' : 'Doğrula'}
-                        </button>
-                      </div>
-
-                      {verificationError && (
-                        <div className="error-message">⚠️ {verificationError}</div>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEmailVerificationStep(null);
-                          setCodeInput('');
-                          setVerificationError('');
-                        }}
-                        className="btn-back-email"
-                      >
-                        ← Geri Dön
-                      </button>
-                    </div>
-                  )}
-
-                  {emailVerificationStep === 'verified' && (
-                    <>
-                      <div className="email-verification-status">
-                        <div className="verification-checkmark">✅ Doğrulandı</div>
-                        <p className="verified-email">{emailInput}</p>
-                      </div>
-                      <hr className="form-divider" />
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* SMS DOĞRULAMA BÖLÜMÜ - Telefon numarası için */}
-              {anket.hedefKitleKriterleri?.telefonNumarasi === true && (
-                <div className="email-verification-section">
-                  <div className="email-section-header">
-                    <h3>📱 Telefon Numarası Doğrulaması</h3>
-                    <p>Ankete katılabilmek için lütfen telefon numaranızı doğrulayın</p>
-                  </div>
-
-                  {phoneVerificationStep === null && (
-                    <div className="verification-form-group">
-                      <label htmlFor="phone">Telefon Numarası</label>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={{
-                          padding: '12px 15px',
-                          background: '#e9ecef',
-                          border: '2px solid #cbd5e0',
-                          borderRight: 'none',
-                          borderRadius: '8px 0 0 8px',
-                          fontWeight: 600,
-                          color: '#495057'
-                        }}>0</span>
-                        <input
-                          id="phone"
-                          type="tel"
-                          className={`form-input ${hatalar.telefonNumarasi ? 'error' : ''}`}
-                          value={dogrulamaBilgileri.telefonNumarasi?.replace(/^0/, '') || ''}
-                          onChange={(e) => {
-                            let value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                            handleKriterChange('telefonNumarasi', '0' + value);
-                            setPhoneVerificationError('');
-                          }}
-                          placeholder="5XX XXX XX XX"
-                          maxLength="10"
-                          style={{ borderRadius: '0 8px 8px 0', flex: 1 }}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleSendPhoneVerificationCode}
-                          disabled={phoneVerificationLoading || !dogrulamaBilgileri.telefonNumarasi || dogrulamaBilgileri.telefonNumarasi.length !== 11}
-                          className="btn-send-code"
-                          style={{ marginLeft: '8px' }}
-                        >
-                          {phoneVerificationLoading ? '⏳ Gönderiliyor...' : '✓ Kod Gönder'}
-                        </button>
-                      </div>
-                      {phoneVerificationError && (
-                        <div className="error-message">⚠️ {phoneVerificationError}</div>
-                      )}
-                    </div>
-                  )}
-
-                  {phoneVerificationStep === 'code' && (
-                    <div className="verification-form-group">
-                      <div className="verification-info">
-                        <p>✓ Doğrulama kodu <strong>{verifiedPhoneNumber}</strong> numarasına gönderildi.</p>
-                      </div>
-
-                      <label htmlFor="phone-code" style={{ marginTop: '16px' }}>SMS Doğrulama Kodu (6 haneli)</label>
-                      <div className="code-input-group">
-                        <input
-                          id="phone-code"
-                          type="text"
-                          value={phoneCodeInput}
-                          onChange={(e) => {
-                            setPhoneCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6));
-                            setPhoneVerificationError('');
-                          }}
-                          placeholder="000000"
-                          maxLength="6"
-                          required
-                          style={{ letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleVerifyPhoneCode}
-                          disabled={phoneVerificationLoading || phoneCodeInput.length !== 6}
-                          className="btn-verify-code"
-                        >
-                          {phoneVerificationLoading ? '⏳' : '✓'} {phoneVerificationLoading ? 'Doğrulanıyor...' : 'Doğrula'}
-                        </button>
-                      </div>
-
-                      {phoneVerificationError && (
-                        <div className="error-message">⚠️ {phoneVerificationError}</div>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPhoneVerificationStep(null);
-                          setPhoneCodeInput('');
-                          setPhoneVerificationError('');
-                        }}
-                        className="btn-back-email"
-                      >
-                        ← Geri Dön
-                      </button>
-                    </div>
-                  )}
-
-                  {phoneVerificationStep === 'verified' && (
-                    <>
-                      <div className="email-verification-status">
-                        <div className="verification-checkmark">✅ Doğrulandı</div>
-                        <p className="verified-email">{verifiedPhoneNumber}</p>
-                      </div>
-                      <hr className="form-divider" />
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* EK DOĞRULAMA BİLGİLERİ - Mail ve telefon hariç diğer kriterler varsa göster */}
-              {Object.keys(dogrulamaBilgileri).filter(k => k !== 'mail' && k !== 'telefonNumarasi').length > 0 && (
-                <div className="criteria-section">
-                  <h3 className="criteria-title">
-                    <span style={{ fontSize: '22px' }}>🔐</span> Ek Doğrulama Bilgileri
-                  </h3>
-                  {Object.keys(dogrulamaBilgileri).map(key => (
-                    (key === 'mail' || key === 'telefonNumarasi') ? null : (
-                      <div key={key} className="form-group">
-                        {key === 'konum' ? (
-                          <div className="konum-container">
-                            <KonumuDogrula
-                              onKonumDogrulandi={handleKonumDogrulandi}
-                            />
-                            {hatalar.konum && <span className="error-text">{hatalar.konum}</span>}
-                          </div>
-                        ) : key === 'kimlikDogrulama' ? (
-                          /* KİMLİK DOĞRULAMA - YÜZ TANIMA UI */
-                          <div className="identity-verification-section">
-                            <div className="email-section-header">
-                              <h3>🆔 Kimlik Doğrulama</h3>
-                              <p>Kimliğinizi doğrulamak için kimlik kartı fotoğrafınızı ve selfie'nizi yükleyin</p>
-                            </div>
-
-                            {identityVerificationStep !== 'verified' ? (
-                              <div className="verification-form-group">
-                                {/* Kimlik Kartı Yükleme */}
-                                <div style={{ marginBottom: '20px' }}>
-                                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#2c3e50' }}>
-                                    📄 Kimlik Kartı Fotoğrafı *
-                                  </label>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleIdCardFileChange}
-                                    style={{
-                                      width: '100%',
-                                      padding: '12px',
-                                      border: '2px dashed #3498db',
-                                      borderRadius: '8px',
-                                      background: '#f8f9fa',
-                                      cursor: 'pointer'
-                                    }}
-                                  />
-                                  {idCardFile && (
-                                    <p style={{ margin: '8px 0', color: '#27ae60', fontSize: '0.9em' }}>
-                                      ✓ {idCardFile.name} seçildi
-                                    </p>
-                                  )}
-                                </div>
-
-                                {/* Selfie Yükleme */}
-                                <div style={{ marginBottom: '20px' }}>
-                                  <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#2c3e50' }}>
-                                    🤳 Selfie Fotoğrafı *
-                                  </label>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleSelfieFileChange}
-                                    style={{
-                                      width: '100%',
-                                      padding: '12px',
-                                      border: '2px dashed #e74c3c',
-                                      borderRadius: '8px',
-                                      background: '#f8f9fa',
-                                      cursor: 'pointer'
-                                    }}
-                                  />
-                                  {selfieFile && (
-                                    <p style={{ margin: '8px 0', color: '#27ae60', fontSize: '0.9em' }}>
-                                      ✓ {selfieFile.name} seçildi
-                                    </p>
-                                  )}
-                                </div>
-
-                                {/* Doğrula Butonu */}
-                                <button
-                                  type="button"
-                                  onClick={handleIdentityVerification}
-                                  disabled={identityVerificationLoading || !idCardFile || !selfieFile}
-                                  className="btn-send-code"
-                                  style={{
-                                    width: '100%',
-                                    padding: '15px',
-                                    fontSize: '1.1em',
-                                    background: (!idCardFile || !selfieFile) ? '#bdc3c7' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                  }}
-                                >
-                                  {identityVerificationLoading ? '⏳ Doğrulanıyor...' : '🔍 Kimliği Doğrula'}
-                                </button>
-
-                                {identityVerificationError && (
-                                  <div className="error-message" style={{ marginTop: '15px' }}>
-                                    ⚠️ {identityVerificationError}
-                                  </div>
-                                )}
-
-                                <p style={{ fontSize: '0.85em', color: '#7f8c8d', marginTop: '15px', textAlign: 'center' }}>
-                                  🔒 Fotoğraflarınız güvenli bir şekilde işlenir ve doğrulama sonrasında silinir.
-                                </p>
+                      {/* EMAIL DOĞRULAMA */}
+                      {anket.hedefKitleKriterleri?.mail === true && (
+                        <>
+                          <div className="dogrulama-item email-item">
+                            <div className="dogrulama-item-header">
+                              <span className="dogrulama-item-icon">📧</span>
+                              <div className="dogrulama-item-title">
+                                <h4>E-posta Doğrulama</h4>
+                                <p>E-posta adresinizi doğrulayın</p>
                               </div>
-                            ) : (
-                              /* Doğrulama Başarılı */
-                              <div className="email-verification-status">
-                                <div className="verification-checkmark">✅ Kimlik Doğrulandı</div>
-                                <p className="verified-email">TC Kimlik No: {verifiedTcNo}</p>
+                            </div>
+                            <div className="dogrulama-item-content">
+                              {emailVerificationStep === null && (
+                                <div className="verification-form-inline">
+                                  <div className="email-input-group">
+                                    <input
+                                      type="email"
+                                      value={emailInput}
+                                      onChange={(e) => {
+                                        setEmailInput(e.target.value);
+                                        setVerificationError('');
+                                      }}
+                                      placeholder="Örn: ad@trakya.edu.tr"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleSendVerificationCode}
+                                      disabled={verificationLoading}
+                                      className="btn-send-code"
+                                    >
+                                      {verificationLoading ? '⏳ Gönderiliyor...' : '✓ Kod Gönder'}
+                                    </button>
+                                  </div>
+                                  {verificationError && (
+                                    <div className="error-message">⚠️ {verificationError}</div>
+                                  )}
+                                </div>
+                              )}
+
+                              {emailVerificationStep === 'code' && (
+                                <div className="verification-form-inline">
+                                  <div className="verification-info">
+                                    <p>✓ Kod <strong>{emailInput}</strong> adresine gönderildi</p>
+                                  </div>
+                                  <div className="code-input-group">
+                                    <input
+                                      type="text"
+                                      value={codeInput}
+                                      onChange={(e) => {
+                                        setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6));
+                                        setVerificationError('');
+                                      }}
+                                      placeholder="000000"
+                                      maxLength="6"
+                                      style={{ letterSpacing: '2px', fontSize: '1.1rem', textAlign: 'center' }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleVerifyCode}
+                                      disabled={verificationLoading || codeInput.length !== 6}
+                                      className="btn-verify-code"
+                                    >
+                                      {verificationLoading ? '⏳' : '✓ Doğrula'}
+                                    </button>
+                                  </div>
+                                  {verificationError && (
+                                    <div className="error-message">⚠️ {verificationError}</div>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEmailVerificationStep(null);
+                                      setCodeInput('');
+                                      setVerificationError('');
+                                    }}
+                                    className="btn-back-email"
+                                  >
+                                    ← Geri
+                                  </button>
+                                </div>
+                              )}
+
+                              {emailVerificationStep === 'verified' && (
+                                <div className="verification-success">
+                                  <span className="success-badge">✅ Doğrulandı</span>
+                                  <span className="verified-info">{emailInput}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="dogrulama-separator"></div>
+                        </>
+                      )}
+
+                      {/* TELEFON DOĞRULAMA */}
+                      {anket.hedefKitleKriterleri?.telefonNumarasi === true && (
+                        <>
+                          <div className="dogrulama-item phone-item">
+                            <div className="dogrulama-item-header">
+                              <span className="dogrulama-item-icon">📱</span>
+                              <div className="dogrulama-item-title">
+                                <h4>Telefon Doğrulama</h4>
+                                <p>Telefon numaranızı SMS ile doğrulayın</p>
+                              </div>
+                            </div>
+                            <div className="dogrulama-item-content">
+                              {phoneVerificationStep === null && (
+                                <div className="verification-form-inline">
+                                  <div className="phone-input-group">
+                                    <span className="phone-prefix">0</span>
+                                    <input
+                                      type="tel"
+                                      value={dogrulamaBilgileri.telefonNumarasi?.replace(/^0/, '') || ''}
+                                      onChange={(e) => {
+                                        let value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        handleKriterChange('telefonNumarasi', '0' + value);
+                                        setPhoneVerificationError('');
+                                      }}
+                                      placeholder="5XX XXX XX XX"
+                                      maxLength="10"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleSendPhoneVerificationCode}
+                                      disabled={phoneVerificationLoading || !dogrulamaBilgileri.telefonNumarasi || dogrulamaBilgileri.telefonNumarasi.length !== 11}
+                                      className="btn-send-code"
+                                    >
+                                      {phoneVerificationLoading ? '⏳ Gönderiliyor...' : '✓ Kod Gönder'}
+                                    </button>
+                                  </div>
+                                  {phoneVerificationError && (
+                                    <div className="error-message">⚠️ {phoneVerificationError}</div>
+                                  )}
+                                </div>
+                              )}
+
+                              {phoneVerificationStep === 'code' && (
+                                <div className="verification-form-inline">
+                                  <div className="verification-info">
+                                    <p>✓ SMS kodu <strong>{verifiedPhoneNumber}</strong> numarasına gönderildi</p>
+                                  </div>
+                                  <div className="code-input-group">
+                                    <input
+                                      type="text"
+                                      value={phoneCodeInput}
+                                      onChange={(e) => {
+                                        setPhoneCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6));
+                                        setPhoneVerificationError('');
+                                      }}
+                                      placeholder="000000"
+                                      maxLength="6"
+                                      style={{ letterSpacing: '2px', fontSize: '1.1rem', textAlign: 'center' }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={handleVerifyPhoneCode}
+                                      disabled={phoneVerificationLoading || phoneCodeInput.length !== 6}
+                                      className="btn-verify-code"
+                                    >
+                                      {phoneVerificationLoading ? '⏳' : '✓ Doğrula'}
+                                    </button>
+                                  </div>
+                                  {phoneVerificationError && (
+                                    <div className="error-message">⚠️ {phoneVerificationError}</div>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setPhoneVerificationStep(null);
+                                      setPhoneCodeInput('');
+                                      setPhoneVerificationError('');
+                                    }}
+                                    className="btn-back-email"
+                                  >
+                                    ← Geri
+                                  </button>
+                                </div>
+                              )}
+
+                              {phoneVerificationStep === 'verified' && (
+                                <div className="verification-success">
+                                  <span className="success-badge">✅ Doğrulandı</span>
+                                  <span className="verified-info">{verifiedPhoneNumber}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {Object.keys(dogrulamaBilgileri).filter(k => k !== 'mail' && k !== 'telefonNumarasi').length > 0 && (
+                            <div className="dogrulama-separator"></div>
+                          )}
+                        </>
+                      )}
+
+                      {/* DİĞER KRİTERLER: Konum, Kimlik, TC vb. */}
+                      {Object.keys(dogrulamaBilgileri).map((key, index, arr) => {
+                        if (key === 'mail' || key === 'telefonNumarasi') return null;
+
+                        const validKeys = arr.filter(k => k !== 'mail' && k !== 'telefonNumarasi');
+                        const isLast = validKeys.indexOf(key) === validKeys.length - 1;
+
+                        return (
+                          <div key={key} className="ek-dogrulama-section">
+                            {/* KONUM DOĞRULAMA */}
+                            {key === 'konum' && (
+                              <div className="dogrulama-item konum-item">
+                                <div className="dogrulama-item-header">
+                                  <span className="dogrulama-item-icon">📍</span>
+                                  <div className="dogrulama-item-title">
+                                    <h4>Konum Doğrulama</h4>
+                                    <p>Konumunuzu doğrulayarak devam edin</p>
+                                  </div>
+                                </div>
+                                <div className="dogrulama-item-content">
+                                  <KonumuDogrula onKonumDogrulandi={handleKonumDogrulandi} />
+                                  {hatalar.konum && <span className="error-text">{hatalar.konum}</span>}
+                                </div>
                               </div>
                             )}
+
+                            {/* KİMLİK DOĞRULAMA */}
+                            {key === 'kimlikDogrulama' && (
+                              <div className="dogrulama-item kimlik-item">
+                                <div className="dogrulama-item-header">
+                                  <span className="dogrulama-item-icon">🆔</span>
+                                  <div className="dogrulama-item-title">
+                                    <h4>Kimlik Doğrulama</h4>
+                                    <p>Kimlik kartınız ve selfie ile doğrulama yapın</p>
+                                  </div>
+                                </div>
+                                <div className="dogrulama-item-content">
+                                  {identityVerificationStep !== 'verified' ? (
+                                    <div className="kimlik-upload-area">
+                                      <div className="upload-row">
+                                        <div className="upload-field">
+                                          <label>📄 Kimlik Kartı Fotoğrafı *</label>
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleIdCardFileChange}
+                                            className="file-input"
+                                          />
+                                          {idCardFile && (
+                                            <span className="file-selected">✓ {idCardFile.name}</span>
+                                          )}
+                                        </div>
+                                        <div className="upload-field">
+                                          <label>🤳 Selfie Fotoğrafı *</label>
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleSelfieFileChange}
+                                            className="file-input selfie"
+                                          />
+                                          {selfieFile && (
+                                            <span className="file-selected">✓ {selfieFile.name}</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={handleIdentityVerification}
+                                        disabled={identityVerificationLoading || !idCardFile || !selfieFile}
+                                        className="btn-verify-identity"
+                                      >
+                                        {identityVerificationLoading ? '⏳ Doğrulanıyor...' : '🔍 Kimliği Doğrula'}
+                                      </button>
+                                      {identityVerificationError && (
+                                        <div className="error-message">⚠️ {identityVerificationError}</div>
+                                      )}
+                                      <p className="security-note">🔒 Verileriniz güvenli şekilde işlenir</p>
+                                    </div>
+                                  ) : (
+                                    <div className="verification-success">
+                                      <span className="success-badge">✅ Kimlik Doğrulandı</span>
+                                      <span className="verified-info">TC: {verifiedTcNo}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* TC KİMLİK NO */}
+                            {key === 'tcNo' && (
+                              <div className="dogrulama-item tc-item">
+                                <div className="dogrulama-item-header">
+                                  <span className="dogrulama-item-icon">🆔</span>
+                                  <div className="dogrulama-item-title">
+                                    <h4>T.C. Kimlik No</h4>
+                                    <p>11 haneli kimlik numaranızı girin</p>
+                                  </div>
+                                </div>
+                                <div className="dogrulama-item-content">
+                                  <input
+                                    type="text"
+                                    className={`form-input tc-input ${hatalar.tcNo ? 'error' : ''}`}
+                                    value={dogrulamaBilgileri.tcNo}
+                                    onChange={(e) => handleKriterChange('tcNo', e.target.value)}
+                                    placeholder="T.C. kimlik numaranızı giriniz"
+                                    maxLength="11"
+                                  />
+                                  {hatalar.tcNo && <span className="error-text">{hatalar.tcNo}</span>}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Diğer Kriterler */}
+                            {!['konum', 'kimlikDogrulama', 'tcNo'].includes(key) && (
+                              <div className="dogrulama-item other-item">
+                                <div className="dogrulama-item-header">
+                                  <span className="dogrulama-item-icon">📋</span>
+                                  <div className="dogrulama-item-title">
+                                    <h4>{key}</h4>
+                                  </div>
+                                </div>
+                                <div className="dogrulama-item-content">
+                                  <input
+                                    type="text"
+                                    className={`form-input ${hatalar[key] ? 'error' : ''}`}
+                                    value={dogrulamaBilgileri[key]}
+                                    onChange={(e) => handleKriterChange(key, e.target.value)}
+                                    placeholder={`${key} giriniz`}
+                                  />
+                                  {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
+                                </div>
+                              </div>
+                            )}
+
+                            {!isLast && <div className="dogrulama-separator"></div>}
                           </div>
-                        ) : (
-                          <>
-                            <label className="form-label">
-                              {key === 'tcNo' && '🆔 T.C. Kimlik No'}
-                              {!['tcNo', 'kimlikDogrulama'].includes(key) && key}
-                              {' *'}
-                            </label>
-                            <input
-                              type={key === 'mail' ? 'email' : 'text'}
-                              className={`form-input ${hatalar[key] ? 'error' : ''}`}
-                              value={dogrulamaBilgileri[key]}
-                              onChange={(e) => handleKriterChange(key, e.target.value)}
-                              placeholder={
-                                key === 'mail' ? 'Email adresinizi giriniz' :
-                                  key === 'tcNo' ? 'T.C. kimlik numaranızı giriniz' :
-                                    `${key} giriniz`
-                              }
-                            />
-                            {hatalar[key] && <span className="error-text">{hatalar[key]}</span>}
-                          </>
-                        )}
-                      </div>
-                    )
-                  ))}
-                </div>
-              )}
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
               <div className="form-actions">
                 <button

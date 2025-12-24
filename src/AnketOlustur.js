@@ -101,7 +101,7 @@ function AnketOlustur() {
         </div>
         <ul>
           <li onClick={handleProfil}><FaUser className="icon" /> Profil</li>
-          <li><FaClipboardList className="icon" /> Anket Oluştur</li>
+          <li className="active"><FaClipboardList className="icon" /> Anket Oluştur</li>
           <li onClick={handleSonuclariGor}><FaChartBar className="icon" /> Sonuçları Gör</li>
           <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
         </ul>

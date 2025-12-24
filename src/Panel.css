@@ -238,6 +238,7 @@
   list-style: none;
   padding: 0 20px;
   margin: 0;
+  overflow: hidden;
 }
 
 .sidebar li {
@@ -254,6 +255,9 @@
   border: 2px solid transparent;
   position: relative;
   overflow: hidden;
+  /* Taşmayı önlemek için max-width */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .sidebar li::before {
@@ -276,7 +280,7 @@
   background: var(--sidebar-hover);
   color: white;
   border-color: var(--primary);
-  transform: translateX(10px) scale(1.02);
+  transform: scale(1.02);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 

@@ -354,11 +354,60 @@
     }
 }
 
-/* Sidebar Active State */
+/* Sidebar Active State - Panel.css ile tutarlı */
 .sidebar ul li.active {
-    background: rgba(45, 106, 79, 0.1);
-    color: #2d6a4f;
-    border-right: 3px solid #2d6a4f;
+    background: var(--sidebar-hover, #1e293b);
+    color: white;
+    border-color: var(--primary, #00dc82);
+    border-left: 3px solid var(--primary, #00dc82);
+    border-right: none;
+}
+
+/* Sidebar Header - Profil için */
+.sidebar .sidebar-header {
+    padding: 0 30px 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.sidebar .sidebar-logo {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #00dc82 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.sidebar .sidebar-subtitle {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Sidebar Icon - Profil sayfası için */
+.sidebar li .icon {
+    color: #00dc82;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sidebar li:hover .icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 98;
+    backdrop-filter: blur(5px);
 }
 
 /* Anket Grid ve Kartları */

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./Panel.css";
-import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaFilter } from "react-icons/fa";
+import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaFilter, FaUserEdit } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
 function Panel() {
@@ -14,6 +14,18 @@ function Panel() {
   const [updatingStatus, setUpdatingStatus] = useState(null); // Hangi anket güncelleniyor
   const itemsPerPage = 15;
   const navigate = useNavigate();
+  const [filterType, setFilterType] = useState('hepsi'); // hepsi, aktif, pasif, ai, manuel
+
+  // Dinamik istatistikler hesaplama
+  const stats = useMemo(() => {
+    return {
+      toplam: anketler.length,
+      aktif: anketler.filter(a => a.durum === 'aktif').length,
+      pasif: anketler.filter(a => a.durum === 'pasif').length,
+      ai: anketler.filter(a => a.aiIleOlusturuldu === true).length,
+      manuel: anketler.filter(a => !a.aiIleOlusturuldu).length
+    };
+  }, [anketler]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -182,16 +194,23 @@ function Panel() {
     }
   };
 
-  // Arama, durum filtresi ve sayfalama
+  // Arama, durum filtresi, tür filtresi ve sayfalama
   const filteredAnketler = anketler.filter(anket => {
     // Arama filtresi
     const aramaUygun = anket.anketBaslik?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       anket.anketAciklama?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Durum filtresi
+    // Durum filtresi (tablodaki select dropdown)
     const durumUygun = durumFilter === 'tumu' || anket.durum === durumFilter;
 
-    return aramaUygun && durumUygun;
+    // Tür filtresi (stats bar butonları)
+    let turUygun = true;
+    if (filterType === 'aktif') turUygun = anket.durum === 'aktif';
+    else if (filterType === 'pasif') turUygun = anket.durum === 'pasif';
+    else if (filterType === 'ai') turUygun = anket.aiIleOlusturuldu === true;
+    else if (filterType === 'manuel') turUygun = !anket.aiIleOlusturuldu;
+
+    return aramaUygun && durumUygun && turUygun;
   });
 
   const totalPages = Math.ceil(filteredAnketler.length / itemsPerPage);
@@ -278,6 +297,46 @@ function Panel() {
             <h1>📋 Anketlerim</h1>
             <p>Toplam {anketler.length} anket</p>
           </div>
+
+          {/* Kompakt İstatistik Badge'leri */}
+          <div className="stats-badges">
+            <span
+              className={`stat-badge ${filterType === 'hepsi' ? 'active' : ''}`}
+              onClick={() => { setFilterType('hepsi'); setCurrentPage(1); }}
+            >
+              <span className="badge-dot all"></span>
+              Tümü: <strong>{stats.toplam}</strong>
+            </span>
+            <span
+              className={`stat-badge ${filterType === 'aktif' ? 'active' : ''}`}
+              onClick={() => { setFilterType('aktif'); setCurrentPage(1); }}
+            >
+              <span className="badge-dot success"></span>
+              Aktif: <strong>{stats.aktif}</strong>
+            </span>
+            <span
+              className={`stat-badge ${filterType === 'pasif' ? 'active' : ''}`}
+              onClick={() => { setFilterType('pasif'); setCurrentPage(1); }}
+            >
+              <span className="badge-dot muted"></span>
+              Pasif: <strong>{stats.pasif}</strong>
+            </span>
+            <span
+              className={`stat-badge ${filterType === 'ai' ? 'active' : ''}`}
+              onClick={() => { setFilterType('ai'); setCurrentPage(1); }}
+            >
+              <span className="badge-dot ai"></span>
+              AI: <strong>{stats.ai}</strong>
+            </span>
+            <span
+              className={`stat-badge ${filterType === 'manuel' ? 'active' : ''}`}
+              onClick={() => { setFilterType('manuel'); setCurrentPage(1); }}
+            >
+              <span className="badge-dot human"></span>
+              Manuel: <strong>{stats.manuel}</strong>
+            </span>
+          </div>
+
           <div className="header-right">
             <div className="search-box">
               <input
@@ -292,7 +351,6 @@ function Panel() {
             </div>
           </div>
         </div>
-
         {loading ? (
           <div className="loading-container">
             <FaSpinner className="fa-spin" style={{ fontSize: "3em", color: "var(--primary)" }} />
@@ -318,6 +376,7 @@ function Panel() {
                 <div className="data-grid">
                   <div className="grid-header">
                     <div className="col col-title">Anket Başlığı</div>
+                    <div className="col col-type">Tür</div>
                     <div className="col col-questions">Sorular</div>
                     <div className="col col-responses">Cevaplar</div>
                     <div className="col col-status" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -360,16 +419,23 @@ function Panel() {
                           <div className="title-content">
                             <div className="title-main">
                               {anket.anketBaslik}
-                              {anket.aiIleOlusturuldu && (
-                                <span className="ai-badge-small">
-                                  <FaRobot /> AI
-                                </span>
-                              )}
                             </div>
                             {anket.anketAciklama && (
                               <div className="title-desc">{anket.anketAciklama}</div>
                             )}
                           </div>
+                        </div>
+
+                        <div className="col col-type">
+                          {anket.aiIleOlusturuldu ? (
+                            <span className="type-badge ai">
+                              <FaRobot /> AI
+                            </span>
+                          ) : (
+                            <span className="type-badge human">
+                              <FaUserEdit /> Manuel
+                            </span>
+                          )}
                         </div>
 
                         <div className="col col-questions">
@@ -606,20 +672,121 @@ function Panel() {
           margin-bottom: 30px;
           flex-wrap: wrap;
           gap: 20px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%);
+          padding: 28px 35px;
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(0, 220, 130, 0.15);
+          border: 1px solid rgba(0, 220, 130, 0.1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .panel-header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 6px;
+          height: 100%;
+          background: linear-gradient(180deg, #00dc82 0%, #00b86c 50%, #667eea 100%);
+          border-radius: 20px 0 0 20px;
+        }
+
+        .panel-header::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          right: -50%;
+          width: 200px;
+          height: 200px;
+          background: radial-gradient(circle, rgba(0, 220, 130, 0.08) 0%, transparent 70%);
+          pointer-events: none;
         }
 
         .header-left h1 {
           margin: 0;
-          font-size: 2rem;
+          font-size: 2.2rem;
           font-weight: 800;
-          color: var(--text-main);
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #00b86c 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          position: relative;
+          z-index: 2;
         }
 
         .header-left p {
-          margin: 5px 0 0 0;
-          color: var(--text-muted);
-          font-size: 0.95rem;
+          margin: 8px 0 0 0;
+          color: #64748b;
+          font-size: 1rem;
+          font-weight: 600;
+          background: linear-gradient(90deg, #64748b 0%, #00b86c 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          position: relative;
+          z-index: 2;
         }
+
+        /* Compact Stats Badges - Inside Header */
+        .stats-badges {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+          z-index: 2;
+        }
+
+        .stat-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 25px;
+          font-size: 0.9rem;
+          color: #475569;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          border: 2px solid transparent;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-badge:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-badge.active {
+          background: rgba(0, 220, 130, 0.1);
+          border-color: #00dc82;
+          color: #0f172a;
+        }
+
+        .stat-badge strong {
+          font-weight: 800;
+          color: #0f172a;
+        }
+
+        .badge-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .badge-dot.all { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+        .badge-dot.success { background: linear-gradient(135deg, #00dc82 0%, #00b86c 100%); }
+        .badge-dot.muted { background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); }
+        .badge-dot.ai { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .badge-dot.human { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+
+        /* Active state dot glow */
+        .stat-badge.active .badge-dot.all { box-shadow: 0 0 8px rgba(100, 116, 139, 0.6); }
+        .stat-badge.active .badge-dot.success { box-shadow: 0 0 8px rgba(0, 220, 130, 0.6); }
+        .stat-badge.active .badge-dot.muted { box-shadow: 0 0 8px rgba(148, 163, 184, 0.6); }
+        .stat-badge.active .badge-dot.ai { box-shadow: 0 0 8px rgba(102, 126, 234, 0.6); }
+        .stat-badge.active .badge-dot.human { box-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
 
         .search-box {
           position: relative;
@@ -650,7 +817,7 @@ function Panel() {
 
         .grid-header {
           display: grid;
-          grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1fr 1fr;
+          grid-template-columns: 2.2fr 0.7fr 0.7fr 0.7fr 0.8fr 1fr 1fr;
           gap: 15px;
           padding: 20px 25px;
           background: linear-gradient(135deg, #00dc82 0%, #00b86c 100%);
@@ -667,7 +834,7 @@ function Panel() {
 
         .grid-row {
           display: grid;
-          grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1fr 1fr;
+          grid-template-columns: 2.2fr 0.7fr 0.7fr 0.7fr 0.8fr 1fr 1fr;
           gap: 15px;
           padding: 20px 25px;
           border-bottom: 1px solid rgba(0, 220, 130, 0.1);
@@ -739,6 +906,45 @@ function Panel() {
           align-items: center;
           gap: 4px;
           box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .type-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          transition: all 0.3s ease;
+        }
+
+        .type-badge.ai {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .type-badge.ai:hover {
+          transform: scale(1.05);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+        }
+
+        .type-badge.human {
+          background: linear-gradient(135deg, #00dc82 0%, #00b86c 100%);
+          color: white;
+          box-shadow: 0 4px 15px rgba(0, 220, 130, 0.3);
+        }
+
+        .type-badge.human:hover {
+          transform: scale(1.05);
+          box-shadow: 0 6px 20px rgba(0, 220, 130, 0.45);
+        }
+
+        .col-type {
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
         .stat-badge {
