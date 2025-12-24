@@ -1,0 +1,266 @@
+/* ===== SORULARI YAPISTIR - AnketKopyala Stili ===== */
+.yapistir-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.yapistir-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* ===== KART YAPISI (AnketKopyala ile Aynı) ===== */
+.yapistir-input-card,
+.yapistir-preview-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== INPUT ALANLARI ===== */
+.yapistir-input-group {
+    margin-bottom: 16px;
+}
+
+.yapistir-input-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1f2937;
+    font-size: 0.9rem;
+}
+
+.yapistir-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.yapistir-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.yapistir-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    resize: vertical;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.yapistir-textarea:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.yapistir-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 20px 0;
+}
+
+.yapistir-aciklama {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0 0 10px 0;
+}
+
+.yapistir-format-ornegi {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.yapistir-format-ornegi code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #1f2937;
+    line-height: 1.6;
+}
+
+.yapistir-metin-alani {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    min-height: 280px;
+    transition: all 0.3s ease;
+}
+
+.yapistir-metin-alani:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* ===== ÖNİZLEME BÖLÜMÜ ===== */
+.yapistir-preview-card {
+    min-height: 600px;
+}
+
+.yapistir-preview-body {
+    max-height: 650px;
+    overflow-y: auto;
+}
+
+.yapistir-preview-title {
+    background: #f0fdf4;
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+    margin-bottom: 16px;
+}
+
+.yapistir-preview-title h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.3rem;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.yapistir-preview-title p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.yapistir-preview-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.yapistir-question-item {
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.yapistir-question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.yapistir-q-number {
+    font-weight: 700;
+    color: #10b981;
+    font-size: 0.9rem;
+}
+
+.yapistir-q-type {
+    background: #e0f2fe;
+    color: #0284c7;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.yapistir-question-text {
+    font-size: 0.95rem;
+    color: #1f2937;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.yapistir-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.yapistir-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.yapistir-option:hover {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.yapistir-radio {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #10b981;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.yapistir-option span {
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .yapistir-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .yapistir-preview-card {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .yapistir-content {
+        gap: 16px;
+    }
+
+    .yapistir-preview-body {
+        max-height: 500px;
+    }
+
+    .yapistir-preview-title h4 {
+        font-size: 1.1rem;
+    }
+
+    .yapistir-question-text {
+        font-size: 0.9rem;
+    }
+}

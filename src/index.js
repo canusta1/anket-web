@@ -16,6 +16,7 @@ import AnketCoz from "./AnketCoz";
 import AnketSonuclari from "./AnketSonuclari";
 import AnketDetay from "./AnketDetay";
 import AnketKopyala from "./AnketKopyala";
+import SorulariYapistir from "./SorulariYapistir";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -29,6 +30,7 @@ root.render(
       <Route path="/uyeol" element={<UyeOl />} />
       <Route path="/anket-olustur" element={<AnketOlustur />} />
       <Route path="/anket-kopyala" element={<AnketKopyala />} />
+      <Route path="/sorulari-yapistir" element={<SorulariYapistir />} />
       <Route path="/sifirdan-anket" element={<SifirdanAnket />} />
       <Route path="/ai-ile-anket" element={<AIileAnket />} />
       <Route path="/hedef-kitle-secimi" element={<HedefKitleSecimi />} />

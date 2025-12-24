@@ -61,9 +61,9 @@ function AnketOlustur() {
     navigate("/sifirdan-anket", { state: { template: convertedTemplate } });
   };
 
-  // 4. YAPISTIR - Geçici fonksiyon
+  // 4. YAPISTIR
   const handleYapistir = () => {
-    alert("Soruları yapıştırma özelliği yakında gelecek!");
+    navigate("/sorulari-yapistir");
   };
 
   const handleProfil = () => navigate("/profil");
