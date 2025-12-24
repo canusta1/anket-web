@@ -1,0 +1,4 @@
+cmake
+numpy
+opencv-python-headless
+face_recognition
