@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Profil.css"; // Senin mevcut CSS dosyanı kullanır
+import ParticleBackground from "./components/ParticleBackground";
 
 // İkonlar (Lucide kütüphanesi ile güncellendi)
 import {
@@ -195,6 +196,9 @@ function Profil() {
 
     return (
         <div className="panel-container">
+            {/* Particle Background */}
+            <ParticleBackground />
+
             {/* Navbar */}
             <nav className="panel-navbar">
                 <div className="nav-left">
@@ -211,21 +215,28 @@ function Profil() {
 
             {/* Sidebar */}
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
+                <div className="sidebar-header">
+                    <div className="sidebar-logo">📊 AnketApp</div>
+                    <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
+                </div>
                 <ul>
                     <li className="active" onClick={handleProfil}>
-                        <User size={20} /> Profil
+                        <User className="icon" size={20} /> Profil
                     </li>
                     <li onClick={handleAnketOlustur}>
-                        <ClipboardList size={20} /> Anket Oluştur
+                        <ClipboardList className="icon" size={20} /> Anket Oluştur
                     </li>
                     <li onClick={handleSonuclariGor}>
-                        <BarChart2 size={20} /> Sonuçları Gör
+                        <BarChart2 className="icon" size={20} /> Sonuçları Gör
                     </li>
                     <li onClick={handleLogout}>
-                        <LogOut size={20} /> Çıkış Yap
+                        <LogOut className="icon" size={20} /> Çıkış Yap
                     </li>
                 </ul>
             </div>
+
+            {/* Overlay - menü açıkken tıklanınca kapatmak için */}
+            {menuOpen && <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>}
 
             {/* İçerik */}
             <main className="profil-main">

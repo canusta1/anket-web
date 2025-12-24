@@ -28,6 +28,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -200,8 +201,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* ==================== CRITERIA SECTION ==================== */
@@ -701,9 +707,11 @@
         transform: scale(0);
         opacity: 0;
     }
+
     50% {
         transform: scale(1.1);
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
@@ -740,8 +748,15 @@
 }
 
 @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .anket-coz-page .email-section-header {
@@ -973,4 +988,314 @@
 
 .anket-coz-page .email-verification-status .verified-email::before {
     content: '📧 ';
+}
+
+/* ==================== EK DOĞRULAMA WRAPPER CARD ==================== */
+.anket-coz-page .ek-dogrulama-wrapper-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e0e7ff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.12);
+    margin: 30px 0;
+    overflow: hidden;
+}
+
+.anket-coz-page .ek-dogrulama-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.anket-coz-page .ek-dogrulama-icon {
+    font-size: 32px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.anket-coz-page .ek-dogrulama-title h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.anket-coz-page .ek-dogrulama-title p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.anket-coz-page .ek-dogrulama-content {
+    padding: 0;
+}
+
+.anket-coz-page .ek-dogrulama-section {
+    display: block;
+}
+
+/* Doğrulama İtem */
+.anket-coz-page .dogrulama-item {
+    padding: 24px;
+}
+
+.anket-coz-page .dogrulama-item-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.anket-coz-page .dogrulama-item-icon {
+    font-size: 24px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.anket-coz-page .dogrulama-item-title h4 {
+    margin: 0 0 3px 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.anket-coz-page .dogrulama-item-title p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.anket-coz-page .dogrulama-item-content {
+    padding-left: 58px;
+}
+
+/* Separator */
+.anket-coz-page .dogrulama-separator {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e0e7ff 20%, #e0e7ff 80%, transparent);
+    margin: 0 24px;
+}
+
+/* Kimlik Upload Area */
+.anket-coz-page .kimlik-upload-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.anket-coz-page .upload-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.anket-coz-page .upload-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.anket-coz-page .upload-field label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.anket-coz-page .file-input {
+    padding: 14px;
+    border: 2px dashed #3b82f6;
+    border-radius: 10px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-size: 0.9rem;
+}
+
+.anket-coz-page .file-input:hover {
+    background: #eff6ff;
+    border-color: #2563eb;
+}
+
+.anket-coz-page .file-input.selfie {
+    border-color: #f97316;
+}
+
+.anket-coz-page .file-input.selfie:hover {
+    background: #fff7ed;
+    border-color: #ea580c;
+}
+
+.anket-coz-page .file-selected {
+    font-size: 0.85rem;
+    color: #16a34a;
+    font-weight: 500;
+}
+
+.anket-coz-page .btn-verify-identity {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.anket-coz-page .btn-verify-identity:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.anket-coz-page .btn-verify-identity:disabled {
+    background: #cbd5e1;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.anket-coz-page .security-note {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Verification Success inside wrapper */
+.anket-coz-page .dogrulama-item .verification-success {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-radius: 10px;
+    border: 1px solid #a7f3d0;
+}
+
+.anket-coz-page .dogrulama-item .success-badge {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+.anket-coz-page .dogrulama-item .verified-info {
+    font-size: 0.95rem;
+    color: #047857;
+    font-weight: 500;
+}
+
+/* TC Input */
+.anket-coz-page .tc-input {
+    max-width: 300px;
+    letter-spacing: 1px;
+    font-size: 1.05rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .anket-coz-page .upload-row {
+        grid-template-columns: 1fr;
+    }
+
+    .anket-coz-page .dogrulama-item-content {
+        padding-left: 0;
+    }
+
+    .anket-coz-page .ek-dogrulama-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .anket-coz-page .phone-input-group {
+        flex-wrap: wrap;
+    }
+}
+
+/* Phone Input Group */
+.anket-coz-page .phone-input-group {
+    display: flex;
+    align-items: center;
+}
+
+.anket-coz-page .phone-prefix {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border: 2px solid #cbd5e1;
+    border-radius: 8px 0 0 8px;
+    font-weight: 700;
+    color: #475569;
+    font-size: 1rem;
+}
+
+.anket-coz-page .phone-input-group input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    font-size: 1rem;
+    transition: all 0.25s;
+    min-width: 150px;
+}
+
+.anket-coz-page .phone-input-group input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+.anket-coz-page .phone-input-group .btn-send-code {
+    margin-left: 8px;
+}
+
+/* Verification Form Inline */
+.anket-coz-page .verification-form-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.anket-coz-page .verification-form-inline .verification-info {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-left: 4px solid #10b981;
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+.anket-coz-page .verification-form-inline .verification-info p {
+    margin: 0;
+    color: #047857;
+    font-size: 0.9rem;
+}
+
+/* Email/Phone Item Icon Colors */
+.anket-coz-page .email-item .dogrulama-item-icon {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.anket-coz-page .phone-item .dogrulama-item-icon {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.anket-coz-page .konum-item .dogrulama-item-icon {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.anket-coz-page .kimlik-item .dogrulama-item-icon {
+    background: linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%);
 }

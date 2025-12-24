@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import "./Anasayfa.css"; // CSS dosya adı küçük harfle ise burayı kontrol et (anasayfa.css)
 import { Link } from "react-router-dom";
 import unnamedImg from "./res/drawable/unnamed.png";
+import ParticleBackground from "./components/ParticleBackground";
 
 function Anasayfa() {
   function scrollSlider(direction) {
@@ -34,8 +35,11 @@ function Anasayfa() {
         </div>
       </nav>
 
-      {/* Hero Bölümü - Padding azaltılarak içerik yukarı taşındı */}
-      <section className="hero" style={{ padding: "50px 120px" }}>
+      {/* Hero Bölümü - Modern ve kompakt */}
+      <section className="hero">
+        {/* Particle Animasyonu Arka Plan */}
+        <ParticleBackground />
+
         <div className="hero-content">
           <div className="hero-text">
             <p className="hero-subtitle">
