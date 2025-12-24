@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Panel.css";
-import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink } from "react-icons/fa";
+import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaFilter } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
 function Panel() {
@@ -9,6 +9,9 @@ function Panel() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [durumFilter, setDurumFilter] = useState("tumu"); // tumu, aktif, pasif
+  const [toastMessage, setToastMessage] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(null); // Hangi anket güncelleniyor
   const itemsPerPage = 15;
   const navigate = useNavigate();
 
@@ -118,11 +121,78 @@ function Panel() {
     return 0;
   };
 
-  // Arama ve sayfalama
-  const filteredAnketler = anketler.filter(anket =>
-    anket.anketBaslik?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    anket.anketAciklama?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Anket durumunu değiştir (Aktif/Pasif)
+  const handleStatusChange = async (anketId, currentDurum) => {
+    const yeniDurum = currentDurum === 'aktif' ? 'pasif' : 'aktif';
+    const token = localStorage.getItem("token");
+
+    // Optimistic UI update
+    setUpdatingStatus(anketId);
+    setAnketler(prev => prev.map(anket =>
+      anket._id === anketId ? { ...anket, durum: yeniDurum } : anket
+    ));
+
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${apiUrl}/api/surveys/${anketId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ durum: yeniDurum })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Başarı mesajı göster
+        setToastMessage({
+          type: 'success',
+          text: yeniDurum === 'aktif'
+            ? '✅ Anket aktif edildi! Link erişime açıldı.'
+            : '🔒 Anket pasif edildi! Link erişime kapatıldı.'
+        });
+
+        // 3 saniye sonra toast'u kapat
+        setTimeout(() => setToastMessage(null), 3000);
+      } else {
+        // Hata durumunda geri al
+        setAnketler(prev => prev.map(anket =>
+          anket._id === anketId ? { ...anket, durum: currentDurum } : anket
+        ));
+        setToastMessage({
+          type: 'error',
+          text: '❌ Durum güncellenemedi: ' + result.error
+        });
+        setTimeout(() => setToastMessage(null), 3000);
+      }
+    } catch (error) {
+      // Hata durumunda geri al
+      setAnketler(prev => prev.map(anket =>
+        anket._id === anketId ? { ...anket, durum: currentDurum } : anket
+      ));
+      setToastMessage({
+        type: 'error',
+        text: '❌ Bağlantı hatası: ' + error.message
+      });
+      setTimeout(() => setToastMessage(null), 3000);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  // Arama, durum filtresi ve sayfalama
+  const filteredAnketler = anketler.filter(anket => {
+    // Arama filtresi
+    const aramaUygun = anket.anketBaslik?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      anket.anketAciklama?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Durum filtresi
+    const durumUygun = durumFilter === 'tumu' || anket.durum === durumFilter;
+
+    return aramaUygun && durumUygun;
+  });
 
   const totalPages = Math.ceil(filteredAnketler.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -135,6 +205,32 @@ function Panel() {
 
   return (
     <div className="panel-container">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '16px 24px',
+            borderRadius: '12px',
+            background: toastMessage.type === 'success'
+              ? 'linear-gradient(135deg, #00dc82 0%, #00b86c 100%)'
+              : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            color: 'white',
+            fontWeight: '600',
+            fontSize: '0.95rem',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+            zIndex: 9999,
+            animation: 'slideInRight 0.3s ease-out',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}
+        >
+          {toastMessage.text}
+        </div>
+      )}
       {/* Üst Navbar */}
       <nav className="panel-navbar">
         <div className="nav-left">
@@ -224,7 +320,31 @@ function Panel() {
                     <div className="col col-title">Anket Başlığı</div>
                     <div className="col col-questions">Sorular</div>
                     <div className="col col-responses">Cevaplar</div>
-                    <div className="col col-status">Durum</div>
+                    <div className="col col-status" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      Durum
+                      <select
+                        value={durumFilter}
+                        onChange={(e) => {
+                          setDurumFilter(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '12px',
+                          border: '2px solid rgba(255,255,255,0.3)',
+                          background: 'rgba(255,255,255,0.2)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="tumu" style={{ color: '#333' }}>Tümü</option>
+                        <option value="aktif" style={{ color: '#333' }}>Aktif</option>
+                        <option value="pasif" style={{ color: '#333' }}>Pasif</option>
+                      </select>
+                    </div>
                     <div className="col col-date">Tarih</div>
                     <div className="col col-actions">İşlemler</div>
                   </div>
@@ -267,9 +387,60 @@ function Panel() {
                         </div>
 
                         <div className="col col-status">
-                          <span className={`status-badge ${getDurumBadge(anket.durum).class}`}>
-                            {getDurumBadge(anket.durum).text}
-                          </span>
+                          <div
+                            className="status-toggle"
+                            onClick={() => handleStatusChange(anket._id, anket.durum)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              cursor: updatingStatus === anket._id ? 'wait' : 'pointer',
+                              opacity: updatingStatus === anket._id ? 0.7 : 1,
+                              transition: 'all 0.3s ease'
+                            }}
+                          >
+                            {/* Toggle Switch */}
+                            <div
+                              style={{
+                                width: '50px',
+                                height: '26px',
+                                borderRadius: '13px',
+                                background: anket.durum === 'aktif'
+                                  ? 'linear-gradient(135deg, #00dc82 0%, #00b86c 100%)'
+                                  : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
+                                position: 'relative',
+                                transition: 'all 0.3s ease',
+                                boxShadow: anket.durum === 'aktif'
+                                  ? '0 4px 15px rgba(0, 220, 130, 0.4)'
+                                  : '0 4px 15px rgba(100, 116, 139, 0.3)'
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: '22px',
+                                  height: '22px',
+                                  borderRadius: '50%',
+                                  background: 'white',
+                                  position: 'absolute',
+                                  top: '2px',
+                                  left: anket.durum === 'aktif' ? '26px' : '2px',
+                                  transition: 'all 0.3s ease',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                                }}
+                              />
+                            </div>
+                            {/* Status Text */}
+                            <span
+                              style={{
+                                fontSize: '0.85rem',
+                                fontWeight: '700',
+                                color: anket.durum === 'aktif' ? '#047857' : '#64748b',
+                                minWidth: '45px'
+                              }}
+                            >
+                              {anket.durum === 'aktif' ? 'Aktif' : 'Pasif'}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="col col-date">
@@ -381,6 +552,22 @@ function Panel() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .status-toggle:hover {
+          transform: scale(1.05);
+        }
+
 
         .empty-state {
           text-align: center;

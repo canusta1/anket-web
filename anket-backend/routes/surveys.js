@@ -382,8 +382,50 @@ router.delete("/:id", auth(true), async (req, res) => {
 });
 
 // ============================================
-// 6. KONUM DOĞRULAMA KONTROL
+// 6.5 ANKET DURUMUNU GÜNCELLE (AKTİF/PASİF)
 // ============================================
+router.patch("/:id/status", auth(true), async (req, res) => {
+  try {
+    const { durum } = req.body;
+
+    // Validasyon
+    if (!['aktif', 'pasif'].includes(durum)) {
+      return res.status(400).json({
+        success: false,
+        error: "Geçersiz durum. 'aktif' veya 'pasif' olmalı."
+      });
+    }
+
+    const anket = await Survey.findById(req.params.id);
+    if (!anket) {
+      return res.status(404).json({ success: false, error: "Anket bulunamadı" });
+    }
+
+    // Yetki kontrolü
+    if (anket.kullaniciId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, error: "Bu anketi değiştirme yetkiniz yok" });
+    }
+
+    anket.durum = durum;
+    await anket.save();
+
+    console.log(`✅ Anket durumu güncellendi: ${anket._id} -> ${durum}`);
+
+    res.json({
+      success: true,
+      message: `Anket durumu "${durum}" olarak güncellendi.`,
+      data: { _id: anket._id, durum: anket.durum }
+    });
+  } catch (e) {
+    console.error("❌ Durum güncelleme hatası:", e);
+    res.status(400).json({ success: false, error: e.message });
+  }
+});
+
+// ============================================
+// 7. KONUM DOĞRULAMA KONTROL
+// ============================================
+
 router.post("/check-location/:anketId", async (req, res) => {
   try {
     const { anketId } = req.params;
@@ -561,11 +603,11 @@ router.get("/:id/results", auth(true), async (req, res) => {
     // Her soru için istatistik oluştur
     anket.sorular.forEach((soru, idx) => {
       const soruId = soru._id.toString();
-      
+
       console.log(`\n📊 Soru ${idx + 1}: ${soru.soruMetni}`);
       console.log(`   Soru ID: ${soruId}`);
       console.log(`   Soru Tipi: ${soru.soruTipi}`);
-      
+
       const soruStat = {
         soruId: soruId,
         soruMetni: soru.soruMetni,
@@ -597,7 +639,7 @@ router.get("/:id/results", auth(true), async (req, res) => {
         soru.secenekler.forEach((secenek) => {
           const secenekId = secenek._id.toString();
           const secenekMetni = typeof secenek === 'string' ? secenek : (secenek.metni || secenek.metin || '');
-          
+
           soruStat.dagilim[secenekId] = {
             secenekId: secenekId,
             metin: secenekMetni,
@@ -647,7 +689,7 @@ router.get("/:id/results", auth(true), async (req, res) => {
       } else if (soru.soruTipi === "slider") {
         // Slider sorular için sayı dağılımını hesapla
         soruStat.dagilim = {};
-        
+
         // Tüm cevapları sayıya çevir ve dağılımı oluştur
         soruCevaplari.forEach((cevap) => {
           const sayi = parseInt(cevap) || 0;
@@ -660,7 +702,7 @@ router.get("/:id/results", auth(true), async (req, res) => {
           }
           soruStat.dagilim[sayi].sayi_cevap++;
         });
-        
+
         // Yüzdeleri hesapla
         Object.keys(soruStat.dagilim).forEach((key) => {
           if (soruStat.toplamCevap > 0) {
@@ -668,7 +710,7 @@ router.get("/:id/results", auth(true), async (req, res) => {
             soruStat.dagilim[key].yuzde = parseFloat(yuzde.toFixed(1));
           }
         });
-        
+
         // Dağılımı array'e çevir
         soruStat.dagilimArray = Object.values(soruStat.dagilim).sort((a, b) => a.sayi - b.sayi);
       }
@@ -753,23 +795,23 @@ router.get("/:id/ai-analysis", auth(true), async (req, res) => {
     // Cevapları metin formatına çevir
     const analizedTexts = cevaplar.map((response) => {
       const cevapMetinler = [];
-      
+
       anket.sorular.forEach((soru) => {
         const cevap = response.cevaplar[soru._id.toString()];
         if (cevap) {
           const soruTipi = soru.soruTipi;
           let cevapText = "";
-          
+
           if (Array.isArray(cevap)) {
             cevapText = cevap.join(", ");
           } else {
             cevapText = String(cevap);
           }
-          
+
           cevapMetinler.push(`Soru: ${soru.soruMetni}\nCevap: ${cevapText}`);
         }
       });
-      
+
       return cevapMetinler.join("\n");
     }).join("\n\n---\n\n");
 
@@ -778,7 +820,7 @@ router.get("/:id/ai-analysis", auth(true), async (req, res) => {
 
     // Soruları ve cevapları organize et - her soru için cevaplar
     let soruCevapAnalizi = {};
-    
+
     anket.sorular.forEach((soru) => {
       soruCevapAnalizi[soru._id.toString()] = {
         soruMetni: soru.soruMetni,
@@ -793,13 +835,13 @@ router.get("/:id/ai-analysis", auth(true), async (req, res) => {
         if (soruCevapAnalizi[soruId]) {
           const cevap = response.cevaplar[soruId];
           let cevapText = "";
-          
+
           if (Array.isArray(cevap)) {
             cevapText = cevap.join(", ");
           } else {
             cevapText = String(cevap);
           }
-          
+
           soruCevapAnalizi[soruId].cevaplar.push(cevapText);
         }
       });
@@ -814,12 +856,12 @@ router.get("/:id/ai-analysis", auth(true), async (req, res) => {
       formattedAnalysis += `SORU ${idx + 1}: ${soruData.soruMetni}\n`;
       formattedAnalysis += `Soru Tipi: ${soruData.soruTipi}\n`;
       formattedAnalysis += `Cevaplar (${soruData.cevaplar.length} kişi):\n`;
-      
+
       // Cevapları sayı ile göster
       soruData.cevaplar.forEach((cevap, cidx) => {
         formattedAnalysis += `  ${cidx + 1}. ${cevap}\n`;
       });
-      
+
       formattedAnalysis += `\n`;
     });
 
@@ -859,7 +901,7 @@ Başka hiçbir şey yazma, SADECE bu JSON'u gönder!
 
     console.log("📊 AI Analiz Prompt gönderiliyor...");
     const completion = await aiService.analyzeWithGroq(analysisPrompt);
-    
+
     let analysisData = {
       duygu: "nötr",
       puan: 5,
@@ -872,7 +914,7 @@ Başka hiçbir şey yazma, SADECE bu JSON'u gönder!
       const cleanText = completion.trim();
       const jsonStart = cleanText.indexOf('{');
       const jsonEnd = cleanText.lastIndexOf('}');
-      
+
       if (jsonStart !== -1 && jsonEnd !== -1) {
         const jsonStr = cleanText.substring(jsonStart, jsonEnd + 1);
         analysisData = JSON.parse(jsonStr);
