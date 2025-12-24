@@ -86,6 +86,49 @@
     margin: 20px 0;
 }
 
+/* ===== JSON YÜKLEME BÖLÜMÜ ===== */
+.yapistir-upload-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 2px dashed #d1d5db;
+}
+
+.yapistir-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.yapistir-upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.yapistir-upload-btn:active {
+    transform: translateY(0);
+}
+
+.yapistir-upload-info {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-style: italic;
+}
+
 .yapistir-aciklama {
     font-size: 0.85rem;
     color: #6b7280;

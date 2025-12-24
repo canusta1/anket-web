@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     FaArrowLeft,
     FaPaste,
     FaCheckCircle,
-    FaEdit
+    FaEdit,
+    FaUpload
 } from "react-icons/fa";
 import "./SorulariYapistir.css";
 
@@ -13,9 +14,117 @@ function SorulariYapistir() {
     const [anketAciklama, setAnketAciklama] = useState("");
     const [metin, setMetin] = useState("");
     const [onizleme, setOnizleme] = useState(null);
+    const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
     const handleGeriDon = () => navigate("/anket-olustur");
+
+    // JSON dosyası yükleme fonksiyonu
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Sadece JSON dosyalarını kabul et
+        if (!file.name.endsWith('.json')) {
+            alert("❌ Lütfen geçerli bir JSON dosyası seçin!");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const jsonData = JSON.parse(e.target.result);
+                
+                // JSON formatını kontrol et ve dönüştür
+                // Format 1: anketBaslik / anket_adi
+                const baslik = jsonData.anketBaslik || jsonData.anket_adi || jsonData.title;
+                if (baslik) {
+                    setAnketBaslik(baslik);
+                }
+                
+                // Format 2: anketAciklama / anket_aciklamasi
+                const aciklama = jsonData.anketAciklama || jsonData.anket_aciklamasi || jsonData.description;
+                if (aciklama) {
+                    setAnketAciklama(aciklama);
+                }
+                
+                if (jsonData.sorular && Array.isArray(jsonData.sorular)) {
+                    // JSON'dan gelen soruları formatla
+                    const formattedSorular = jsonData.sorular.map((soru, index) => {
+                        // Soru metnini al (farklı format destekleri)
+                        const soruMetni = soru.soruMetni || soru.soru_metni || soru.metin || soru.soru || '';
+                        
+                        // Cevap tipini al ve dönüştür
+                        const cevapTipi = soru.soruTipi || soru.cevap_tipi || soru.tip || 'acik-uclu';
+                        let anketTipi = 'acik-uclu';
+                        
+                        // Cevap tipi dönüşümleri
+                        if (cevapTipi === 'tek_secimli' || cevapTipi === 'coktan-tek' || cevapTipi === 'radio') {
+                            anketTipi = 'coktan-tek';
+                        } else if (cevapTipi === 'coklu_secimli' || cevapTipi === 'coktan-coklu' || cevapTipi === 'checkbox') {
+                            anketTipi = 'coktan-coklu';
+                        } else if (cevapTipi === 'serbest_metin' || cevapTipi === 'acik-uclu' || cevapTipi === 'text') {
+                            anketTipi = 'acik-uclu';
+                        } else if (cevapTipi === 'slider' || cevapTipi === 'skala') {
+                            anketTipi = 'slider';
+                        }
+                        
+                        // Seçenekleri al ve formatla
+                        const secenekler = (soru.secenekler || []).map(sec => {
+                            if (typeof sec === 'string') {
+                                return sec;
+                            } else if (sec.etiket) {
+                                return sec.etiket;
+                            } else if (sec.metin) {
+                                return sec.metin;
+                            } else if (sec.label) {
+                                return sec.label;
+                            }
+                            return '';
+                        });
+                        
+                        return {
+                            id: Date.now() + index + Math.random(),
+                            metin: soruMetni,
+                            tip: anketTipi,
+                            secenekler: secenekler,
+                            zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : true
+                        };
+                    });
+                    
+                    setOnizleme(formattedSorular);
+                    
+                    // Metin alanını da doldur
+                    const metinFormati = formattedSorular.map((soru, idx) => {
+                        let soruStr = `${idx + 1}. "${soru.metin}"\n`;
+                        if (soru.secenekler && soru.secenekler.length > 0) {
+                            soru.secenekler.forEach((sec, i) => {
+                                soruStr += `${String.fromCharCode(65 + i)}) ${sec}\n`;
+                            });
+                        }
+                        return soruStr;
+                    }).join('\n');
+                    
+                    setMetin(metinFormati);
+                    
+                } else {
+                    alert("❌ JSON dosyasında 'sorular' dizisi bulunamadı!");
+                }
+            } catch (error) {
+                console.error("JSON parse hatası:", error);
+                alert("❌ JSON dosyası okunamadı! Lütfen geçerli bir JSON dosyası seçin.");
+            }
+        };
+        
+        reader.onerror = () => {
+            alert("❌ Dosya okuma hatası!");
+        };
+        
+        reader.readAsText(file);
+        
+        // Input'u sıfırla (aynı dosyayı tekrar seçebilmek için)
+        event.target.value = '';
+    };
 
     // Metin parse fonksiyonu - Gelişmiş
     const parseAnketMetni = (text) => {
@@ -176,7 +285,29 @@ function SorulariYapistir() {
                                 <div className="yapistir-divider"></div>
 
                                 <div className="yapistir-input-group">
-                                    <label>Soruları Yapıştır</label>
+                                    <label>Soruları Yapıştır veya JSON Yükle</label>
+                                    
+                                    {/* JSON Yükleme Butonu */}
+                                    <div className="yapistir-upload-section">
+                                        <button 
+                                            className="yapistir-upload-btn"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            type="button"
+                                        >
+                                            <FaUpload /> JSON Dosyası Yükle
+                                        </button>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept=".json"
+                                            onChange={handleFileUpload}
+                                            style={{ display: 'none' }}
+                                        />
+                                        <span className="yapistir-upload-info">
+                                            veya aşağıya manuel olarak yapıştırın
+                                        </span>
+                                    </div>
+
                                     <p className="yapistir-aciklama">
                                         Sorularınızı şu formatta yapıştırın:
                                     </p>
