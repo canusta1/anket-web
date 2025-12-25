@@ -81,9 +81,12 @@ async function cleanupTempFiles(filePaths) {
 function runFaceVerification(idCardPath, selfiePath) {
   return new Promise((resolve, reject) => {
     const pythonScript = path.join(__dirname, "..", "services", "faceVerify.py");
+    
+    // Virtual environment'daki Python executable'ını kullan
+    const pythonExecutable = path.join(__dirname, "..", "..", ".venv", "Scripts", "python.exe");
 
     // Python scriptini çalıştır
-    const pythonProcess = spawn("python", [pythonScript, idCardPath, selfiePath]);
+    const pythonProcess = spawn(pythonExecutable, [pythonScript, idCardPath, selfiePath]);
 
     let stdout = "";
     let stderr = "";
