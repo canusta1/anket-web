@@ -42,6 +42,14 @@ const AnketCoz = () => {
   const [verifiedTcNo, setVerifiedTcNo] = useState('');
   const [identityVerificationToken, setIdentityVerificationToken] = useState(null);
 
+  // TC Kimlik No OCR doğrulama için state'ler
+  const [tcVerificationStep, setTcVerificationStep] = useState(null); // null, 'verified'
+  const [tcIdCardFile, setTcIdCardFile] = useState(null);
+  const [tcVerificationError, setTcVerificationError] = useState('');
+  const [tcVerificationLoading, setTcVerificationLoading] = useState(false);
+  const [tcVerificationToken, setTcVerificationToken] = useState(null);
+  const [verifiedTcNoOcr, setVerifiedTcNoOcr] = useState('');
+
   // Anket verilerini çek
   useEffect(() => {
     const fetchAnket = async () => {
@@ -422,6 +430,62 @@ const AnketCoz = () => {
     if (e.target.files && e.target.files[0]) {
       setSelfieFile(e.target.files[0]);
       setIdentityVerificationError('');
+    }
+  };
+
+  // TC OCR için dosya seçimi
+  const handleTcIdCardFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setTcIdCardFile(e.target.files[0]);
+      setTcVerificationError('');
+    }
+  };
+
+  // TC Kimlik No OCR Doğrulama
+  const handleTcOcrVerification = async (e) => {
+    e.preventDefault();
+    setTcVerificationError('');
+    setTcVerificationLoading(true);
+
+    try {
+      const tcNo = dogrulamaBilgileri.tcNo;
+
+      // Validasyonlar
+      if (!tcNo || tcNo.trim().length !== 11) {
+        throw new Error('Lütfen 11 haneli TC Kimlik No giriniz');
+      }
+
+      if (!tcIdCardFile) {
+        throw new Error('Lütfen kimlik kartı fotoğrafı seçiniz');
+      }
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
+
+      // FormData ile gönder
+      const formData = new FormData();
+      formData.append('tcNo', tcNo);
+      formData.append('idCard', tcIdCardFile);
+
+      const response = await fetch(`${apiUrl}/api/verification/verify-tc-ocr`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'TC doğrulama başarısız');
+      }
+
+      // Doğrulama başarılı
+      setVerifiedTcNoOcr(data.data.tcKimlikNo);
+      setTcVerificationToken(data.data.verificationToken);
+      setTcVerificationStep('verified');
+      setTcVerificationError('');
+    } catch (err) {
+      setTcVerificationError(err.message);
+    } finally {
+      setTcVerificationLoading(false);
     }
   };
 
@@ -949,26 +1013,84 @@ const AnketCoz = () => {
                               </div>
                             )}
 
-                            {/* TC KİMLİK NO */}
+                            {/* TC KİMLİK NO - OCR DOĞRULAMA */}
                             {key === 'tcNo' && (
                               <div className="dogrulama-item tc-item">
                                 <div className="dogrulama-item-header">
                                   <span className="dogrulama-item-icon">🆔</span>
                                   <div className="dogrulama-item-title">
-                                    <h4>T.C. Kimlik No</h4>
-                                    <p>11 haneli kimlik numaranızı girin</p>
+                                    <h4>T.C. Kimlik No Doğrulama</h4>
+                                    <p>TC numaranızı girin ve kimlik kartınızı yükleyin</p>
                                   </div>
                                 </div>
                                 <div className="dogrulama-item-content">
-                                  <input
-                                    type="text"
-                                    className={`form-input tc-input ${hatalar.tcNo ? 'error' : ''}`}
-                                    value={dogrulamaBilgileri.tcNo}
-                                    onChange={(e) => handleKriterChange('tcNo', e.target.value)}
-                                    placeholder="T.C. kimlik numaranızı giriniz"
-                                    maxLength="11"
-                                  />
-                                  {hatalar.tcNo && <span className="error-text">{hatalar.tcNo}</span>}
+                                  {tcVerificationStep !== 'verified' ? (
+                                    <div className="tc-verification-compact">
+                                      {/* Yan Yana Layout */}
+                                      <div className="tc-row">
+                                        {/* Sol: TC Input */}
+                                        <div className="tc-input-box">
+                                          <label>🔢 T.C. Kimlik No</label>
+                                          <div className="tc-input-field">
+                                            <input
+                                              type="text"
+                                              className={`tc-input-compact ${hatalar.tcNo ? 'error' : ''} ${dogrulamaBilgileri.tcNo?.length === 11 ? 'valid' : ''}`}
+                                              value={dogrulamaBilgileri.tcNo || ''}
+                                              onChange={(e) => {
+                                                const value = e.target.value.replace(/\D/g, '').slice(0, 11);
+                                                handleKriterChange('tcNo', value);
+                                                setTcVerificationError('');
+                                              }}
+                                              placeholder="_ _ _ _ _ _ _ _ _ _ _"
+                                              maxLength="11"
+                                            />
+                                            {dogrulamaBilgileri.tcNo?.length === 11 && (
+                                              <span className="input-check">✓</span>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {/* Sağ: Fotoğraf Upload */}
+                                        <div className="tc-upload-box">
+                                          <label>📷 Kimlik Fotoğrafı</label>
+                                          <label className={`tc-upload-area ${tcIdCardFile ? 'has-file' : ''}`}>
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              onChange={handleTcIdCardFileChange}
+                                              style={{ display: 'none' }}
+                                            />
+                                            {tcIdCardFile ? (
+                                              <span className="upload-success">✓ {tcIdCardFile.name.substring(0, 15)}...</span>
+                                            ) : (
+                                              <span className="upload-placeholder">📤 Fotoğraf Seç</span>
+                                            )}
+                                          </label>
+                                        </div>
+                                      </div>
+
+                                      {/* Alt: Buton ve Mesajlar */}
+                                      <button
+                                        type="button"
+                                        onClick={handleTcOcrVerification}
+                                        disabled={tcVerificationLoading || !dogrulamaBilgileri.tcNo || dogrulamaBilgileri.tcNo.length !== 11 || !tcIdCardFile}
+                                        className="btn-verify-tc-compact"
+                                      >
+                                        {tcVerificationLoading ? '⏳ Doğrulanıyor...' : '🔍 Doğrula'}
+                                      </button>
+
+                                      {tcVerificationError && (
+                                        <div className="tc-error-msg">⚠️ {tcVerificationError}</div>
+                                      )}
+
+                                      <p className="tc-security-hint">🔒 Fotoğraf doğrulamadan sonra silinir</p>
+                                    </div>
+                                  ) : (
+                                    <div className="verification-success">
+                                      <span className="success-badge">✅ TC Kimlik No Doğrulandı</span>
+                                      <span className="verified-info">{verifiedTcNoOcr}</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -1010,7 +1132,8 @@ const AnketCoz = () => {
                   disabled={
                     (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified') ||
                     (anket.hedefKitleKriterleri?.telefonNumarasi === true && phoneVerificationStep !== 'verified') ||
-                    (anket.hedefKitleKriterleri?.kimlikDogrulama === true && identityVerificationStep !== 'verified')
+                    (anket.hedefKitleKriterleri?.kimlikDogrulama === true && identityVerificationStep !== 'verified') ||
+                    (anket.hedefKitleKriterleri?.tcNo === true && tcVerificationStep !== 'verified')
                   }
                 >
                   Devam Et →
