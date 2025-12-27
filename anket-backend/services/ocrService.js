@@ -12,19 +12,6 @@ const fs = require('fs');
  */
 const PREPROCESSING_STRATEGIES = [
     {
-        name: 'high-contrast',
-        description: 'Yüksek kontrast, standart threshold',
-        process: async (buffer) => {
-            return sharp(buffer)
-                .grayscale()
-                .normalize()
-                .sharpen({ sigma: 2 })
-                .resize({ width: 2400, height: 1600, fit: 'inside', withoutEnlargement: false })
-                .threshold(128)
-                .toBuffer();
-        }
-    },
-    {
         name: 'light-threshold',
         description: 'Açık arka planlar için düşük threshold',
         process: async (buffer) => {
@@ -34,6 +21,19 @@ const PREPROCESSING_STRATEGIES = [
                 .sharpen({ sigma: 1.5 })
                 .resize({ width: 2400, height: 1600, fit: 'inside', withoutEnlargement: false })
                 .threshold(100)
+                .toBuffer();
+        }
+    },
+    {
+        name: 'high-contrast',
+        description: 'Yüksek kontrast, standart threshold',
+        process: async (buffer) => {
+            return sharp(buffer)
+                .grayscale()
+                .normalize()
+                .sharpen({ sigma: 2 })
+                .resize({ width: 2400, height: 1600, fit: 'inside', withoutEnlargement: false })
+                .threshold(128)
                 .toBuffer();
         }
     },
@@ -154,13 +154,21 @@ async function runOCR(imagePath) {
 function extractAllPotentialTCs(text) {
     if (!text || typeof text !== 'string') return [];
 
-    // Tüm boşluk ve özel karakterleri kaldır
-    const cleanText = text.replace(/[\s\-\.,:;\/\\|_]/g, '');
+    // Sadece rakamları al
+    const digits = text.replace(/\D/g, '');
+    const candidates = new Set();
 
-    // 11 haneli sayıları bul (ilk hane 0 olamaz)
-    const matches = cleanText.match(/[1-9][0-9]{10}/g) || [];
+    // Sliding window ile tüm 11 haneli olası sayıları çıkar
+    for (let i = 0; i <= digits.length - 11; i++) {
+        const candidate = digits.substring(i, i + 11);
+        
+        // İlk hane 0 olamaz
+        if (candidate[0] !== '0') {
+            candidates.add(candidate);
+        }
+    }
 
-    return [...new Set(matches)]; // Eşsiz değerler
+    return [...candidates];
 }
 
 /**
@@ -190,7 +198,7 @@ function isValidTCKimlikNo(tc) {
  * ANA FONKSİYON: Kimlik kartından TC oku
  * Çoklu strateji ile deneyerek en iyi sonucu bulur
  */
-async function readTCFromIdCard(imagePath) {
+async function readTCFromIdCard(imagePath, targetTc = null) {
     const result = {
         success: false,
         tcKimlikNo: null,
@@ -203,6 +211,7 @@ async function readTCFromIdCard(imagePath) {
 
     try {
         console.log('🔍 TC OCR başlatılıyor (Çoklu Strateji):', imagePath);
+        if (targetTc) console.log('🎯 Hedef TC:', targetTc);
 
         // Her stratejiyi dene
         for (const strategy of PREPROCESSING_STRATEGIES) {
@@ -222,8 +231,20 @@ async function readTCFromIdCard(imagePath) {
             const candidates = extractAllPotentialTCs(ocrText);
             console.log(`   🔢 Bulunan adaylar: ${candidates.length > 0 ? candidates.map(c => c.substring(0, 3) + '***').join(', ') : 'Yok'}`);
 
-            // Algoritma ile doğrula
+            // Adayları kontrol et
             for (const candidate of candidates) {
+                // 1. Hedef TC varsa ve eşleşiyorsa (Algoritma kontrolünü atla/öncele)
+                if (targetTc && candidate === targetTc) {
+                    console.log(`   ✅ HEDEF TC İLE EŞLEŞTİ! Strateji: ${strategy.name}`);
+                    result.success = true;
+                    result.tcKimlikNo = candidate;
+                    result.rawText = ocrText;
+                    result.strategy = strategy.name;
+                    await cleanupProcessedFiles(processedFiles);
+                    return result;
+                }
+
+                // 2. Algoritmik doğrulama (Hedef yoksa veya hedef eşleşmediyse)
                 if (isValidTCKimlikNo(candidate)) {
                     console.log(`   ✅ GEÇERLİ TC BULUNDU! Strateji: ${strategy.name}`);
                     result.success = true;
@@ -231,7 +252,11 @@ async function readTCFromIdCard(imagePath) {
                     result.rawText = ocrText;
                     result.strategy = strategy.name;
 
-                    // Dosyaları temizle ve dön
+                    // Eğer hedef TC varsa ve bu aday hedef değilse, belki yanlış okudu ama geçerli bir TC buldu.
+                    // Yine de döndür, controller karşılaştıracak. 
+                    // Ama hedef TC öncelikli olduğu için loop devam etmeli mi? 
+                    // Hayır, valid bir TC bulduysak ve hedef ile eşleşmediyse, muhtemelen OCR yanlış okudu veya kartta başka bir TC var.
+                    // Controller zaten kontrol edecek.
                     await cleanupProcessedFiles(processedFiles);
                     return result;
                 }

@@ -464,7 +464,7 @@ router.post("/verify-tc-ocr", upload.single("idCard"), async (req, res) => {
     console.log(`  - Dosya: ${req.file.filename}`);
 
     // OCR ile TC Kimlik No'yu oku
-    const ocrResult = await readTCFromIdCard(uploadedFile);
+    const ocrResult = await readTCFromIdCard(uploadedFile, tcNo && tcNo.trim());
 
     console.log("📄 OCR Sonucu:", {
       success: ocrResult.success,
