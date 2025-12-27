@@ -1,5 +1,10 @@
 const emailjs = require('@emailjs/nodejs');
 
+emailjs.init({
+  publicKey: process.env.EMAILJS_PUBLIC_KEY,
+  privateKey: process.env.EMAILJS_PRIVATE_KEY,
+});
+
 // EmailJS Konfigürasyonu (.env dosyasından)
 const EMAILJS_CONFIG = {
   serviceId: process.env.EMAILJS_SERVICE_ID,
@@ -26,33 +31,27 @@ function generateVerificationCode() {
  */
 async function sendVerificationCode(userEmail, verificationCode, surveyTitle) {
   try {
-    console.log(`📧 EmailJS ile mail gönderiliyor: ${userEmail}`);
+    // Hata ayıklama için bu satırı ekleyin:
+    console.log("Kullanılan Public Key:", process.env.EMAILJS_PUBLIC_KEY);
 
-    // EmailJS şablon değişkenleri eşleştirmesi
     const templateParams = {
-      email: userEmail,           // Alıcı e-posta -> EmailJS 'email' anahtarı
-      passcode: verificationCode, // OTP kodu -> EmailJS 'passcode' anahtarı
-      time: '10 dakika',          // Geçerlilik süresi -> EmailJS 'time' anahtarı
+      email: userEmail,
+      passcode: verificationCode,
+      time: '10 dakika',
     };
 
-    // EmailJS ile e-posta gönderimi
     const response = await emailjs.send(
-      EMAILJS_CONFIG.serviceId,
-      EMAILJS_CONFIG.templateId,
-      templateParams,
-      {
-        publicKey: EMAILJS_CONFIG.publicKey,
-        privateKey: EMAILJS_CONFIG.privateKey,
-      }
+      process.env.EMAILJS_SERVICE_ID, // Doğrudan env'den okuyun
+      process.env.EMAILJS_TEMPLATE_ID,
+      templateParams
     );
 
-    console.log('✅ Doğrulama kodu başarıyla gönderildi. Status:', response.status, 'Text:', response.text);
+    console.log('✅ Başarılı:', response.status);
     return true;
-
   } catch (error) {
-    console.error('❌ EmailJS Hatası Detayı:', error);
-    // Hata mesajını frontend'e düzgün iletmek için fırlatıyoruz
-    throw new Error(`Mail gönderilemedi: ${error.text || error.message}`);
+    // Hata mesajını daha detaylı loglayalım
+    console.error('❌ Hata:', error);
+    throw new Error(`Mail gönderilemedi: ${error.message || 'Bilinmeyen Hata'}`);
   }
 }
 
