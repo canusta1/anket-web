@@ -1,476 +1,803 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
     FaBars,
     FaUser,
-    FaClipboardList,
     FaChartBar,
+    FaClipboardList,
     FaSignOutAlt,
     FaArrowLeft,
+    FaPlus,
     FaTrash,
+    FaHome,
+    FaMoon,
+    FaSun,
+    FaCheckCircle,
+    FaLayerGroup,
+    FaChevronRight,
+    FaChevronLeft,
+    FaEnvelope,
+    FaIdCard,
+    FaMapMarkerAlt,
+    FaMobileAlt,
+    FaShieldAlt,
+    FaCopy,
+    FaSearch,
+    FaMapMarkedAlt,
     FaRobot,
     FaMagic,
     FaSpinner,
-    FaPlus,
-    FaMinus, // Eksi ikonu eklendi
-    FaHome
+    FaMinus
 } from "react-icons/fa";
-import "./AIileAnket.css"; // CSS dosyasını import ediyoruz
+import "./SifirdanAnket.css"; // SHARED: We use the same CSS as the manual wizard
+
+const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA_API_KEY_GIRINIZ";
 
 function AIileAnket() {
+    const navigate = useNavigate();
     const location = useLocation();
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
 
-    // --- STATE YÖNETİMİ ---
-    const [aiTopic, setAiTopic] = useState(location?.state?.topic ?? "");
-    const [aiQuestionCount, setAiQuestionCount] = useState(10);
+    // --- WIZARD STATE ---
+    const [currentStep, setCurrentStep] = useState(1); // 1: AI Prompt, 2: Questions, 3: Audience, 4: Success
+
+    // --- STEP 1: AI Prompt ---
     const [anketBaslik, setAnketBaslik] = useState("");
     const [anketAciklama, setAnketAciklama] = useState("");
+    const [aiTopic, setAiTopic] = useState(location?.state?.topic ?? "");
+    const [aiQuestionCount, setAiQuestionCount] = useState(10);
+    const [aiLoading, setAiLoading] = useState(false);
 
+    // --- STEP 2: Sorular (Same as SifirdanAnket) ---
     const [sorular, setSorular] = useState([]);
-    const [soruListesiAcik, setSoruListesiAcik] = useState(false); // False = Giriş Formu, True = Liste
+    const [activeQuestionId, setActiveQuestionId] = useState(null);
 
-    const navigate = useNavigate();
+    // Auto-select first question if exists and none selected
+    useEffect(() => {
+        if (sorular.length > 0 && !activeQuestionId) {
+            setActiveQuestionId(sorular[0].id);
+        }
+    }, [sorular, activeQuestionId]);
 
+    // --- STEP 3: Hedef Kitle (Same as SifirdanAnket) ---
+    const [secilenKriterler, setSecilenKriterler] = useState({
+        mail: false,
+        tcNo: false,
+        konum: false,
+        kimlikDogrulama: false,
+        telefonNumarasi: false
+    });
+    const [mailUzantisi, setMailUzantisi] = useState("");
+    const [kayitliKonumKriteri, setKayitliKonumKriteri] = useState(null);
+
+    // Konum Modal & Google Maps
+    const [konumModalAcik, setKonumModalAcik] = useState(false);
+    const [scriptLoaded, setScriptLoaded] = useState(false);
+    const [googleYeri, setGoogleYeri] = useState(null);
+    const [kisitlamaTuru, setKisitlamaTuru] = useState("sehir");
+    const [radiusDegeri, setRadiusDegeri] = useState("50");
+    const [mapSearchInput, setMapSearchInput] = useState("");
+    const autoCompleteRef = useRef(null);
+
+    // --- GLOBAL STATES ---
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [olusanLink, setOlusanLink] = useState(null);
+    const [darkMode, setDarkMode] = useState(() => {
+        const saved = localStorage.getItem('panelDarkMode');
+        return saved === 'true';
+    });
+
+    // --- EFFECTS ---
+    useEffect(() => {
+        localStorage.setItem('panelDarkMode', darkMode);
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }, [darkMode]);
+
+    // Google Maps Script (Step 3'te modal açıldığında lazım)
+    useEffect(() => {
+        if (konumModalAcik && !scriptLoaded) {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                setScriptLoaded(true);
+                return;
+            }
+            const script = document.createElement("script");
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+            script.async = true;
+            script.defer = true;
+            script.onload = () => setScriptLoaded(true);
+            document.head.appendChild(script);
+        }
+    }, [konumModalAcik, scriptLoaded]);
+
+    useEffect(() => {
+        if (scriptLoaded && konumModalAcik && autoCompleteRef.current) {
+            const autocomplete = new window.google.maps.places.Autocomplete(autoCompleteRef.current, {
+                types: ['geocode'],
+                componentRestrictions: { country: "tr" },
+                fields: ["address_components", "geometry", "formatted_address", "name"]
+            });
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                if (place.geometry) {
+                    let il = "", ilce = "", mahalle = "";
+                    place.address_components.forEach(cp => {
+                        if (cp.types.includes("administrative_area_level_1")) il = cp.long_name;
+                        if (cp.types.includes("administrative_area_level_2")) ilce = cp.long_name;
+                        if (cp.types.includes("neighborhood") || cp.types.includes("sublocality")) mahalle = cp.long_name;
+                    });
+                    setGoogleYeri({ tamAdres: place.formatted_address, il, ilce, mahalle, lat: place.geometry.location.lat(), lng: place.geometry.location.lng() });
+                }
+            });
+        }
+    }, [scriptLoaded, konumModalAcik]);
+
+    // --- HANDLERS ---
     const handleLogout = () => navigate("/giris");
     const handleGeriDon = () => navigate("/anket-olustur");
-    const handleAnketOlustur = () => navigate("/anket-olustur");
 
-    // --- SORU SAYISI ARTIRMA/AZALTMA (YENİ) ---
+    // AI Question Count Controls
     const handleCountChange = (val) => {
-        if (val === "") {
-            setAiQuestionCount(""); // Kullanıcı sildiğinde boş kalsın
-            return;
-        }
+        if (val === "") { setAiQuestionCount(""); return; }
         let newValue = parseInt(val);
         if (isNaN(newValue)) return;
         if (newValue > 50) newValue = 50;
         setAiQuestionCount(newValue);
     };
-
     const handleCountBlur = () => {
-        // Inputtan çıkınca boşsa veya 1'den küçükse 1 yap
-        if (aiQuestionCount === "" || aiQuestionCount < 1) {
-            setAiQuestionCount(1);
-        }
+        if (aiQuestionCount === "" || aiQuestionCount < 1) setAiQuestionCount(1);
     };
-
     const increaseCount = () => {
         const current = aiQuestionCount === "" ? 0 : aiQuestionCount;
         if (current < 50) setAiQuestionCount(current + 1);
     };
-
     const decreaseCount = () => {
         const current = aiQuestionCount === "" ? 1 : aiQuestionCount;
         if (current > 1) setAiQuestionCount(current - 1);
     };
 
-    // ----------------------------------------------------
-    // 1. ADIM: AI İLE SORULARI OLUŞTUR
-    // ----------------------------------------------------
+    // AI Generate Questions
     const handleAIileOlustur = async () => {
-        if (!anketBaslik.trim()) {
-            alert("❌ Lütfen anketinize bir başlık verin.");
-            return;
-        }
-        if (!aiTopic.trim()) {
-            alert("❌ Lütfen yapay zekaya bir konu (prompt) verin.");
-            return;
-        }
+        if (!anketBaslik.trim()) { alert("❌ Lütfen anketinize bir başlık verin."); return; }
+        if (!aiTopic.trim()) { alert("❌ Lütfen yapay zekaya bir konu (prompt) verin."); return; }
         const count = aiQuestionCount === "" ? 10 : aiQuestionCount;
-        if (count < 1 || count > 50) {
-            alert("❌ Soru sayısı 1 ile 50 arasında olmalıdır.");
-            return;
-        }
+        if (count < 1 || count > 50) { alert("❌ Soru sayısı 1 ile 50 arasında olmalıdır."); return; }
 
-        setLoading(true);
-
+        setAiLoading(true);
         try {
             const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
             const response = await fetch(`${apiUrl}/api/ai/generate-survey`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 'Authorization': `Bearer ${localStorage.getItem("token")}` 
-                },
-                body: JSON.stringify({
-                    topic: aiTopic,
-                    questionCount: count
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic: aiTopic, questionCount: count })
             });
-
             const result = await response.json();
-
             if (result.success) {
-                // Gelen sorulara frontend için unique ID ekle ve secenekleri normalize et
                 const islenmisSorular = result.data.sorular.map((s, i) => ({
-                    ...s,
-                    id: Date.now() + i,
+                    id: Date.now() + i + Math.random(),
+                    metin: s.metin || s.soruMetni || "",
+                    tip: s.tip || s.soruTipi || "acik-uclu",
+                    secenekler: Array.isArray(s.secenekler) ? s.secenekler.map(sec => typeof sec === 'string' ? sec : (sec.metni || sec.metin || '')) : [],
                     zorunlu: true,
-                    // Seçeneklerin array olduğundan emin ol
-                    secenekler: Array.isArray(s.secenekler) ? s.secenekler : []
+                    sliderMin: s.tip === 'slider' ? 1 : null,
+                    sliderMax: s.tip === 'slider' ? 10 : null
                 }));
-
                 setSorular(islenmisSorular);
-                setSoruListesiAcik(true); // Formu gizle, listeyi aç
+                setCurrentStep(2); // Go to Question Editing
             } else {
                 alert("❌ Hata: " + (result.error || "AI servisi yanıt vermedi."));
             }
-
         } catch (error) {
             console.error('AI Hatası:', error);
             alert("❌ Sunucuya bağlanılamadı.");
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    // Question Handlers (Same as SifirdanAnket)
+    const handleSoruDegis = (id, metin) => setSorular(sorular.map(s => s.id === id ? { ...s, metin } : s));
+    const handleTipDegis = (id, tip) => setSorular(sorular.map(s => {
+        if (s.id === id) {
+            const base = { ...s, tip, secenekler: tip.includes("coktan") ? ["Seçenek 1", "Seçenek 2"] : [] };
+            if (tip === 'slider') return { ...base, sliderMin: 1, sliderMax: 10 };
+            return base;
+        }
+        return s;
+    }));
+    const handleSliderAyarlarDegis = (id, key, deger) => setSorular(sorular.map(s => s.id === id ? { ...s, [key]: deger } : s));
+    const handleSecenekDegis = (sId, index, deger) => setSorular(sorular.map(s => {
+        if (s.id === sId) {
+            const yeniSec = [...s.secenekler];
+            yeniSec[index] = deger;
+            return { ...s, secenekler: yeniSec };
+        }
+        return s;
+    }));
+    const handleSecenekSil = (sId, index) => setSorular(sorular.map(s => s.id === sId ? { ...s, secenekler: s.secenekler.filter((_, i) => i !== index) } : s));
+    const handleSecenekEkle = (sId) => setSorular(sorular.map(s => s.id === sId ? { ...s, secenekler: [...s.secenekler, `Yeni Seçenek`] } : s));
+    const handleZorunluToggle = (id) => setSorular(sorular.map(s => s.id === id ? { ...s, zorunlu: !s.zorunlu } : s));
+    const handleSoruSil = (id) => {
+        const yeniSorular = sorular.filter(s => s.id !== id);
+        setSorular(yeniSorular);
+        if (activeQuestionId === id) setActiveQuestionId(yeniSorular.length > 0 ? yeniSorular[0].id : null);
+    };
+    const handleYeniSoruEkle = () => {
+        const yeniId = Math.random();
+        const yeniSoru = { id: yeniId, metin: "", tip: "acik-uclu", secenekler: [], zorunlu: false };
+        setSorular([...sorular, yeniSoru]);
+        setActiveQuestionId(yeniId);
+    };
+
+    // Kriter İşlemleri
+    const handleKriterToggle = (kriter) => setSecilenKriterler({ ...secilenKriterler, [kriter]: !secilenKriterler[kriter] });
+    const handleKonumKaydet = () => {
+        setKayitliKonumKriteri({ tip: kisitlamaTuru, target: googleYeri, radius: radiusDegeri, label: googleYeri.tamAdres });
+        setKonumModalAcik(false);
+    };
+
+    // --- WIZARD NAVIGATION ---
+    const nextStep = () => {
+        if (currentStep === 2 && sorular.length === 0) { alert("En az bir soru eklemelisiniz."); return; }
+        if (currentStep === 2 && sorular.some(s => !s.metin.trim())) { alert("Lütfen tüm soruların metnini doldurun."); return; }
+        setCurrentStep(currentStep + 1);
+        window.scrollTo(0, 0);
+    };
+    const prevStep = () => { setCurrentStep(currentStep - 1); window.scrollTo(0, 0); };
+
+    // --- FİNAL YAYINLAMA (Same as SifirdanAnket) ---
+    const handleFinalYayinla = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) { navigate("/giris"); return; }
+        setLoading(true);
+
+        const backendSorular = sorular.map((s, idx) => ({
+            soruId: idx.toString(),
+            soruMetni: s.metin,
+            soruTipi: s.tip,
+            zorunlu: s.zorunlu,
+            siraNo: idx + 1,
+            secenekler: s.secenekler.map((m, i) => ({ secenekId: i.toString(), metin: m })),
+            sliderMin: s.tip === 'slider' ? (s.sliderMin || 1) : null,
+            sliderMax: s.tip === 'slider' ? (s.sliderMax || 10) : null
+        }));
+
+        const finalData = {
+            anketBaslik,
+            anketAciklama,
+            sorular: backendSorular,
+            aiIleOlusturuldu: true, // Mark as AI-created
+            hedefKitleKriterleri: {
+                ...secilenKriterler,
+                mailUzantisi,
+                konumHedefi: secilenKriterler.konum && kayitliKonumKriteri ? {
+                    tip: kayitliKonumKriteri.tip,
+                    hedef: {
+                        il: kayitliKonumKriteri.target.il,
+                        ilce: kayitliKonumKriteri.target.ilce,
+                        mahalle: kayitliKonumKriteri.target.mahalle,
+                        lat: kayitliKonumKriteri.target.lat,
+                        lng: kayitliKonumKriteri.target.lng
+                    },
+                    radius: kayitliKonumKriteri.tip === 'radius' ? parseInt(kayitliKonumKriteri.radius) : null,
+                    aciklama: kayitliKonumKriteri.label
+                } : null
+            }
+        };
+
+        try {
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+            const res = await fetch(`${apiUrl}/api/surveys`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(finalData)
+            });
+            const result = await res.json();
+            if (result.success) {
+                const link = `${window.location.origin}/anket-coz/${result.data.paylasimLinki.split('/').pop()}`;
+                setOlusanLink(link);
+                setCurrentStep(4);
+            } else {
+                alert("Hata: " + result.error);
+            }
+        } catch (err) {
+            alert("Bağlantı hatası.");
         } finally {
             setLoading(false);
         }
     };
 
-    // ----------------------------------------------------
-    // 2. ADIM: ANKETİ VERİTABANINA KAYDET
-    // ----------------------------------------------------
-    const handleDevamEt = () => {
-        // 1. Validasyonlar
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert("❌ Önce giriş yapmalısınız!");
-            navigate("/giris");
-            return;
-        }
-
-        if (!anketBaslik.trim()) {
-            alert("❌ Anket başlığı boş olamaz!");
-            return;
-        }
-        if (sorular.length === 0) {
-            alert("❌ En az bir soru olmalı!");
-            return;
-        }
-
-        // 2. Veriyi Paketle (Backend'e uygun formatta hazırlıyoruz ama göndermiyoruz)
-        const backendFormatindaSorular = sorular.map((s, index) => {
-            // Seçenekleri normalize et - array olduğundan emin ol
-            let secenekler = [];
-            if (Array.isArray(s.secenekler)) {
-                secenekler = s.secenekler.map((sec, i) => {
-                    // String ise direkt metni kullan, obje ise metni/text alanını al
-                    const metinDegeri = typeof sec === 'string' ? sec : (sec.metni || sec.metin || sec.text || '');
-                    return {
-                        metni: metinDegeri // Backend 'metni' (i ile biten) bekliyor
-                    };
-                });
-            }
-
-            return {
-                soruMetni: s.metin,
-                soruTipi: s.tip,
-                zorunlu: s.zorunlu !== undefined ? s.zorunlu : true,
-                siraNo: index + 1,
-                secenekler: secenekler,
-                sliderMin: s.tip === 'slider' ? 1 : null,
-                sliderMax: s.tip === 'slider' ? 10 : null
-            };
-        });
-
-        const tasinanVeri = {
-            anketBaslik: anketBaslik,
-            anketAciklama: anketAciklama,
-            sorular: backendFormatindaSorular,
-            aiIleOlusturuldu: true
-        };
-
-        // 3. Veriyi yanımıza alıp bir sonraki ekrana geçiyoruz
-        navigate("/hedef-kitle-secimi", { state: tasinanVeri });
-    };
-    // --- YARDIMCI FONKSİYONLAR (SORU LİSTESİ İÇİN) ---
-    const handleSoruDegis = (id, yeniMetin) => {
-        setSorular(sorular.map((s) => (s.id === id ? { ...s, metin: yeniMetin } : s)));
-    };
-    const handleTipDegis = (id, tip) => {
-        setSorular(sorular.map((s) => s.id === id ? { ...s, tip, secenekler: tip.includes("coktan") ? ["", ""] : [] } : s));
-    };
-    const handleSecenekEkle = (id) => {
-        setSorular(sorular.map((s) => s.id === id ? { ...s, secenekler: [...s.secenekler, ""] } : s));
-    };
-    const handleSecenekDegis = (id, index, text) => {
-        setSorular(sorular.map((s) => {
-            if (s.id === id) {
-                const arr = [...s.secenekler];
-                arr[index] = text;
-                return { ...s, secenekler: arr };
-            }
-            return s;
-        }));
-    };
-    const handleSecenekSil = (id, index) => {
-        setSorular(sorular.map((s) => {
-            if (s.id === id) {
-                return { ...s, secenekler: s.secenekler.filter((_, i) => i !== index) };
-            }
-            return s;
-        }));
-    };
-    const handleZorunluDegis = (id) => {
-        setSorular(sorular.map((s) => (s.id === id ? { ...s, zorunlu: !s.zorunlu } : s)));
-    };
-    const handleSoruSil = (id) => {
-        setSorular(sorular.filter(s => s.id !== id));
-    };
-
     return (
-        <div className="panel-container">
+        <div className="wizard-page panel-container">
             {/* Navbar */}
             <nav className="panel-navbar">
                 <div className="nav-left">
-                    <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-                    <FaArrowLeft className="menu-icon" onClick={handleGeriDon} style={{ marginRight: "15px" }} />
-                    <span className="panel-logo">AnketApp</span>
+                    <button className="icon-btn" onClick={() => setMenuOpen(!menuOpen)}><FaBars /></button>
+                    <button className="icon-btn back-btn" onClick={handleGeriDon}><FaArrowLeft /></button>
+                    <span className="panel-logo">AnketApp <span className="logo-badge ai-badge">AI</span></span>
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
-                    <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
+                    <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
+                        {darkMode ? <FaSun /> : <FaMoon />}
+                    </button>
                 </div>
             </nav>
 
             {/* Sidebar */}
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
+                <div className="sidebar-header">
+                    <div className="sidebar-logo">🤖 AI Anket</div>
+                </div>
                 <ul>
+                    <li onClick={() => navigate('/panel')}><FaChartBar className="icon" /> Dashboard</li>
+                    <li className="active"><FaRobot className="icon" /> AI ile Oluştur</li>
                     <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
-                    <li><FaClipboardList className="icon" /> Anket Oluştur</li>
-                    <li><FaChartBar className="icon" /> Sonuçları Gör</li>
-                    <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
+                    <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış</li>
                 </ul>
             </div>
+            {menuOpen && <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>}
 
-            {/* Ana İçerik */}
-            {/* Eğer form açıksa 'compact-mode' ekle (scroll yok), liste açıksa normal davran */}
-            <main className={`anket-main ${!soruListesiAcik ? 'compact-mode' : ''}`}>
-
-                {/* --- EKRAN 1: KOMPAKT SPLIT VIEW --- */}
-                {!soruListesiAcik ? (
-                    <div className="compact-center-wrapper">
-                        <div className="compact-card">
-
-                            {/* SOL SÜTUN: Anket Bilgileri */}
-                            <div className="compact-col left-col">
-                                <div className="compact-header">
-                                    <div className="sifirdan-ikon-cerceve small-icon">
-                                        <FaClipboardList className="sifirdan-ana-ikon" />
-                                    </div>
-                                    <div>
-                                        <h2>Anket Bilgileri</h2>
-                                        <p>Temel detayları belirleyin.</p>
-                                    </div>
-                                </div>
-
-                                <div className="sifirdan-input-group">
-                                    <label>Anket Başlığı</label>
-                                    <input
-                                        type="text"
-                                        className="sifirdan-text-input compact-input"
-                                        placeholder="Örn: Personel Memnuniyet Anketi"
-                                        value={anketBaslik}
-                                        onChange={(e) => setAnketBaslik(e.target.value)}
-                                        disabled={loading}
-                                        autoFocus
-                                    />
-                                </div>
-
-                                <div className="sifirdan-input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                    <label>Açıklama <span style={{ fontWeight: 'normal', color: '#999' }}>(Opsiyonel)</span></label>
-                                    <textarea
-                                        className="sifirdan-textarea-input compact-textarea"
-                                        placeholder="Anketin amacı nedir?"
-                                        value={anketAciklama}
-                                        onChange={(e) => setAnketAciklama(e.target.value)}
-                                        disabled={loading}
-                                        style={{ flex: 1, resize: 'none' }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* SAĞ SÜTUN: AI Ayarları */}
-                            <div className="compact-col right-col">
-                                <div className="compact-header">
-                                    <div className="sifirdan-ikon-cerceve small-icon ai-bg">
-                                        <FaRobot className="sifirdan-ana-ikon ai-color" />
-                                    </div>
-                                    <div>
-                                        <h2>Yapay Zeka</h2>
-                                        <p>Konuyu söyleyin, soruları yazsın.</p>
-                                    </div>
-                                </div>
-
-                                <div className="sifirdan-input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                    <label style={{ color: '#2d6a4f' }}>✨ AI Prompt (Konu)</label>
-                                    <textarea
-                                        value={aiTopic}
-                                        onChange={(e) => setAiTopic(e.target.value)}
-                                        placeholder="Örn: Bir restoran için hijyen, servis hızı ve lezzet hakkında sorular..."
-                                        className="sifirdan-textarea-input compact-textarea ai-focus"
-                                        disabled={loading}
-                                        style={{ flex: 1, resize: 'none' }}
-                                    />
-                                </div>
-
-                                {/* YENİ: Soru Sayısı ve Oluştur Butonu Yan Yana */}
-                                <div className="ai-footer-row">
-                                    <div className="question-count-control">
-                                        <label>Soru Sayısı</label>
-                                        <div className="counter-wrapper">
-                                            <button
-                                                className="counter-btn"
-                                                onClick={decreaseCount}
-                                                disabled={loading}
-                                            >
-                                                <FaMinus size={10} />
-                                            </button>
-
-                                            <input
-                                                type="text"
-                                                className="counter-input"
-                                                value={aiQuestionCount}
-                                                onChange={(e) => handleCountChange(e.target.value)}
-                                                onBlur={handleCountBlur}
-                                                disabled={loading}
-                                            />
-
-                                            <button
-                                                className="counter-btn"
-                                                onClick={increaseCount}
-                                                disabled={loading}
-                                            >
-                                                <FaPlus size={10} />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        className="ai-generate-btn"
-                                        onClick={handleAIileOlustur}
-                                        disabled={loading || !aiTopic.trim() || !anketBaslik.trim()}
-                                    >
-                                        {loading ? <FaSpinner className="spinning" /> : <FaMagic />}
-                                        {loading ? "Oluşturuluyor..." : "Anket Oluştur"}
-                                    </button>
-                                </div>
-                            </div>
-
+            <main className="wizard-main">
+                {/* Stepper */}
+                {currentStep < 4 && (
+                    <div className="wizard-stepper">
+                        <div className={`step-item ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
+                            <div className="step-number">{currentStep > 1 ? <FaCheckCircle /> : <FaRobot />}</div>
+                            <div className="step-label">AI Prompt</div>
+                        </div>
+                        <div className="step-connector"></div>
+                        <div className={`step-item ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
+                            <div className="step-number">{currentStep > 2 ? <FaCheckCircle /> : "2"}</div>
+                            <div className="step-label">Sorular</div>
+                        </div>
+                        <div className="step-connector"></div>
+                        <div className={`step-item ${currentStep >= 3 ? 'active' : ''}`}>
+                            <div className="step-number">3</div>
+                            <div className="step-label">Hedef Kitle</div>
                         </div>
                     </div>
-                ) : (
-                    /* --- EKRAN 2: LİSTELEME EKRANI (Burası scroll olabilir) --- */
-                    <div className="sifirdan-soru-olusturma-ekrani" style={{ paddingTop: '2rem' }}>
-                        <div className="sifirdan-soru-listesi-header">
-                            <div style={{ flex: 1 }}>
-                                <div className="sifirdan-input-group" style={{ marginBottom: '0.5rem' }}>
-                                    <input
-                                        type="text"
-                                        value={anketBaslik}
-                                        onChange={(e) => setAnketBaslik(e.target.value)}
-                                        className="sifirdan-text-input"
-                                        style={{ fontWeight: 'bold', fontSize: '1.2rem' }}
-                                    />
-                                </div>
-                                <div className="sifirdan-input-group">
-                                    <textarea
-                                        value={anketAciklama}
-                                        onChange={(e) => setAnketAciklama(e.target.value)}
-                                        className="sifirdan-textarea-input"
-                                        rows="2"
-                                    />
-                                </div>
-                            </div>
-                            <span className="sifirdan-soru-sayisi-badge">{sorular.length} soru</span>
-                        </div>
+                )}
 
-                        <div className="sifirdan-sorular-listesi">
-                            {sorular.map((soru, index) => (
-                                <div key={soru.id} className="sifirdan-modern-soru-kutusu">
-                                    {/* Soru İçeriği */}
-                                    <div className="sifirdan-soru-ust-alani">
-                                        <div className="sifirdan-soru-numarasi">Soru {index + 1}</div>
-                                        <button className="sifirdan-soru-sil-butonu" onClick={() => handleSoruSil(soru.id)}>
-                                            <FaTrash />
-                                        </button>
-                                    </div>
-                                    <div className="sifirdan-soru-metin-alani">
-                                        <input
-                                            type="text"
-                                            value={soru.metin}
-                                            onChange={(e) => handleSoruDegis(soru.id, e.target.value)}
-                                            className="sifirdan-soru-metin-input"
-                                        />
-                                    </div>
-                                    <div className="sifirdan-soru-ayarlari">
-                                        <div className="sifirdan-tip-secim-alani">
-                                            <label>Soru Tipi:</label>
-                                            <select
-                                                value={soru.tip}
-                                                onChange={(e) => handleTipDegis(soru.id, e.target.value)}
-                                                className="sifirdan-tip-select"
-                                            >
-                                                <option value="acik-uclu">Açık Uçlu</option>
-                                                <option value="coktan-tek">Çoktan Seçmeli (Tek)</option>
-                                                <option value="coktan-coklu">Çoktan Seçmeli (Çoklu)</option>
-                                                <option value="slider">Slider (1-10)</option>
-                                            </select>
+                <div className="wizard-content-area">
+                    {/* STEP 1: AI PROMPT */}
+                    {currentStep === 1 && (
+                        <div className="wizard-step step-info animate-in">
+                            <div className="step-header-text">
+                                <h2><FaRobot style={{marginRight: '10px', color: 'var(--w-primary)'}} /> Yapay Zeka ile Anket Oluştur</h2>
+                                <p>Konunuzu söyleyin, AI sizin için profesyonel sorular oluştursun.</p>
+                            </div>
+                            <div className="ai-prompt-form">
+                                <div className="ai-form-grid">
+                                    {/* Left Column: Survey Info */}
+                                    <div className="ai-form-col">
+                                        <h3><FaClipboardList /> Anket Bilgileri</h3>
+                                        <div className="fancy-input-group">
+                                            <label>Anket Başlığı</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Örn: Personel Memnuniyet Anketi" 
+                                                value={anketBaslik} 
+                                                onChange={(e) => setAnketBaslik(e.target.value)}
+                                                className="fancy-text-input"
+                                                disabled={aiLoading}
+                                            />
                                         </div>
-                                        <div className="sifirdan-zorunluluk-alani">
-                                            <label className="sifirdan-switch">
-                                                <input type="checkbox" checked={soru.zorunlu} onChange={() => handleZorunluDegis(soru.id)} />
-                                                <span className="sifirdan-slider round"></span>
-                                            </label>
-                                            <span>{soru.zorunlu ? "Zorunlu" : "İsteğe Bağlı"}</span>
+                                        <div className="fancy-input-group">
+                                            <label>Açıklama (İsteğe Bağlı)</label>
+                                            <textarea 
+                                                placeholder="Katılımcılara anketin amacından bahsedin..." 
+                                                value={anketAciklama} 
+                                                onChange={(e) => setAnketAciklama(e.target.value)}
+                                                className="fancy-textarea"
+                                                rows="4"
+                                                disabled={aiLoading}
+                                            />
                                         </div>
                                     </div>
-                                    {/* Seçenekler */}
-                                    {(soru.tip === "coktan-tek" || soru.tip === "coktan-coklu") && (
-                                        <div className="sifirdan-secenekler-alani">
-                                            {soru.secenekler.map((secenek, i) => (
-                                                <div key={i} className="sifirdan-secenek-satiri">
-                                                    <div className="sifirdan-secenek-tipi-goster">
-                                                        {soru.tip === "coktan-tek" ? <div className="sifirdan-radio-nokta"></div> : <div className="sifirdan-checkbox-kare"></div>}
-                                                    </div>
-                                                    <input
-                                                        type="text"
-                                                        value={secenek}
-                                                        onChange={(e) => handleSecenekDegis(soru.id, i, e.target.value)}
-                                                        className="sifirdan-secenek-input"
+                                    
+                                    {/* Right Column: AI Settings */}
+                                    <div className="ai-form-col ai-col">
+                                        <h3><FaMagic /> AI Ayarları</h3>
+                                        <div className="fancy-input-group">
+                                            <label>✨ AI Prompt (Konu)</label>
+                                            <textarea 
+                                                placeholder="Örn: Bir restoran için hijyen, servis hızı ve lezzet hakkında sorular oluştur..." 
+                                                value={aiTopic} 
+                                                onChange={(e) => setAiTopic(e.target.value)}
+                                                className="fancy-textarea ai-textarea"
+                                                rows="5"
+                                                disabled={aiLoading}
+                                            />
+                                        </div>
+                                        <div className="ai-count-row">
+                                            <div className="question-count-control">
+                                                <label>Soru Sayısı</label>
+                                                <div className="counter-wrapper">
+                                                    <button className="counter-btn" onClick={decreaseCount} disabled={aiLoading}><FaMinus size={10} /></button>
+                                                    <input 
+                                                        type="text" 
+                                                        className="counter-input" 
+                                                        value={aiQuestionCount} 
+                                                        onChange={(e) => handleCountChange(e.target.value)}
+                                                        onBlur={handleCountBlur}
+                                                        disabled={aiLoading}
                                                     />
-                                                    <button className="sifirdan-secenek-sil-butonu" onClick={() => handleSecenekSil(soru.id, i)}>
-                                                        <FaTrash />
-                                                    </button>
+                                                    <button className="counter-btn" onClick={increaseCount} disabled={aiLoading}><FaPlus size={10} /></button>
                                                 </div>
-                                            ))}
-                                            <button className="sifirdan-secenek-ekle-butonu" onClick={() => handleSecenekEkle(soru.id)}>
-                                                <FaPlus style={{ marginRight: "6px" }} /> Yeni Seçenek
+                                            </div>
+                                            <button 
+                                                className="ai-generate-btn"
+                                                onClick={handleAIileOlustur}
+                                                disabled={aiLoading || !aiTopic.trim() || !anketBaslik.trim()}
+                                            >
+                                                {aiLoading ? <FaSpinner className="spinning" /> : <FaMagic />}
+                                                {aiLoading ? "Oluşturuluyor..." : "Soruları Oluştur"}
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 2: QUESTIONS (Same as SifirdanAnket) */}
+                    {currentStep === 2 && (
+                        <div className="wizard-step step-questions animate-in">
+                            <div className="questions-layout">
+                                {/* Left Sidebar: Question List */}
+                                <div className="questions-sidebar">
+                                    <div className="sidebar-card">
+                                        <h3>Sorular ({sorular.length})</h3>
+                                        <div className="question-list-nav">
+                                            {sorular.map((s, i) => (
+                                                <div 
+                                                    key={s.id} 
+                                                    className={`nav-item ${activeQuestionId === s.id ? 'active' : ''}`}
+                                                    onClick={() => setActiveQuestionId(s.id)}
+                                                >
+                                                    <span className="idx">{i + 1}</span>
+                                                    <span className="txt">{s.metin || "Adsız Soru"}</span>
+                                                    <div className="nav-actions">
+                                                        <button 
+                                                            className="mini-del-btn"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleSoruSil(s.id);
+                                                            }}
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button className="add-btn-sidebar" onClick={handleYeniSoruEkle}>
+                                            <FaPlus /> Soru Ekle
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Right Main: Active Question Editor */}
+                                <div className="questions-editor">
+                                    {sorular.length === 0 ? (
+                                        <div className="empty-questions-state">
+                                            <div className="empty-icon"><FaClipboardList /></div>
+                                            <h3>Henüz soru eklenmedi</h3>
+                                            <p>Anketinizi oluşturmaya başlamak için soldaki menüden veya aşağıdaki butondan soru ekleyin.</p>
+                                            <button className="big-add-question" onClick={handleYeniSoruEkle}>
+                                                <FaPlus /> İlk Soruyu Ekle
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {(() => {
+                                                const activeQ = sorular.find(s => s.id === activeQuestionId) || sorular[0];
+                                                if (activeQ && activeQuestionId !== activeQ.id) setActiveQuestionId(activeQ.id);
+                                                if (!activeQ) return null;
+                                                const index = sorular.findIndex(s => s.id === activeQ.id);
+
+                                                return (
+                                                    <div className="q-workspace">
+                                                        <div className="q-workspace-header">
+                                                            <div className="q-info">
+                                                                <span className="q-index">Soru {index + 1}</span>
+                                                                <span className="q-type-label">{activeQ.tip.replace('-', ' ').toUpperCase()}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="q-workspace-panel animate-in">
+                                                            <div className="q-panel-section main-input-section">
+                                                                <label className="section-mini-label">Soru Metni</label>
+                                                                <textarea 
+                                                                    placeholder="Katılımcıya ne sormak istersiniz?" 
+                                                                    value={activeQ.metin}
+                                                                    onChange={(e) => handleSoruDegis(activeQ.id, e.target.value)}
+                                                                    className="q-panel-input"
+                                                                    autoFocus
+                                                                    rows={1}
+                                                                    onInput={(e) => {
+                                                                        e.target.style.height = 'auto';
+                                                                        e.target.style.height = e.target.scrollHeight + 'px';
+                                                                    }}
+                                                                />
+                                                            </div>
+
+                                                            <div className="q-panel-section settings-section">
+                                                                <div className="section-header">
+                                                                    <FaLayerGroup /> <span>Soru Ayarları</span>
+                                                                </div>
+                                                                <div className="q-config-grid">
+                                                                    <div className="q-config-field">
+                                                                        <label>Soru Tipi</label>
+                                                                        <select value={activeQ.tip} onChange={(e) => handleTipDegis(activeQ.id, e.target.value)}>
+                                                                            <option value="acik-uclu">✍️ Açık Uçlu (Metin)</option>
+                                                                            <option value="coktan-tek">◉ Çoktan Seçmeli (Tek)</option>
+                                                                            <option value="coktan-coklu">☑️ Çoktan Seçmeli (Çoklu)</option>
+                                                                            <option value="slider">🎚️ Slider (Puanlama)</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    
+                                                                    <div className="q-config-field clickable" onClick={() => handleZorunluToggle(activeQ.id)}>
+                                                                        <label>Zorunluluk</label>
+                                                                        <div className="compact-toggle-wrap">
+                                                                            <div className={`custom-toggle mini ${activeQ.zorunlu ? 'on' : 'off'}`}>
+                                                                                <div className="toggle-circle"></div>
+                                                                            </div>
+                                                                            <span className="toggle-label">{activeQ.zorunlu ? 'Zorunlu' : 'İsteğe Bağlı'}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {activeQ.tip === 'slider' && (
+                                                                <div className="q-panel-section slider-config-section animate-in">
+                                                                    <div className="section-header">
+                                                                        <FaSearch /> <span>Slider Yapılandırması</span>
+                                                                    </div>
+                                                                    <div className="slider-config-grid">
+                                                                        <div className="config-group">
+                                                                            <label>Değer Aralığı</label>
+                                                                            <div className="range-inputs">
+                                                                                <input 
+                                                                                    type="number" 
+                                                                                    value={activeQ.sliderMin || 1} 
+                                                                                    onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMin', parseInt(e.target.value))}
+                                                                                    placeholder="Min"
+                                                                                />
+                                                                                <span>-</span>
+                                                                                <input 
+                                                                                    type="number" 
+                                                                                    value={activeQ.sliderMax || 10} 
+                                                                                    onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMax', parseInt(e.target.value))}
+                                                                                    placeholder="Max"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {activeQ.tip.includes("coktan") && (
+                                                                <div className="q-panel-section choices-section">
+                                                                    <div className="section-header">
+                                                                        <FaClipboardList /> <span>Seçenekler</span>
+                                                                    </div>
+                                                                    <div className="choices-compact-list">
+                                                                        {activeQ.secenekler.map((sec, i) => (
+                                                                            <div key={i} className="choice-compact-row">
+                                                                                <div className="choice-indicator">
+                                                                                    {activeQ.tip === 'coktan-tek' ? <div className="dot-icon" /> : <div className="check-icon" />}
+                                                                                </div>
+                                                                                <input 
+                                                                                    type="text" 
+                                                                                    value={sec} 
+                                                                                    onChange={(e) => handleSecenekDegis(activeQ.id, i, e.target.value)}
+                                                                                    placeholder={`Seçenek ${i + 1}`}
+                                                                                    className="choice-minimal-input"
+                                                                                />
+                                                                                <button className="minimal-del-btn" onClick={() => handleSecenekSil(activeQ.id, i)}>
+                                                                                    <FaTrash />
+                                                                                </button>
+                                                                            </div>
+                                                                        ))}
+                                                                        <button className="add-choice-minimal" onClick={() => handleSecenekEkle(activeQ.id)}>
+                                                                            <FaPlus /> Yeni Seçenek Ekle
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {activeQ.tip === 'slider' && (
+                                                                <div className="q-panel-section preview-section">
+                                                                    <div className="section-header">
+                                                                        <FaSearch /> <span>Slider Önizleme</span>
+                                                                    </div>
+                                                                    <div className="slider-preview-box">
+                                                                        <input type="range" min={activeQ.sliderMin || 1} max={activeQ.sliderMax || 10} disabled />
+                                                                        <div className="slider-labels">
+                                                                            <span>{activeQ.sliderMin || 1}</span>
+                                                                            <span>{activeQ.sliderMax || 10}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </>
                                     )}
                                 </div>
-                            ))}
+                            </div>
                         </div>
+                    )}
 
-                        <div className="sifirdan-anket-aksiyonlari">
-                            <button
-                                className="sifirdan-ikincil-buton"
-                                onClick={() => {
-                                    if (window.confirm("Yeniden AI ile oluşturmak ister misiniz? Mevcut sorular silinecek.")) {
-                                        setSoruListesiAcik(false); // Başa dön
-                                        setSorular([]);
-                                    }
-                                }}
-                            >
-                                Yeniden Oluştur
+                    {/* STEP 3: AUDIENCE (Same as SifirdanAnket) */}
+                    {currentStep === 3 && (
+                        <div className="wizard-step step-audience animate-in">
+                            <div className="step-header-text">
+                                <h2>Hedef Kitle ve Kurallar</h2>
+                                <p>Anketinizin kimler tarafından ve hangi kurallarla doldurulacağını belirleyin.</p>
+                            </div>
+
+                            <div className="audience-grid">
+                                <div className={`audience-card ${secilenKriterler.kimlikDogrulama ? 'expanded' : ''}`} onClick={() => handleKriterToggle("kimlikDogrulama")}>
+                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("kimlikDogrulama")}}><FaCheckCircle /></div>
+                                    <FaShieldAlt className="card-icon" />
+                                    <div className="card-content-wrap">
+                                        <h3>Biyometrik Kimlik & Yüz Doğrulama</h3>
+                                        <p>AI destekli yüz tanıma ve canlılık testi ile en yüksek güvenlik seviyesini sağlar.</p>
+                                    </div>
+                                </div>
+                                <div className={`audience-card ${secilenKriterler.tcNo ? 'expanded' : ''}`} onClick={() => handleKriterToggle("tcNo")}>
+                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("tcNo")}}><FaCheckCircle /></div>
+                                    <FaIdCard className="card-icon" />
+                                    <div className="card-content-wrap">
+                                        <h3>TC Kimlik No Doğrulama</h3>
+                                        <p>Nüfus ve Vatandaşlık İşleri (NVİ) üzerinden kimlik bilgilerinin doğruluğu kontrol edilir.</p>
+                                    </div>
+                                </div>
+                                <div className={`audience-card ${secilenKriterler.telefonNumarasi ? 'expanded' : ''}`} onClick={() => handleKriterToggle("telefonNumarasi")}>
+                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("telefonNumarasi")}}><FaCheckCircle /></div>
+                                    <FaMobileAlt className="card-icon" />
+                                    <div className="card-content-wrap">
+                                        <h3>Telefon Doğrulama</h3>
+                                        <p>Bot saldırılarını engellemek için katılımcıların telefon numarası SMS ile onaylanır.</p>
+                                    </div>
+                                </div>
+                                <div className={`audience-card ${secilenKriterler.mail ? 'expanded' : ''}`} onClick={() => handleKriterToggle("mail")}>
+                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("mail")}}><FaCheckCircle /></div>
+                                    <FaEnvelope className="card-icon" />
+                                    <div className="card-content-wrap">
+                                        <h3>E-posta Kısıtlaması</h3>
+                                        <p>Anketinizi sadece belirli kurumsal veya özel e-posta uzantılarına sahip kişilerle sınırlayın.</p>
+                                        {secilenKriterler.mail && (
+                                            <div className="nested-input" onClick={e => e.stopPropagation()}>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="@kurum.com" 
+                                                    value={mailUzantisi}
+                                                    onChange={e => setMailUzantisi(e.target.value)}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className={`audience-card ${secilenKriterler.konum ? 'expanded' : ''}`} onClick={() => handleKriterToggle("konum")}>
+                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("konum")}}><FaCheckCircle /></div>
+                                    <FaMapMarkerAlt className="card-icon" />
+                                    <div className="card-content-wrap">
+                                        <h3>Bölge Kısıtlaması</h3>
+                                        <p>Anketin sadece sizin belirlediğiniz il, ilce veya özel bir radius alanı içinden cevaplanmasını sağlar.</p>
+                                        {secilenKriterler.konum && (
+                                            <div className="nested-actions">
+                                                {kayitliKonumKriteri ? (
+                                                    <span className="location-badge">{kayitliKonumKriteri.label}</span>
+                                                ) : (
+                                                    <span className="no-location">Konum seçilmedi</span>
+                                                )}
+                                                <button className="select-map-btn" onClick={() => setKonumModalAcik(true)}>Haritada Seç</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 4: SUCCESS */}
+                    {currentStep === 4 && (
+                        <div className="wizard-step step-success animate-in">
+                            <div className="celebration-card">
+                                <div className="check-blob"><FaCheckCircle /></div>
+                                <h1 className="success-title">Harika Bir İş Çıkardın!</h1>
+                                <p>AI ile oluşturduğun anket başarıyla yayınlandı.</p>
+                                
+                                <div className="link-copy-area">
+                                    <label>Paylaşım Linki</label>
+                                    <div className="link-box">
+                                        <code>{olusanLink}</code>
+                                        <button onClick={() => {navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!");}}><FaCopy /></button>
+                                    </div>
+                                </div>
+
+                                <div className="success-actions">
+                                    <button className="btn-main-finish" onClick={() => navigate("/panel")}>Dashboard'a Dön</button>
+                                    <button className="btn-sec-finish" onClick={() => window.open(olusanLink)}>Anketi Görüntüle</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer Controls */}
+                {currentStep > 1 && currentStep < 4 && (
+                    <div className="wizard-footer">
+                        <div className="footer-left">
+                            <button className="btn-wizard prev" onClick={prevStep}>
+                                <FaChevronLeft /> Geri
                             </button>
-                            <button className="sifirdan-birincil-buton" onClick={handleDevamEt}>
-                                İlerle
-                            </button>
+                        </div>
+                        <div className="footer-right">
+                            {currentStep < 3 ? (
+                                <button className="btn-wizard next" onClick={nextStep}>
+                                    Devam Et <FaChevronRight />
+                                </button>
+                            ) : (
+                                <button className="btn-wizard launch" onClick={handleFinalYayinla} disabled={loading}>
+                                    {loading ? "Yayınlanıyor..." : "Anketi Yayınla"} <FaCheckCircle />
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}
             </main>
+
+            {/* Google Maps Modal */}
+            {konumModalAcik && (
+                <div className="maps-modal-overlay">
+                    <div className="maps-modal">
+                        <div className="modal-head">
+                            <h3><FaMapMarkedAlt /> Lokasyon Hedefleme</h3>
+                            <button className="close-btn" onClick={() => setKonumModalAcik(false)}>✕</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="search-box-map">
+                                <FaSearch className="s-icon" />
+                                <input ref={autoCompleteRef} type="text" placeholder="Şehir, ilçe veya mahalle aratın..." value={mapSearchInput} onChange={e => setMapSearchInput(e.target.value)} />
+                            </div>
+                            {googleYeri && (
+                                <div className="location-settings">
+                                    <div className="selected-preview">Seçilen: <strong>{googleYeri.tamAdres}</strong></div>
+                                    <div className="config-row">
+                                        <button className={kisitlamaTuru === "sehir" ? 'active' : ''} onClick={() => setKisitlamaTuru("sehir")}>Şehir ({googleYeri.il})</button>
+                                        {googleYeri.ilce && <button className={kisitlamaTuru === "ilce" ? 'active' : ''} onClick={() => setKisitlamaTuru("ilce")}>İlçe ({googleYeri.ilce})</button>}
+                                        <button className={kisitlamaTuru === "radius" ? 'active' : ''} onClick={() => setKisitlamaTuru("radius")}>Mesafe (Radius)</button>
+                                    </div>
+                                    {kisitlamaTuru === "radius" && (
+                                        <div className="radius-pick">
+                                            <label>Yarıçap (Metre):</label>
+                                            <select value={radiusDegeri} onChange={e => setRadiusDegeri(e.target.value)}>
+                                                <option value="100">100m</option>
+                                                <option value="500">500m</option>
+                                                <option value="1000">1km</option>
+                                                <option value="5000">5km</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn-confirm" onClick={handleKonumKaydet} disabled={!googleYeri}>Seçimi Onayla</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

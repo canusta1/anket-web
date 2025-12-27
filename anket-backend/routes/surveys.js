@@ -361,22 +361,34 @@ router.post("/submit", async (req, res) => {
 });
 
 // ============================================
-// 6. ANKET SİL
+// 6. ANKET SİL (TAM TEMİZLİK)
 // ============================================
 router.delete("/:id", auth(true), async (req, res) => {
   try {
-    const anket = await Survey.findById(req.params.id);
-    if (!anket) return res.status(404).json({ success: false, error: "Bulunamadı" });
+    const anketId = req.params.id;
+    const anket = await Survey.findById(anketId);
+    
+    if (!anket) return res.status(404).json({ success: false, error: "Anket bulunamadı." });
 
+    // Yetki kontrolü (sadece kendi anketini silebilir)
     if (anket.kullaniciId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ success: false, error: "Yetkiniz yok" });
+      return res.status(403).json({ success: false, error: "Bu anketi silme yetkiniz yok." });
     }
 
-    await SurveyLink.deleteMany({ anketId: req.params.id });
-    await Survey.findByIdAndDelete(req.params.id);
+    // 1. Ankete bağlı tüm linkleri sil
+    await SurveyLink.deleteMany({ anketId });
+    
+    // 2. Ankete verilmiş tüm cevapları sil
+    await SurveyResponse.deleteMany({ anketId });
+    
+    // 3. Anketin kendisini sil
+    await Survey.findByIdAndDelete(anketId);
 
-    res.status(204).end();
+    console.log(`🗑️ Anket ve tüm verileri silindi: ${anketId}`);
+
+    res.json({ success: true, message: "Anket ve ilişkili tüm veriler başarıyla silindi." });
   } catch (e) {
+    console.error("❌ Silme Hatası:", e);
     res.status(400).json({ success: false, error: e.message });
   }
 });

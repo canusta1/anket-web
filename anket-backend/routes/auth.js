@@ -1,7 +1,16 @@
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const auth = require("../middleware/auth");
+const { generateVerificationCode, sendVerificationCode } = require("../services/mailService");
+
+// Google OAuth Client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Geçici doğrulama kodları (Memory'de - production'da Redis kullanılmalı)
+const verificationCodes = new Map();
+const CODE_EXPIRY = 10 * 60 * 1000; // 10 dakika
 
 function sign(u) {
   return jwt.sign(
@@ -11,24 +20,92 @@ function sign(u) {
   );
 }
 
-// Kayıt
+// Doğrulama kodu gönder
+router.post("/send-code", async (req, res) => {
+  try {
+    const { email, firstName } = req.body;
+
+    if (!email) throw new Error("E-posta adresi gerekli");
+    if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error("Geçersiz e-posta");
+
+    // E-posta zaten kayıtlı mı kontrol et
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new Error("Bu e-posta adresi zaten kayıtlı");
+    }
+
+    // Doğrulama kodu oluştur
+    const code = generateVerificationCode();
+    
+    // Kodu memory'de sakla (email -> {code, expiry, attempts})
+    verificationCodes.set(email, {
+      code,
+      expiry: Date.now() + CODE_EXPIRY,
+      attempts: 0
+    });
+
+    // E-posta gönder
+    await sendVerificationCode(email, code, firstName || 'Kullanıcı');
+
+    console.log(`✅ Doğrulama kodu gönderildi: ${email}`);
+    res.json({ message: "Doğrulama kodu gönderildi", expiresIn: CODE_EXPIRY / 1000 });
+
+  } catch (e) {
+    console.error("❌ Kod gönderme hatası:", e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Kayıt (doğrulama kodu ile)
 router.post("/register", async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, tckn, password } = req.body;
+    const { firstName, lastName, email, phone, password, verificationCode } = req.body;
 
-    // basit doğrulamalar
+    // Basit doğrulamalar
     if (!firstName || !lastName || !email || !password)
       throw new Error("Zorunlu alanlar eksik");
     if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error("Geçersiz e-posta");
-    if (tckn && !/^\d{11}$/.test(tckn)) throw new Error("TCKN 11 haneli olmalı");
     if (password.length < 6) throw new Error("Şifre min 6 karakter");
 
+    // Doğrulama kodu kontrolü
+    if (!verificationCode) {
+      throw new Error("Doğrulama kodu gerekli");
+    }
+
+    const storedData = verificationCodes.get(email);
+    if (!storedData) {
+      throw new Error("Doğrulama kodu bulunamadı. Lütfen önce kod isteyin.");
+    }
+
+    // Süre kontrolü
+    if (Date.now() > storedData.expiry) {
+      verificationCodes.delete(email);
+      throw new Error("Doğrulama kodunun süresi doldu. Lütfen yeni kod isteyin.");
+    }
+
+    // Deneme sayısı kontrolü (max 5)
+    if (storedData.attempts >= 5) {
+      verificationCodes.delete(email);
+      throw new Error("Çok fazla yanlış deneme. Lütfen yeni kod isteyin.");
+    }
+
+    // Kod kontrolü
+    if (storedData.code !== verificationCode) {
+      storedData.attempts++;
+      throw new Error("Doğrulama kodu hatalı");
+    }
+
+    // Kod doğru - temizle
+    verificationCodes.delete(email);
+
+    // Kullanıcıyı oluştur
     const u = new User({ firstName, lastName, email, phone, password });
-    if (tckn) u.tckn = tckn; // sanal setter şifreler
     await u.save();
 
     const token = sign(u);
+    console.log(`✅ Yeni kullanıcı kayıt oldu: ${email}`);
     res.status(201).json({ token, user: u.safeJSON() });
+
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
@@ -43,6 +120,55 @@ router.post("/login", async (req, res) => {
 
   const token = sign(u);
   res.json({ token, user: u.safeJSON() });
+});
+
+// Google OAuth Giriş
+router.post("/google", async (req, res) => {
+  try {
+    const { email, given_name, family_name, picture, sub } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: "E-posta bilgisi gerekli" });
+    }
+
+    const googleId = sub;
+
+    // Kullanıcıyı bul veya oluştur
+    let user = await User.findOne({ email });
+    
+    if (!user) {
+      // Yeni kullanıcı oluştur (Google ile kayıt)
+      user = new User({
+        firstName: given_name || "Google",
+        lastName: family_name || "Kullanıcı",
+        email,
+        googleId,
+        profilePicture: picture,
+        password: Math.random().toString(36).slice(-12) + "Aa1!", // Rastgele güçlü şifre
+        isGoogleUser: true
+      });
+      await user.save();
+      console.log(`✅ Yeni Google kullanıcısı kayıt oldu: ${email}`);
+    } else {
+      // Mevcut kullanıcının Google bilgilerini güncelle
+      if (!user.googleId && googleId) {
+        user.googleId = googleId;
+        user.isGoogleUser = true;
+      }
+      if (picture && !user.profilePicture) {
+        user.profilePicture = picture;
+      }
+      await user.save();
+      console.log(`✅ Google ile giriş yapıldı: ${email}`);
+    }
+
+    const token = sign(user);
+    res.json({ token, user: user.safeJSON() });
+
+  } catch (err) {
+    console.error("❌ Google OAuth hatası:", err.message);
+    res.status(401).json({ error: "Google kimlik doğrulama başarısız: " + err.message });
+  }
 });
 
 // Oturum sahibi bilgilerini GETİR (Mevcut kodun)

@@ -1,1475 +1,425 @@
-/* AnketCoz.css - Tam ve Güzelleştirilmiş Hali */
+/* ==========================================
+   ANKET CEVAPLAMA EKRANI (PROFESYONEL TASARIM)
+   Clean, modern, focus-oriented styling
+========================================== */
 
 .anket-coz-page {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    background-attachment: fixed;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
-    padding: 40px 20px;
+  min-height: 100vh;
+  background-color: var(--panel-bg); /* açık gri / koyu mod uyumlu */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 40px 20px;
+  color: var(--panel-text);
+  line-height: 1.6;
 }
 
-.anket-coz-page * {
-    box-sizing: border-box;
+/* Container & Layout */
+.anket-container {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.anket-coz-page .anket-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.anket-coz-page .anket-wrapper {
-    animation: slideInUp 0.6s ease-out;
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ==================== FORM YAPISI (DÜZENLEME) ==================== */
-/* Form içeriğinin ve butonların alt alta düzgün durmasını sağlar */
-.anket-coz-page .form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
-/* ==================== LOADING ==================== */
-.anket-coz-page .loading-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    padding: 60px 20px;
-}
-
-.anket-coz-page .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #e2e8f0;
-    border-top: 3px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.anket-coz-page .loading-wrapper p {
-    color: #718096;
-    font-size: 14px;
-}
-
-/* ==================== BOXES ==================== */
-.anket-coz-page .anket-card,
-.anket-coz-page .error-card,
-.anket-coz-page .success-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 30px;
-    margin-bottom: 20px;
-    pointer-events: auto;
-}
-
-/* ==================== STEP INDICATOR ==================== */
-.anket-coz-page .step-indicator {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.anket-coz-page .step-badge {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 14px;
-    background: #e2e8f0;
-    color: #718096;
-}
-
-.anket-coz-page .step-badge.active {
-    background: #667eea;
-    color: white;
-}
-
-.anket-coz-page .step-badge.completed {
-    background: #48bb78;
-    color: white;
-}
-
-.anket-coz-page .step-line {
-    width: 30px;
-    height: 2px;
-    background: #e2e8f0;
-}
-
-/* ==================== HEADER ==================== */
-.anket-coz-page .section-header {
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.anket-coz-page .section-header h1 {
-    font-size: 28px;
-    color: white;
-    margin-bottom: 10px;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.anket-coz-page .section-header p {
-    font-size: 15px;
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.5;
-}
-
-/* ==================== FORM GROUP ==================== */
-.anket-coz-page .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.anket-coz-page .form-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #2d3748;
-}
-
-.anket-coz-page .form-input,
-.anket-coz-page .textarea-input {
-    padding: 10px 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 14px;
-    color: #2d3748;
-    font-family: inherit;
-    background: white;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.anket-coz-page .form-input:focus,
-.anket-coz-page .textarea-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
-    transform: translateY(-2px);
-    transition: all 0.3s ease;
-}
-
-.anket-coz-page .form-input.error {
-    border-color: #f44336;
-    background: #fff5f5;
-}
-
-.anket-coz-page .error-text {
-    font-size: 12px;
-    color: #f44336;
-    font-weight: 600;
-    margin-top: 4px;
-}
-
-/* ==================== FORM ROW ==================== */
-.anket-coz-page .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    animation: fadeIn 0.6s ease-out 0.2s both;
+.anket-wrapper {
+  animation: fadeIn 0.5s ease-out;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==================== CRITERIA SECTION ==================== */
-.anket-coz-page .criteria-section {
-    margin: 30px 0;
-    padding: 24px;
-    background: linear-gradient(135deg, #f0f4ff 0%, #f9f5ff 100%);
-    border: 2px solid #e0e7ff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+/* ==================== KART TASARIMI ==================== */
+.survey-card {
+  background: var(--panel-card);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 40px;
+  margin-bottom: 24px;
+  border: 1px solid var(--panel-border);
+  position: relative;
+  overflow: hidden;
 }
 
-.anket-coz-page .criteria-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #667eea;
-    margin: 0 0 18px 0;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e0e7ff;
-
-    color: #2d3748;
-    margin-bottom: 15px;
+/* Header Section */
+.survey-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--panel-border);
 }
 
-/* ==================== SORULAR ==================== */
-.anket-coz-page .sorular-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 30px;
+.survey-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--panel-text);
+  margin-bottom: 12px;
+  letter-spacing: -0.025em;
 }
 
-.anket-coz-page .soru-card {
-    padding: 20px;
-    background: #f9fafb;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
+.survey-header p {
+  color: var(--panel-text-muted);
+  font-size: 1.1rem;
 }
 
-.anket-coz-page .soru-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 20px;
+/* ==================== FORM GRUPLARI ==================== */
+.form-group {
+  margin-bottom: 24px;
 }
 
-.anket-coz-page .soru-numarasi {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-    height: 28px;
-    background: #667eea;
-    color: white;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 14px;
-    flex-shrink: 0;
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--panel-text);
+  font-size: 0.95rem;
 }
 
-.anket-coz-page .soru-text {
-    font-size: 16px;
-    color: #2d3748;
-    font-weight: 600;
-    line-height: 1.5;
-    margin: 0;
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--panel-bg-alt);
+  color: var(--panel-text);
+  transition: all 0.2s ease;
 }
 
-.anket-coz-page .soru-content {
-    margin-top: 15px;
+.form-input:focus {
+  outline: none;
+  border-color: var(--panel-accent);
+  box-shadow: 0 0 0 3px var(--panel-accent-light);
 }
 
-/* ==================== SEÇENEKLER ==================== */
-.anket-coz-page .secenekler {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.form-input.error {
+  border-color: var(--panel-danger);
 }
 
-.anket-coz-page .radio-wrapper,
-.anket-coz-page .checkbox-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.error-text {
+  color: var(--panel-danger);
+  font-size: 0.875rem;
+  margin-top: 6px;
+  display: block;
 }
 
-.anket-coz-page .radio-wrapper:hover,
-.anket-coz-page .checkbox-wrapper:hover {
-    background: #f9fafb;
-    border-color: #cbd5e0;
+/* ==================== STEPPER ==================== */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 40px;
 }
 
-.anket-coz-page .radio-input,
-.anket-coz-page .checkbox-input {
-    width: 18px;
-    height: 18px;
-    accent-color: #667eea;
-    flex-shrink: 0;
-    cursor: pointer;
+.step-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--panel-bg-alt);
+  border: 2px solid var(--panel-border);
+  color: var(--panel-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: all 0.3s ease;
 }
 
-.anket-coz-page .radio-label,
-.anket-coz-page .checkbox-label {
-    font-size: 14px;
-    color: #2d3748;
-    margin: 0;
-    display: inline;
-    cursor: pointer;
+.step-badge.active {
+  background: var(--panel-accent);
+  border-color: var(--panel-accent);
+  color: white;
+  box-shadow: 0 0 0 4px var(--panel-accent-light);
 }
 
-/* ==================== TEXTAREA ==================== */
-.anket-coz-page .textarea-input {
-    width: 100%;
-    min-height: 80px;
-    padding: 10px 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 14px;
-    color: #2d3748;
-    resize: vertical;
-    font-family: inherit;
+.step-badge.completed {
+  background: var(--panel-success);
+  border-color: var(--panel-success);
+  color: white;
+}
+
+.step-line {
+  height: 2px;
+  width: 60px;
+  background: var(--panel-border);
+}
+
+/* ==================== SORU KARTLARI ==================== */
+.question-block {
+  margin-bottom: 40px;
+  padding: 24px;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--panel-bg-alt);
+  transition: border-color 0.2s;
+}
+
+.question-block:hover, .question-block:focus-within {
+  border-color: var(--panel-accent);
+}
+
+.question-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.question-number {
+  background: var(--panel-accent-light);
+  color: var(--panel-accent);
+  font-weight: 700;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--panel-text);
+  margin-top: 4px;
+}
+
+/* ==================== SEÇENEKLER (Modern Radio/Checkbox) ==================== */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.custom-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--panel-card);
+}
+
+.custom-option:hover {
+  background: var(--panel-card-hover);
+  border-color: var(--panel-text-muted);
+}
+
+.custom-option.selected {
+  border-color: var(--panel-accent);
+  background: var(--panel-accent-light);
+}
+
+.option-indicator {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--panel-text-muted);
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.custom-option.checkbox .option-indicator {
+  border-radius: 4px;
+}
+
+.custom-option.selected .option-indicator {
+  border-color: var(--panel-accent);
+  background: var(--panel-accent);
+}
+
+.custom-option.selected .option-indicator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%; /* Checkbox için farklı olabilir ama şimdilik nokta */
+}
+
+.option-label {
+  font-size: 1rem;
+  color: var(--panel-text);
 }
 
 /* ==================== SLIDER ==================== */
-.anket-coz-page .slider-container {
-    width: 100%;
-    padding: 20px 0;
+.slider-container {
+  padding: 20px 10px;
 }
 
-.anket-coz-page .slider-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+.slider-wrapper {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
 }
 
-.anket-coz-page .slider-input {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: linear-gradient(to right, #e2e8f0 0%, #e2e8f0 100%);
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-    cursor: pointer;
+.slider-input {
+  width: 100%;
+  height: 6px;
+  background: var(--panel-border);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
 }
 
-.anket-coz-page .slider-input::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #667eea;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-    transition: all 0.2s ease;
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--panel-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.1s;
 }
 
-.anket-coz-page .slider-input::-webkit-slider-thumb:hover {
-    width: 28px;
-    height: 28px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+.slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
 
-.anket-coz-page .slider-input::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #667eea;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-    transition: all 0.2s ease;
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: var(--panel-text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.anket-coz-page .slider-input::-moz-range-thumb:hover {
-    width: 28px;
-    height: 28px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+.slider-value-display {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--panel-accent);
+  margin-bottom: 8px;
 }
 
-.anket-coz-page .slider-input::-moz-range-track {
-    background: none;
-    border: none;
+/* ==================== DOĞRULAMA KARTLARI ==================== */
+.verification-card {
+  background: var(--panel-bg-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
 }
 
-.anket-coz-page .slider-labels {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+.verification-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--panel-border);
 }
 
-.anket-coz-page .slider-label-min,
-.anket-coz-page .slider-label-max {
-    font-size: 13px;
-    color: #718096;
-    font-weight: 500;
-    min-width: 40px;
+.verification-icon {
+  font-size: 1.5rem;
 }
 
-.anket-coz-page .slider-label-min {
-    text-align: left;
+.verification-title h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--panel-text);
 }
 
-.anket-coz-page .slider-label-max {
-    text-align: right;
+.verification-title p {
+  font-size: 0.85rem;
+  color: var(--panel-text-muted);
+  margin: 2px 0 0 0;
 }
 
-.anket-coz-page .slider-value {
-    flex: 1;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: #667eea;
-    background: #f0f4ff;
-    padding: 8px 12px;
-    border-radius: 4px;
+/* Inline Verification Input Group */
+.verify-input-group {
+  display: flex;
+  gap: 12px;
 }
 
-/* ==================== BUTTONS (DÜZENLENDİ) ==================== */
-/* Butonları kapsayan alan */
-.anket-coz-page .form-actions {
-    display: flex;
-    flex-direction: row;
-    /* Yan yana dizilim */
-    justify-content: space-between;
-    /* Aralarına boşluk koy */
-    align-items: center;
-    width: 100%;
-    /* Sayfa genişliğini kapla */
-    gap: 15px;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+.btn-verify {
+  padding: 0 24px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--panel-accent);
+  color: white;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
 
-/* Butonların kendisi */
-.anket-coz-page .btn-primary,
-.anket-coz-page .btn-primary,
-.anket-coz-page .btn-secondary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 24px;
-    height: 48px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex: 1;
-    min-width: 120px;
+.btn-verify:hover:not(:disabled) {
+  background: var(--panel-accent-hover);
+  transform: translateY(-1px);
 }
 
-.anket-coz-page .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+.btn-verify:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.anket-coz-page .btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+/* Success State for Verification */
+.verified-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-.anket-coz-page .btn-primary:active:not(:disabled) {
-    transform: translateY(0);
+/* ==================== ACTIONS ==================== */
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 40px;
 }
 
-.anket-coz-page .btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.btn-primary {
+  flex: 1;
+  height: 56px;
+  background: var(--panel-black, #1e293b); /* Fallback */
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.anket-coz-page .btn-secondary {
-    background: #e2e8f0;
-    color: #2d3748;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
-.anket-coz-page .btn-secondary:hover {
-    background: #cbd5e0;
-    transform: translateY(-2px);
-}
-
-/* ==================== ERROR & SUCCESS CARDS ==================== */
-.anket-coz-page .error-card {
-    text-align: center;
-}
-
-.anket-coz-page .error-icon {
-    font-size: 48px;
-    margin-bottom: 15px;
-}
-
-.anket-coz-page .error-card h2 {
-    font-size: 20px;
-    color: #e53e3e;
-    margin-bottom: 10px;
-}
-
-.anket-coz-page .error-card p {
-    font-size: 14px;
-    color: #718096;
-    margin-bottom: 15px;
-    line-height: 1.5;
-}
-
-.anket-coz-page .success-card {
-    text-align: center;
-}
-
-.anket-coz-page .success-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #48bb78;
-    color: white;
-    font-size: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-}
-
-.anket-coz-page .success-card h1 {
-    font-size: 22px;
-    color: #2d3748;
-    margin-bottom: 12px;
-}
-
-.anket-coz-page .success-card p {
-    font-size: 14px;
-    color: #718096;
-    margin-bottom: 12px;
-    line-height: 1.5;
-}
-
-.anket-coz-page .success-subtitle {
-    font-weight: 600;
-    color: #48bb78;
-    margin-bottom: 30px !important;
-}
-
-.anket-coz-page .success-card .btn-primary {
-    width: 100%;
-}
-
-/* ==================== RESPONSIVE ==================== */
+/* Responsive */
 @media (max-width: 768px) {
-    .anket-coz-page .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-
-    .anket-coz-page .anket-card,
-    .anket-coz-page .error-card,
-    .anket-coz-page .success-card {
-        padding: 20px;
-    }
-
-    .anket-coz-page .section-header h1 {
-        font-size: 20px;
-    }
-
-    .anket-coz-page .soru-text {
-        font-size: 13px;
-    }
-
-    /* Mobilde butonlar alt alta geçsin (kullanıcı deneyimi için) */
-    .anket-coz-page .form-actions {
-        flex-direction: column;
-    }
-
-    .anket-coz-page .btn-primary,
-    .anket-coz-page .btn-secondary {
-        width: 100%;
-    }
-}
-
-/* ==================== EMAIL DOĞRULAMA ==================== */
-.anket-coz-page .verification-form {
-    background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    margin-top: 20px;
-    border: 1px solid #e8ecf1;
-}
-
-.anket-coz-page .email-input-group {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-}
-
-.anket-coz-page .email-input-group input {
-    flex: 1;
-    padding: 14px 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 1rem;
-    background-color: white;
-    transition: all 0.3s ease;
-}
-
-.anket-coz-page .email-input-group input:focus {
-    border-color: #00b067;
-    box-shadow: 0 0 0 3px rgba(0, 176, 103, 0.1);
-    outline: none;
-}
-
-.anket-coz-page .btn-send-code {
-    padding: 14px 24px;
-    background: linear-gradient(135deg, #00b067, #009256);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0, 176, 103, 0.3);
-}
-
-.anket-coz-page .btn-send-code:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 176, 103, 0.4);
-}
-
-.anket-coz-page .btn-send-code:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.anket-coz-page .verification-info {
-    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
-    border-left: 4px solid #00b067;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #c8e6c9;
-}
-
-.anket-coz-page .verification-info p {
-    margin: 6px 0;
-    font-size: 0.95rem;
-    color: #2e7d32;
-}
-
-.anket-coz-page .verification-info p:first-child {
-    font-weight: 600;
-    color: #1b5e20;
-}
-
-.anket-coz-page .error-message {
-    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-    border-left: 4px solid #f44336;
-    padding: 12px;
-    border-radius: 8px;
-    margin: 15px 0;
-    color: #c62828;
-    font-size: 0.9rem;
-    border: 1px solid #ef9a9a;
-}
-
-.anket-coz-page .verification-success {
-    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-    padding: 40px 30px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 176, 103, 0.15);
-    margin-top: 20px;
-    border: 1px solid #d1fae5;
-}
-
-.anket-coz-page .verification-success .success-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-    animation: bounceIn 0.6s ease-out;
-    display: block;
-}
-
-@keyframes bounceIn {
-    0% {
-        transform: scale(0);
-        opacity: 0;
-    }
-
-    50% {
-        transform: scale(1.1);
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-.anket-coz-page .verification-success h2 {
-    color: #00b067;
-    margin: 10px 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-.anket-coz-page .verification-success p {
-    color: #555;
-    margin: 5px 0;
-    font-size: 0.95rem;
-}
-
-.anket-coz-page .full-width {
-    width: 100%;
-}
-
-/* ==================== EMAIL DOĞRULAMA FORMLAR ==================== */
-
-.anket-coz-page .email-verification-section {
-    background: linear-gradient(135deg, #fff5e6 0%, #ffebe0 100%);
+  .anket-coz-page {
+    padding: 20px 16px;
+  }
+  
+  .survey-card {
     padding: 24px;
-    border-radius: 12px;
-    border: 2px solid #ffe0b2;
-    margin: 24px 0;
-    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.1);
-    animation: slideInRight 0.6s ease-out 0.2s both;
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.anket-coz-page .email-section-header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #ffe0b2;
-}
-
-.anket-coz-page .email-section-header h3 {
-    margin: 0 0 8px 0;
-    color: #f57c00;
-    font-size: 1.1rem;
-    font-weight: 700;
-}
-
-.anket-coz-page .email-section-header p {
-    margin: 0;
-    color: #e65100;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.anket-coz-page .verification-form-group {
-    display: flex;
+  }
+  
+  .verify-input-group {
     flex-direction: column;
-    gap: 12px;
-}
-
-.anket-coz-page .verification-form-group label {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.95rem;
-}
-
-.anket-coz-page .email-input-group {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-}
-
-.anket-coz-page .email-input-group input {
-    flex: 1;
-    padding: 12px 14px;
-    border: 2px solid #ffe0b2;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    background-color: white;
-    transition: all 0.3s ease;
-}
-
-.anket-coz-page .email-input-group input:focus {
-    border-color: #f57c00;
-    box-shadow: 0 0 0 4px rgba(245, 124, 0, 0.15);
-    outline: none;
-}
-
-.anket-coz-page .code-input-group {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    margin-top: 10px;
-}
-
-.anket-coz-page .code-input-group input {
-    flex: 1;
-    padding: 12px 14px;
-    border: 2px solid #ffe0b2;
-    border-radius: 8px;
-    font-size: 1rem;
-    letter-spacing: 2px;
-    text-align: center;
-    background-color: white;
-    transition: all 0.3s ease;
-}
-
-.anket-coz-page .code-input-group input:focus {
-    border-color: #f57c00;
-    box-shadow: 0 0 0 4px rgba(245, 124, 0, 0.15);
-    outline: none;
-}
-
-.anket-coz-page .btn-send-code {
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #f57c00, #e65100);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
-}
-
-.anket-coz-page .btn-send-code:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(245, 124, 0, 0.4);
-}
-
-.anket-coz-page .btn-send-code:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.anket-coz-page .btn-verify-code {
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #f57c00, #e65100);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
-}
-
-.anket-coz-page .btn-verify-code:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(245, 124, 0, 0.4);
-}
-
-.anket-coz-page .btn-verify-code:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.anket-coz-page .btn-back-email {
-    padding: 10px 16px;
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 12px;
+  }
+  
+  .btn-verify {
     width: 100%;
-}
-
-.anket-coz-page .btn-back-email:hover {
-    background: #e5e7eb;
-    border-color: #9ca3af;
-    transform: translateY(-1px);
-}
-
-.anket-coz-page .verification-info {
-    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
-    border-left: 4px solid #00b067;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #c8e6c9;
-}
-
-.anket-coz-page .verification-info p {
-    margin: 6px 0;
-    font-size: 0.95rem;
-    color: #2e7d32;
-}
-
-.anket-coz-page .verification-info p:first-child {
-    font-weight: 600;
-    color: #1b5e20;
-}
-
-.anket-coz-page .verification-success-inline {
-    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
-    border-left: 4px solid #00b067;
-    padding: 16px;
-    border-radius: 8px;
-    margin: 16px 0;
-    border: 1px solid #c8e6c9;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.anket-coz-page .verification-success-inline .success-icon-small {
-    font-size: 24px;
-    color: #00b067;
-    font-weight: bold;
-}
-
-.anket-coz-page .verification-success-inline p {
-    margin: 0;
-    color: #2e7d32;
-    font-size: 0.95rem;
-}
-
-.anket-coz-page .form-divider {
-    margin: 24px 0;
-    border: none;
-    border-top: 1px solid #e5e7eb;
-}
-
-/* ==================== EMAIL VERIFICATION STATUS (DOĞRULANMIŞ) ==================== */
-.anket-coz-page .email-verification-status {
-    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
-    border: 2px solid #4caf50;
-    border-left: 5px solid #00b067;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 16px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    animation: slideInUp 0.4s ease-out;
-}
-
-.anket-coz-page .email-verification-status .verification-checkmark {
-    font-size: 24px;
-    font-weight: 700;
-    color: #00b067;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.anket-coz-page .email-verification-status .verified-email {
-    margin: 0;
-    color: #2e7d32;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.anket-coz-page .email-verification-status .verified-email::before {
-    content: '📧 ';
-}
-
-/* ==================== EK DOĞRULAMA WRAPPER CARD ==================== */
-.anket-coz-page .ek-dogrulama-wrapper-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 2px solid #e0e7ff;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.12);
-    margin: 30px 0;
-    overflow: hidden;
-}
-
-.anket-coz-page .ek-dogrulama-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.anket-coz-page .ek-dogrulama-icon {
-    font-size: 32px;
-    width: 56px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    flex-shrink: 0;
-}
-
-.anket-coz-page .ek-dogrulama-title h3 {
-    margin: 0 0 4px 0;
-    font-size: 1.3rem;
-    font-weight: 700;
-}
-
-.anket-coz-page .ek-dogrulama-title p {
-    margin: 0;
-    font-size: 0.9rem;
-    opacity: 0.9;
-}
-
-.anket-coz-page .ek-dogrulama-content {
-    padding: 0;
-}
-
-.anket-coz-page .ek-dogrulama-section {
-    display: block;
-}
-
-/* Doğrulama İtem */
-.anket-coz-page .dogrulama-item {
-    padding: 24px;
-}
-
-.anket-coz-page .dogrulama-item-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.anket-coz-page .dogrulama-item-icon {
-    font-size: 24px;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
-    border-radius: 10px;
-    flex-shrink: 0;
-}
-
-.anket-coz-page .dogrulama-item-title h4 {
-    margin: 0 0 3px 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #2d3748;
-}
-
-.anket-coz-page .dogrulama-item-title p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #718096;
-}
-
-.anket-coz-page .dogrulama-item-content {
-    padding-left: 58px;
-}
-
-/* Separator */
-.anket-coz-page .dogrulama-separator {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #e0e7ff 20%, #e0e7ff 80%, transparent);
-    margin: 0 24px;
-}
-
-/* Kimlik Upload Area */
-.anket-coz-page .kimlik-upload-area {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.anket-coz-page .upload-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.anket-coz-page .upload-field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.anket-coz-page .upload-field label {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.9rem;
-}
-
-.anket-coz-page .file-input {
-    padding: 14px;
-    border: 2px dashed #3b82f6;
-    border-radius: 10px;
-    background: #f8fafc;
-    cursor: pointer;
-    transition: all 0.25s;
-    font-size: 0.9rem;
-}
-
-.anket-coz-page .file-input:hover {
-    background: #eff6ff;
-    border-color: #2563eb;
-}
-
-.anket-coz-page .file-input.selfie {
-    border-color: #f97316;
-}
-
-.anket-coz-page .file-input.selfie:hover {
-    background: #fff7ed;
-    border-color: #ea580c;
-}
-
-.anket-coz-page .file-selected {
-    font-size: 0.85rem;
-    color: #16a34a;
-    font-weight: 500;
-}
-
-.anket-coz-page .btn-verify-identity {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
-
-.anket-coz-page .btn-verify-identity:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-.anket-coz-page .btn-verify-identity:disabled {
-    background: #cbd5e1;
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
-.anket-coz-page .security-note {
-    text-align: center;
-    font-size: 0.85rem;
-    color: #64748b;
-    margin: 0;
-}
-
-/* Verification Success inside wrapper */
-.anket-coz-page .dogrulama-item .verification-success {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-    border-radius: 10px;
-    border: 1px solid #a7f3d0;
-}
-
-.anket-coz-page .dogrulama-item .success-badge {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #059669;
-}
-
-.anket-coz-page .dogrulama-item .verified-info {
-    font-size: 0.95rem;
-    color: #047857;
-    font-weight: 500;
-}
-
-/* TC Input */
-.anket-coz-page .tc-input {
-    max-width: 300px;
-    letter-spacing: 1px;
-    font-size: 1.05rem;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-    .anket-coz-page .upload-row {
-        grid-template-columns: 1fr;
-    }
-
-    .anket-coz-page .dogrulama-item-content {
-        padding-left: 0;
-    }
-
-    .anket-coz-page .ek-dogrulama-header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .anket-coz-page .phone-input-group {
-        flex-wrap: wrap;
-    }
-}
-
-/* Phone Input Group */
-.anket-coz-page .phone-input-group {
-    display: flex;
-    align-items: center;
-}
-
-.anket-coz-page .phone-prefix {
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-    border: 2px solid #cbd5e1;
-    border-radius: 8px 0 0 8px;
-    font-weight: 700;
-    color: #475569;
-    font-size: 1rem;
-}
-
-.anket-coz-page .phone-input-group input {
-    flex: 1;
-    padding: 12px 14px;
-    border: 2px solid #e2e8f0;
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-    font-size: 1rem;
-    transition: all 0.25s;
-    min-width: 150px;
-}
-
-.anket-coz-page .phone-input-group input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-    outline: none;
-}
-
-.anket-coz-page .phone-input-group .btn-send-code {
-    margin-left: 8px;
-}
-
-/* Verification Form Inline */
-.anket-coz-page .verification-form-inline {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.anket-coz-page .verification-form-inline .verification-info {
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-    border-left: 4px solid #10b981;
-    padding: 12px 16px;
-    border-radius: 8px;
-}
-
-.anket-coz-page .verification-form-inline .verification-info p {
-    margin: 0;
-    color: #047857;
-    font-size: 0.9rem;
-}
-
-/* Email/Phone Item Icon Colors */
-.anket-coz-page .email-item .dogrulama-item-icon {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-}
-
-.anket-coz-page .phone-item .dogrulama-item-icon {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-}
-
-.anket-coz-page .konum-item .dogrulama-item-icon {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-}
-
-.anket-coz-page .kimlik-item .dogrulama-item-icon {
-    background: linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%);
-}
-
-/* ==================== TC KİMLİK NO OCR DOĞRULAMA - COMPACT ==================== */
-.anket-coz-page .tc-item .dogrulama-item-icon {
-    background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
-}
-
-.anket-coz-page .tc-verification-compact {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-/* Yan Yana Row */
-.anket-coz-page .tc-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    align-items: end;
-}
-
-/* TC Input Box */
-.anket-coz-page .tc-input-box {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.anket-coz-page .tc-input-box label {
-    font-weight: 600;
-    color: #475569;
-    font-size: 0.85rem;
-}
-
-.anket-coz-page .tc-input-field {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.anket-coz-page .tc-input-compact {
-    width: 100%;
-    padding: 12px 40px 12px 14px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 1rem;
-    letter-spacing: 1.5px;
-    font-weight: 600;
-    color: #1e293b;
-    background: #f8fafc;
-    transition: all 0.25s ease;
-}
-
-.anket-coz-page .tc-input-compact:focus {
-    border-color: #22c55e;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
-    outline: none;
-}
-
-.anket-coz-page .tc-input-compact.valid {
-    border-color: #22c55e;
-    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-}
-
-.anket-coz-page .tc-input-compact.error {
-    border-color: #ef4444;
-}
-
-.anket-coz-page .input-check {
-    position: absolute;
-    right: 12px;
-    color: #22c55e;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-/* Upload Box */
-.anket-coz-page .tc-upload-box {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.anket-coz-page .tc-upload-box>label:first-child {
-    font-weight: 600;
-    color: #475569;
-    font-size: 0.85rem;
-}
-
-.anket-coz-page .tc-upload-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 16px;
-    border: 2px dashed #94a3b8;
-    border-radius: 10px;
-    background: #f8fafc;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    min-height: 44px;
-}
-
-.anket-coz-page .tc-upload-area:hover {
-    border-color: #22c55e;
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-}
-
-.anket-coz-page .tc-upload-area.has-file {
-    border-color: #22c55e;
-    border-style: solid;
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-}
-
-.anket-coz-page .upload-placeholder {
-    color: #64748b;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.anket-coz-page .upload-success {
-    color: #16a34a;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-/* Compact Verify Button */
-.anket-coz-page .btn-verify-tc-compact {
-    width: 100%;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-}
-
-.anket-coz-page .btn-verify-tc-compact:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
-}
-
-.anket-coz-page .btn-verify-tc-compact:disabled {
-    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
-/* Error and Hint */
-.anket-coz-page .tc-error-msg {
-    background: #fef2f2;
-    border-left: 3px solid #ef4444;
-    padding: 10px 14px;
-    border-radius: 6px;
-    color: #b91c1c;
-    font-size: 0.85rem;
-}
-
-.anket-coz-page .tc-security-hint {
-    text-align: center;
-    font-size: 0.8rem;
-    color: #64748b;
-    margin: 0;
-}
-
-/* Responsive */
-@media (max-width: 520px) {
-    .anket-coz-page .tc-row {
-        grid-template-columns: 1fr;
-    }
+  }
 }

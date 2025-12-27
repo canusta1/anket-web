@@ -41,6 +41,11 @@ const UserSchema = new mongoose.Schema({
 
   password: { type: String, required: true, minlength: 6 }, // HASH saklanır
   roles: { type: [String], default: ["user"] },
+  
+  // Google OAuth alanları
+  googleId: { type: String, unique: true, sparse: true },
+  profilePicture: { type: String },
+  isGoogleUser: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // Sanal setter: düz TCKN gelirse tckn_enc'ye şifreleyerek yazar

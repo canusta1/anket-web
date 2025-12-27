@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./AnketOlustur.css";
-import { FaBars, FaUser, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaHome } from "react-icons/fa";
+import { FaBars, FaUser, FaChartBar, FaClipboardList, FaSignOutAlt, FaHome, FaMoon, FaSun, FaPlus, FaRobot, FaCopy, FaPaste } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 function AnketOlustur() {
@@ -8,6 +8,21 @@ function AnketOlustur() {
   const [titleText, setTitleText] = useState("");
   const [charIndex, setCharIndex] = useState(0);
   const navigate = useNavigate();
+
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('panelDarkMode');
+    return saved === 'true';
+  });
+
+  // Dark mode effect
+  useEffect(() => {
+    localStorage.setItem('panelDarkMode', darkMode);
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
 
   const fullTitle = "Nasıl bir anket oluşturmak istiyorsunuz?";
 
@@ -22,79 +37,44 @@ function AnketOlustur() {
     }
   }, [charIndex, fullTitle]);
 
-  const handleLogout = () => navigate("/giris");
-
-  // 1. SIFIRDAN ANKET (Yönlendirme)
-  const handleSifirdanAnket = () => {
-    navigate("/sifirdan-anket");
-  };
-
-  // 2. YAPAY ZEKA (Yönlendirme)
-  const handleYapayZeka = () => {
-    navigate("/ai-ile-anket");
-  };
-
-  // Sifirdan anket yaratma
-  const [mode, setMode] = useState("main"); // main, sifirdan, ai
-
-  const handleKopyala = () => {
-    navigate('/anket-kopyala');
-  };
-
-  // Şablon seçildiğinde düzenleme ekranına yönlendir (state ile)
-  const handleTemplateSelect = (template) => {
-    // Backend format'ını frontend format'ına çevir
-    const convertedTemplate = {
-      ...template,
-      sorular: (template.sorular || []).map((soru) => ({
-        id: Math.random(),
-        metin: soru.soruMetni || soru.metin || soru.soru || '',
-        tip: soru.soruTipi || soru.tip || 'acik-uclu',
-        secenekler: (soru.secenekler || []).map(sec =>
-          typeof sec === 'string' ? sec : sec.metin || ''
-        ),
-        zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : false
-      }))
-    };
-
-    console.log("✅ Dönüştürülen Template:", convertedTemplate);
-    navigate("/sifirdan-anket", { state: { template: convertedTemplate } });
-  };
-
-  // 4. YAPISTIR
-  const handleYapistir = () => {
-    navigate("/sorulari-yapistir");
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/giris");
   };
 
   const handleProfil = () => navigate("/profil");
-  const handleAnaSayfa = () => navigate("/panel");
   const handleSonuclariGor = () => {
     setMenuOpen(false);
     navigate("/anket-sonuclari");
   };
-
-  // Menüyü kapatma
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <div className="panel-container">
+    <div className="ac-container">
       {/* Navbar */}
-      <nav className="panel-navbar">
+      <nav className="ac-navbar">
         <div className="nav-left">
           <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
           <span className="panel-logo">AnketApp</span>
         </div>
 
         <div className="nav-right">
-          <button className="nav-link" onClick={handleAnaSayfa}>
-            <FaHome className="nav-icon" /> Ana Sayfa
+          <button className="nav-link" onClick={() => navigate("/panel")} style={{background:'none', border:'none', cursor:'pointer', fontFamily:'inherit'}}>
+            <FaHome /> Ana Sayfa
           </button>
-          <button className="btn-white">Anket Oluştur</button>
+          <button 
+            className="theme-toggle" 
+            onClick={() => setDarkMode(!darkMode)}
+            title={darkMode ? 'Açık Tema' : 'Koyu Tema'}
+            style={{background:'none', border:'1px solid var(--panel-border)', padding:'8px', borderRadius:'8px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center'}}
+          >
+            {darkMode ? <FaSun /> : <FaMoon />}
+          </button>
         </div>
       </nav>
 
-      {/* Sidebar */}
-      <div className={`sidebar ${menuOpen ? "open" : ""}`}>
+      {/* Sidebar - Harmonized */}
+      <div className={`ac-sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">📊 AnketApp</div>
           <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
@@ -110,51 +90,50 @@ function AnketOlustur() {
       {/* Overlay */}
       {menuOpen && <div className="sidebar-overlay" onClick={closeMenu}></div>}
 
-      {/* İçerik */}
+      {/* Main Content */}
       <main className="anket-main">
-        <div className="title-container">
-          <h1 className="animated-title">
-            {titleText}
-            <span className="cursor">|</span>
-          </h1>
-          <div className="title-decoration">
-            <div className="decoration-line"></div>
-            <div className="decoration-dots">•••</div>
-            <div className="decoration-line"></div>
-          </div>
-        </div>
+        <h1>
+          {titleText}
+          <span style={{animation: 'blink 1s infinite'}}>|</span>
+        </h1>
 
-        <div className="anket-grid">
-          {/* SIFIRDAN ANKET KARTI */}
-          <div className="anket-olustur-card" onClick={handleSifirdanAnket}>
-            <div className="card-icon">✏️</div>
-            <h3>Sıfırdan Anket Oluştur</h3>
-            <p>Boş bir sayfadan başlayarak kendi sorularınızı oluşturun.</p>
-            <div className="card-hover-effect"></div>
+        <div className="option-cards">
+          {/* SIFIRDAN ANKET */}
+          <div className="option-card standard" onClick={() => navigate("/sifirdan-anket")}>
+            <div className="card-icon">
+              <FaPlus />
+            </div>
+            <div className="card-badge new">Popüler</div>
+            <h3>Sıfırdan Oluştur</h3>
+            <p>Boş bir sayfadan başlayarak kendi sorularınızı ve akışınızı oluşturun.</p>
           </div>
 
-          {/* YAPAY ZEKA KARTI */}
-          <div className="anket-olustur-card ai-olustur-card" onClick={handleYapayZeka}>
-            <div className="card-icon">🤖</div>
-            <h3>Yapay Zeka ile Oluştur</h3>
-            <p>Kısa bir açıklama girin, yapay zeka sizin için anket tasarlasın.</p>
-            <div className="card-hover-effect"></div>
-            <div className="ai-glow"></div>
+          {/* YAPAY ZEKA */}
+          <div className="option-card ai" onClick={() => navigate("/ai-ile-anket")}>
+            <div className="card-icon">
+              <FaRobot />
+            </div>
+            <div className="card-badge beta">Yapay Zeka</div>
+            <h3>AI ile Oluştur</h3>
+            <p>Konuyu söyleyin, yapay zeka sizin için en uygun anket sorularını hazırlasın.</p>
           </div>
 
-          {/* DİĞER KARTLAR */}
-          <div className="anket-olustur-card" onClick={handleKopyala}>
-            <div className="card-icon">📋</div>
+          {/* KOPYALA */}
+          <div className="option-card copy" onClick={() => navigate("/anket-kopyala")}>
+            <div className="card-icon">
+              <FaCopy />
+            </div>
             <h3>Anketi Kopyala</h3>
-            <p>Mevcut anketlerinizi temel alarak yeni bir sürüm oluşturun.</p>
-            <div className="card-hover-effect"></div>
+            <p>Mevcut bir anketinizi veya şablonu kopyalayarak üzerinde değişiklik yapın.</p>
           </div>
 
-          <div className="anket-olustur-card" onClick={handleYapistir}>
-            <div className="card-icon">📝</div>
+          {/* YAPIŞTIR */}
+          <div className="option-card paste" onClick={() => navigate("/sorulari-yapistir")}>
+            <div className="card-icon">
+              <FaPaste />
+            </div>
             <h3>Soruları Yapıştır</h3>
-            <p>Elinizdeki soruları yapıştırın, sistem otomatik olarak anketi oluştursun.</p>
-            <div className="card-hover-effect"></div>
+            <p>Elinizdeki soru listesini yapıştırın, otomatik forma dönüştürelim.</p>
           </div>
         </div>
       </main>

@@ -1,3 +1,50 @@
+/* ========================
+   GLOBAL THEME VARIABLES
+   Copied from Panel.css to be available everywhere
+======================== */
+:root {
+  --panel-bg: #f8fafc;
+  --panel-bg-alt: #ffffff;
+  --panel-card: #ffffff;
+  --panel-card-hover: #f1f5f9;
+  --panel-border: #e2e8f0;
+  --panel-text: #1e293b;
+  --panel-text-muted: #64748b;
+  --panel-accent: #00d4aa;
+  --panel-accent-hover: #00b894;
+  --panel-accent-light: rgba(0, 212, 170, 0.08);
+  --panel-success: #10b981;
+  --panel-warning: #f59e0b;
+  --panel-danger: #ef4444;
+  --panel-purple: #8b5cf6;
+  --panel-blue: #3b82f6;
+  --panel-radius: 8px;
+  --panel-radius-lg: 12px;
+  --panel-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --panel-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* Wizard Specific Colors (optional mapping) */
+  --w-primary: #00d4aa;
+  --w-card: #ffffff;
+}
+
+body.dark-mode {
+  --panel-bg: #0a0f14;
+  --panel-bg-alt: #0d1117;
+  --panel-card: #161b22;
+  --panel-card-hover: #1c2128;
+  --panel-border: #30363d;
+  --panel-text: #f0f6fc;
+  --panel-text-muted: #c9d1d9;
+  --panel-accent: #00d4aa;
+  --panel-accent-hover: #33e0bd;
+  --panel-accent-light: rgba(0, 212, 170, 0.15);
+  --panel-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --panel-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+
+  --w-card: #161b22;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -8,6 +55,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   line-height: 1.6;
+  background-color: var(--panel-bg);
+  color: var(--panel-text);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 * {
@@ -23,13 +73,4 @@ code {
     monospace;
 }
 
-/* Ana Sayfa butonu yazı rengi siyah - Global */
-a[href="/panel"],
-.nav-right>a {
-  color: #000 !important;
-}
-
-a[href="/panel"]:hover,
-.nav-right>a:hover {
-  color: #333 !important;
-}
+/* Global link styles removed - use component-level CSS for proper dark mode support */

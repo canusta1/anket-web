@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import Anasayfa from './anasayfa';
 import Giris from './Giris';
@@ -20,27 +21,32 @@ import SorulariYapistir from "./SorulariYapistir";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
+// Google Client ID - .env dosyasından okur
+const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
+
 root.render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<Navigate to="/anasayfa" replace />} />
-      <Route path="/anasayfa" element={<Anasayfa />} />
-      <Route path="/panel" element={<Panel />} />
-      <Route path="/giris" element={<Giris />} />
-      <Route path="/uyeol" element={<UyeOl />} />
-      <Route path="/anket-olustur" element={<AnketOlustur />} />
-      <Route path="/anket-kopyala" element={<AnketKopyala />} />
-      <Route path="/sorulari-yapistir" element={<SorulariYapistir />} />
-      <Route path="/sifirdan-anket" element={<SifirdanAnket />} />
-      <Route path="/ai-ile-anket" element={<AIileAnket />} />
-      <Route path="/hedef-kitle-secimi" element={<HedefKitleSecimi />} />
-      <Route path="/profil" element={<Profil />} />
-      <Route path="/anket-coz/:linkKodu" element={<AnketCoz />} />
-      
-      {/* SONUÇLAR ROUTES */}
-      <Route path="/anket-sonuclari" element={<AnketSonuclari />} />
-      <Route path="/anket-sonuclari/:id" element={<AnketSonuclari />} />
-      <Route path="/anket-detay/:id" element={<AnketDetay />} />
-    </Routes>
-  </BrowserRouter>
+  <GoogleOAuthProvider clientId={googleClientId}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/anasayfa" replace />} />
+        <Route path="/anasayfa" element={<Anasayfa />} />
+        <Route path="/panel" element={<Panel />} />
+        <Route path="/giris" element={<Giris />} />
+        <Route path="/uyeol" element={<UyeOl />} />
+        <Route path="/anket-olustur" element={<AnketOlustur />} />
+        <Route path="/anket-kopyala" element={<AnketKopyala />} />
+        <Route path="/sorulari-yapistir" element={<SorulariYapistir />} />
+        <Route path="/sifirdan-anket" element={<SifirdanAnket />} />
+        <Route path="/ai-ile-anket" element={<AIileAnket />} />
+        <Route path="/hedef-kitle-secimi" element={<HedefKitleSecimi />} />
+        <Route path="/profil" element={<Profil />} />
+        <Route path="/anket-coz/:linkKodu" element={<AnketCoz />} />
+        
+        {/* SONUÇLAR ROUTES */}
+        <Route path="/anket-sonuclari" element={<AnketSonuclari />} />
+        <Route path="/anket-sonuclari/:id" element={<AnketSonuclari />} />
+        <Route path="/anket-detay/:id" element={<AnketDetay />} />
+      </Routes>
+    </BrowserRouter>
+  </GoogleOAuthProvider>
 );

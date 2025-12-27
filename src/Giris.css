@@ -1,217 +1,373 @@
-﻿/* GIRIS SAYFASI CSS */
+﻿/* GIRIS SAYFASI CSS - WINUI3 STYLE */
 
 /* ------------------------------
-   GENEL G├ûR├£N├£M
+   CSS VARIABLES (DESIGN TOKENS)
 ------------------------------ */
-.auth-container {
+:root {
+    --bg-primary: #0a0f14;
+    --bg-secondary: #0d1117;
+    --bg-panel: #161b22;
+    --bg-input: #21262d;
+    --bg-input-hover: #292f36;
+    
+    --accent-primary: #00d4aa;
+    --accent-secondary: #00b894;
+    --accent-glow: rgba(0, 212, 170, 0.15);
+    
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    
+    --border-color: #30363d;
+    --border-focus: #00d4aa;
+    
+    --error-bg: rgba(248, 81, 73, 0.1);
+    --error-color: #f85149;
+    --error-border: #f85149;
+    
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}
+
+/* ------------------------------
+   PAGE LAYOUT
+------------------------------ */
+.auth-page {
     display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 50%, var(--bg-secondary) 100%);
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle glow effects across entire page */
+.auth-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 30%, var(--accent-glow) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(0, 184, 148, 0.1) 0%, transparent 35%),
+        radial-gradient(circle at 50% 50%, rgba(0, 212, 170, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ------------------------------
+   LEFT PANEL - BRANDING
+------------------------------ */
+.auth-branding {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #134e42 0%, #00b067 100%);
-    padding: 20px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
+    padding: 48px;
+    background: transparent;
+    position: relative;
+    z-index: 2;
 }
 
-.auth-box {
-    background: #fff;
-    width: 400px;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    animation: slideUp 0.4s ease;
+.branding-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 450px;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+/* Logo Section */
+.logo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.logo-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3);
+}
+
+.logo-icon svg {
+    width: 36px;
+    height: 36px;
+    color: var(--bg-primary);
+}
+
+.logo-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.branding-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin: 0 0 48px 0;
+}
+
+/* Features List */
+.features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: left;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    text-align: left;
+}
+
+.feature-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--accent-glow);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.feature-icon svg {
+    width: 22px;
+    height: 22px;
+    color: var(--accent-primary);
+}
+
+.feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.feature-text strong {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.feature-text span {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* Branding Footer */
+.branding-footer {
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 1;
+}
+
+.branding-footer p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
 }
 
 /* ------------------------------
-   BA┼ŞLIK VE A├çIKLAMA
+   RIGHT PANEL - LOGIN FORM
 ------------------------------ */
+.auth-form-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    background: transparent;
+    position: relative;
+    z-index: 2;
+}
+
+.auth-form-container {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg-panel);
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 2;
+}
+
+/* Auth Header */
 .auth-header {
-    text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 32px;
 }
 
 .auth-header h2 {
-    color: #134e42;
-    font-size: 1.8rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    margin: 0 0 8px;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
 }
 
 .auth-header p {
     font-size: 0.95rem;
-    color: #666;
+    color: var(--text-secondary);
     margin: 0;
-}
-
-/* FOOTER LINK ALANI */
-.auth-footer {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.auth-footer p {
-    font-size: 0.9rem;
-    color: #555;
-    margin: 0;
-}
-
-.link-primary {
-    color: #00b067;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
-
-.link-primary:hover {
-    color: #00885a;
-    text-decoration: underline;
-}
-
-/* ALERT MESAJLARI */
-.alert {
-    padding: 12px 14px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-    animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.alert-error {
-    background-color: #ffebee;
-    color: #c62828;
-    border-left: 4px solid #c62828;
-}
-
-.alert-success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border-left: 4px solid #2e7d32;
 }
 
 /* ------------------------------
-   FORM ELEMANLARI
+   FORM ELEMENTS
 ------------------------------ */
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 20px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .form-group label {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #333333;
-    display: block;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"] {
-    padding: 11px 13px;
-    border-radius: 8px;
-    border: 1.5px solid #ddd;
-    font-size: 0.95rem;
-    transition: 0.2s ease;
-    background-color: #fafafa;
-    color: #222;
+    font-size: 0.875rem;
     font-weight: 500;
+    color: var(--text-secondary);
 }
 
-input:focus {
-    border-color: #00b067;
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(0, 176, 103, 0.1);
+.form-group input,
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    transition: var(--transition-fast);
+    box-sizing: border-box;
+}
+
+.form-group input::placeholder {
+    color: var(--text-muted);
+}
+
+.form-group input:hover {
+    background: var(--bg-input-hover);
+    border-color: #3d444d;
+}
+
+.form-group input:focus {
     outline: none;
+    background: var(--bg-input);
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-input:disabled {
-    background-color: #f5f5f5;
-    color: #999;
-    cursor: not-allowed;
-}
-
-/* PLACEHOLDER ST─░L */
-input::placeholder {
-    color: #999;
-    font-weight: 500;
+.password-input-wrapper {
+    position: relative;
 }
 
 /* ------------------------------
-   BUTONLAR
+   ALERT MESSAGES
 ------------------------------ */
-.btn-green {
-    background: linear-gradient(135deg, #00b067, #007f4f);
-    color: white;
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    animation: slideDown 0.3s ease;
+}
+
+.alert-error {
+    background: var(--error-bg);
+    border: 1px solid rgba(248, 81, 73, 0.3);
+    color: var(--error-color);
+}
+
+.alert-error svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ------------------------------
+   PRIMARY BUTTON
+------------------------------ */
+.btn-primary {
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: var(--bg-primary);
     border: none;
-    padding: 12px 16px;
-    border-radius: 8px;
-    cursor: pointer;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
     font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.3px;
-    transition: 0.3s ease;
+    cursor: pointer;
+    transition: var(--transition-normal);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 44px;
+    gap: 10px;
 }
 
-.btn-green:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00c878, #02965a);
+.btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 176, 103, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 212, 170, 0.35);
 }
 
-.btn-green:active:not(:disabled) {
+.btn-primary:active:not(:disabled) {
     transform: translateY(0);
 }
 
-.btn-green:disabled {
+.btn-primary:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
 
-/* SPINNER */
+/* Spinner */
 .spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(10, 15, 20, 0.3);
+    border-top-color: var(--bg-primary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -222,117 +378,183 @@ input::placeholder {
     }
 }
 
-/* B├ûL├£C─░ ├ç─░ZG─░ */
+/* ------------------------------
+   DIVIDER
+------------------------------ */
 .auth-divider {
     position: relative;
     text-align: center;
     margin: 24px 0;
-    color: #999;
-    font-size: 0.85rem;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    width: 45%;
-    height: 1px;
-    background: #ddd;
 }
 
 .auth-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
     left: 0;
-}
-
-.auth-divider::after {
     right: 0;
+    height: 1px;
+    background: var(--border-color);
 }
 
-/* SOSYAL G─░R─░┼Ş */
+.auth-divider span {
+    position: relative;
+    background: var(--bg-panel);
+    padding: 0 16px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ------------------------------
+   SOCIAL LOGIN
+------------------------------ */
 .social-login {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
 }
 
 .social-btn {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 11px 16px;
-    cursor: pointer;
+    width: 100%;
+    padding: 12px 20px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
     font-size: 0.9rem;
     font-weight: 500;
-    color: white;
-    transition: 0.3s ease;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 44px;
+    gap: 12px;
 }
 
-.social-btn.google {
-    background-color: #ea4335;
+.social-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.social-btn:hover {
+    background: var(--bg-input-hover);
+    border-color: #3d444d;
+    transform: translateY(-1px);
+}
+
+.social-btn.google:hover {
     border-color: #ea4335;
 }
 
-.social-btn.google:hover:not(:disabled) {
-    background-color: #d33425;
-    border-color: #d33425;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+/* ------------------------------
+   AUTH FOOTER
+------------------------------ */
+.auth-footer {
+    text-align: center;
+    margin-top: 24px;
 }
 
-.social-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+.auth-footer p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
 }
 
-/* RESPONSIVE */
-@media (max-width: 480px) {
-    .auth-box {
-        width: 100%;
-        padding: 30px 20px;
+.auth-footer a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition-fast);
+}
+
+.auth-footer a:hover {
+    color: #33e0bd;
+    text-decoration: underline;
+}
+
+/* ------------------------------
+   RESPONSIVE DESIGN
+------------------------------ */
+@media (max-width: 1024px) {
+    .auth-page {
+        flex-direction: column;
     }
+    
+    .auth-branding {
+        padding: 32px;
+        min-height: auto;
+    }
+    
+    .features-list {
+        display: none;
+    }
+    
+    .branding-subtitle {
+        margin-bottom: 0;
+    }
+    
+    .branding-footer {
+        display: none;
+    }
+    
+    .auth-form-panel {
+        padding: 32px;
+    }
+}
 
+@media (max-width: 600px) {
+    .auth-branding {
+        padding: 24px;
+    }
+    
+    .logo-section {
+        gap: 12px;
+    }
+    
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .logo-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .logo-text {
+        font-size: 1.4rem;
+    }
+    
+    .auth-form-panel {
+        padding: 24px;
+    }
+    
     .auth-header h2 {
         font-size: 1.5rem;
     }
-
-    .auth-container {
-        padding: 16px;
+    
+    .form-group input {
+        padding: 12px 14px;
+    }
+    
+    .btn-primary {
+        padding: 12px 18px;
     }
 }
 
-/* TABLET */
-@media (max-width: 768px) {
-    .auth-box {
-        width: 95%;
-        max-width: 400px;
-    }
+/* ------------------------------
+   ESKI UYUMLULUK (gecici)
+------------------------------ */
+.auth-container,
+.auth-box {
+    display: none;
 }
 
-/* DARK MODE DESTEK (Gelecek) */
-@media (prefers-color-scheme: dark) {
-    .auth-box {
-        background: #1e1e1e;
-        color: #e0e0e0;
-    }
-
-    .auth-header h2,
-    .form-group label {
-        color: #e0e0e0;
-    }
-
-    input {
-        background-color: #2a2a2a;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-
-    input::placeholder {
-        color: #888;
-    }
+/* Error text from old design */
+.error-text {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 4px;
 }

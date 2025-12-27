@@ -1,313 +1,319 @@
-﻿/* ├£YE OL SAYFASI CSS - ─░K─░ S├£TUN LAYOUT */
+﻿/* UYE OL SAYFASI CSS - GIRIS STILLERINI KULLANIR */
+
+/* Import Giris.css for shared styles */
+@import './Giris.css';
 
 /* ------------------------------
-   GENEL G├ûR├£N├£M
+   REGISTER FORM SPECIFIC STYLES
 ------------------------------ */
-.auth-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #134e42 0%, #00b067 100%);
-    padding: 20px;
+
+/* Compact form container for register */
+.register-form {
+    max-width: 480px !important;
+    padding: 24px !important;
 }
 
-.auth-box {
-    background: #fff;
-    width: 500px;
-    padding: 45px 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.register-form .auth-header {
+    margin-bottom: 20px;
 }
 
-.auth-box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+.register-form .auth-header h2 {
+    font-size: 1.5rem;
 }
 
-/* ------------------------------
-   BA┼ŞLIK VE A├çIKLAMA
------------------------------- */
-.auth-box h2 {
-    color: #134e42;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    text-align: center;
+.register-form .auth-header p {
+    font-size: 0.875rem;
 }
 
-.auth-box p {
-    font-size: 0.95rem;
-    color: #444;
-    margin-bottom: 25px;
-    text-align: center;
+.register-form .auth-form {
+    gap: 14px;
 }
 
-.auth-box a {
-    color: #00b067;
-    text-decoration: none;
-    font-weight: 600;
+.register-form .form-group {
+    gap: 5px;
 }
 
-.auth-box a:hover {
-    text-decoration: underline;
+.register-form .form-group label {
+    font-size: 0.8rem;
 }
 
-/* ------------------------------
-   FORM ELEMANLARI - ─░K─░ S├£TUN LAYOUT
------------------------------- */
-form {
+.register-form .form-group input {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+}
+
+/* Two column form rows */
+.form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    text-align: left;
+    gap: 12px;
 }
 
-label {
-    margin: 0 0 6px 0;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #333333;
-    display: block;
-}
-
-.form-group label {
-    font-size: 0.97rem;
-    font-weight: 700;
-    color: #333333;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"] {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 0.95rem;
-    width: 100%;
-    box-sizing: border-box;
-    transition: 0.2s ease;
-    color: #222;
-    font-weight: 500;
-}
-
-input:focus {
-    border-color: #00b067;
-    box-shadow: 0 0 0 3px rgba(0, 176, 103, 0.15);
-    outline: none;
-}
-
-/* FULL WIDTH ALANLAR */
-.form-group-full {
-    grid-column: 1 / -1;
-}
-
-.form-group-full input {
-    width: 100%;
-}
-
-/* ─░K─░ S├£TUN ALANLAR (AD/SOYAD, EMAIL/PHONE, etc) */
-.form-group {
+/* Checkbox group styling - compact */
+.checkbox-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
 }
 
-/* ------------------------------
-   BUTONLAR
------------------------------- */
-.btn-green {
-    background: linear-gradient(135deg, #00b067, #007f4f);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.3px;
-    transition: 0.3s ease;
-    grid-column: 1 / -1;
-    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
 }
 
-.btn-green:hover {
-    background: linear-gradient(135deg, #00c878, #02965a);
-    transform: scale(1.02);
+.checkbox-label:hover {
+    color: var(--text-primary);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkbox-text {
+    line-height: 1.3;
+}
+
+.register-form .btn-primary {
+    padding: 12px 18px;
+    font-size: 0.9rem;
+}
+
+.register-form .auth-footer {
+    margin-top: 16px;
 }
 
 /* ------------------------------
-   CHECKBOX ALANI
+   STEP INDICATOR
 ------------------------------ */
-.checkbox-group {
-    grid-column: 1 / -1;
-    margin-top: 10px;
-    margin-bottom: 15px;
-    background: #f9f9f9;
-    padding: 12px;
-    border-radius: 8px;
+.step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 24px;
 }
 
-.checkbox-group label {
+.step-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-input);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.step-dot.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.step-line {
+    width: 60px;
+    height: 2px;
+    background: var(--border-color);
+}
+
+/* ------------------------------
+   VERIFICATION INPUT
+------------------------------ */
+.verification-input-group {
+    text-align: center;
+}
+
+.verification-input {
+    text-align: center;
+    font-size: 1.5rem !important;
+    letter-spacing: 8px;
+    font-weight: 600;
+    padding: 16px !important;
+}
+
+/* ------------------------------
+   ALERT SUCCESS
+------------------------------ */
+.alert-success {
+    background: rgba(0, 212, 170, 0.1);
+    border: 1px solid rgba(0, 212, 170, 0.3);
+    color: var(--accent-primary);
+}
+
+.alert-success svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* ------------------------------
+   RESEND & SECONDARY BUTTONS
+------------------------------ */
+.resend-section {
+    text-align: center;
+    margin: 12px 0;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
     font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.btn-link:hover:not(:disabled) {
+    color: #33e0bd;
+}
+
+.btn-link:disabled {
+    color: var(--text-muted);
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-input);
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+/* ------------------------------
+   PASSWORD INFO TOOLTIP
+------------------------------ */
+.label-with-info {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #333333;
-    font-weight: 700;
+}
+
+.info-tooltip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: help;
+}
+
+.info-tooltip svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.info-tooltip:hover svg {
+    color: var(--accent-primary);
+}
+
+.tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    min-width: 200px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 100;
+}
+
+.info-tooltip:hover .tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--border-color);
+}
+
+.tooltip-content strong {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
-.checkbox-group label:last-child {
-    margin-bottom: 0;
+.tooltip-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-/* ------------------------------
-   SOSYAL G─░R─░┼Ş BUTONLARI
------------------------------- */
-.social-login {
-    grid-column: 1 / -1;
-    margin-top: 25px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-}
-
-.social-btn {
-    border: none;
-    border-radius: 8px;
-    padding: 9px 16px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: white;
-    transition: 0.3s ease;
-    flex: 1 1 30%;
-    min-width: 100px;
-}
-
-.social-btn.microsoft {
-    background-color: #2f2f2f;
-}
-
-.social-btn.facebook {
-    background-color: #1877f2;
-}
-
-.social-btn.linkedin {
-    background-color: #0a66c2;
-}
-
-.social-btn.google {
-    background-color: #ea4335;
-}
-
-.social-btn.apple {
-    background-color: #000;
-}
-
-.social-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
-
-/* ------------------------------
-   B├ûL├£C├£ ├ç─░ZG─░ (divider)
------------------------------- */
-.divider {
-    grid-column: 1 / -1;
-    margin-top: 30px;
-    margin-bottom: 15px;
-    color: #888;
-    font-size: 0.9rem;
+.tooltip-content li {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    padding: 3px 0;
+    padding-left: 14px;
     position: relative;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
-.divider::before,
-.divider::after {
-    content: "";
+.tooltip-content li::before {
+    content: '•';
     position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background: #ddd;
-}
-
-.divider::before {
     left: 0;
-}
-
-.divider::after {
-    right: 0;
+    color: var(--accent-primary);
 }
 
 /* ------------------------------
-   RESPONSIVE TASARIM
+   RESPONSIVE ADJUSTMENTS
 ------------------------------ */
 @media (max-width: 600px) {
-    .auth-box {
-        width: 100%;
-        padding: 30px 20px;
+    .register-form {
+        max-width: 100% !important;
+        padding: 20px !important;
     }
-
-    form {
+    
+    .form-row {
         grid-template-columns: 1fr;
         gap: 12px;
     }
+}
 
-    .form-group-full {
-        grid-column: 1;
+@media (max-width: 1024px) {
+    .register-form {
+        max-width: 440px !important;
     }
-
-    .social-btn {
-        flex: 1 1 100%;
-        min-width: 100%;
-    }
-}
-
-/* TABLET G├ûR├£N├£M├£ */
-@media (max-width: 768px) {
-    .auth-box {
-        width: 95%;
-        max-width: 450px;
-    }
-}
-
-/* MASA├£ST├£ - GEN─░┼Ş EKRAN */
-@media (min-width: 1200px) {
-    .auth-box {
-        width: 550px;
-    }
-}
-
-/* ------------------------------
-   UX DOKUNU┼ŞLARI
------------------------------- */
-.btn-green:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.error-text {
-    color: #c62828;
-    font-size: 0.85rem;
-    margin: 4px 0 0 2px;
-    grid-column: 1 / -1;
-}
-
-/* BA┼ŞARILI DURUM */
-input.success {
-    border-color: #4caf50;
-    background-color: #f1f8f4;
-}
-
-/* HATA DURUMU */
-input.error {
-    border-color: #c62828;
-    background-color: #ffebee;
 }
