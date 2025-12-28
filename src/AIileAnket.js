@@ -30,6 +30,7 @@ import {
     FaMinus
 } from "react-icons/fa";
 import "./SifirdanAnket.css"; // SHARED: We use the same CSS as the manual wizard
+import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA_API_KEY_GIRINIZ";
 
@@ -317,7 +318,7 @@ function AIileAnket() {
                 <div className="nav-left">
                     <button className="icon-btn" onClick={() => setMenuOpen(!menuOpen)}><FaBars /></button>
                     <button className="icon-btn back-btn" onClick={handleGeriDon}><FaArrowLeft /></button>
-                    <span className="panel-logo">AnketApp <span className="logo-badge ai-badge">AI</span></span>
+                    <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" /> <span className="logo-badge ai-badge">AI</span>
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
@@ -330,7 +331,7 @@ function AIileAnket() {
             {/* Sidebar */}
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
                 <div className="sidebar-header">
-                    <div className="sidebar-logo">🤖 AI Anket</div>
+                    <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
                 </div>
                 <ul>
                     <li onClick={() => navigate('/panel')}><FaChartBar className="icon" /> Dashboard</li>

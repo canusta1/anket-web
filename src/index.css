@@ -74,3 +74,33 @@ code {
 }
 
 /* Global link styles removed - use component-level CSS for proper dark mode support */
+
+/* ========================
+   SURVAI LOGO STYLES
+   Global logo image styling
+======================== */
+.panel-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.sidebar-logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+.landing-logo-img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
+.footer-logo-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.9;
+}

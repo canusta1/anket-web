@@ -31,6 +31,7 @@ import {
     FaEdit
 } from "react-icons/fa";
 import "./SifirdanAnket.css";
+import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA_API_KEY_GIRINIZ";
 
@@ -301,7 +302,7 @@ function SifirdanAnket() {
                 <div className="nav-left">
                     <button className="icon-btn" onClick={() => setMenuOpen(!menuOpen)}><FaBars /></button>
                     <button className="icon-btn back-btn" onClick={handleGeriDon}><FaArrowLeft /></button>
-                    <span className="panel-logo">AnketApp <span className="logo-badge">PRO</span></span>
+                    <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" /> <span className="logo-badge">PRO</span>
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
@@ -315,7 +316,7 @@ function SifirdanAnket() {
             {/* Sidebar */}
             <div className={`sidebar ${menuOpen ? "open" : ""}`}>
                 <div className="sidebar-header">
-                    <div className="sidebar-logo">📊 AnketApp</div>
+                    <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
                 </div>
                 <ul>
                     <li onClick={() => navigate('/panel')}><FaChartBar className="icon" /> Dashboard</li>

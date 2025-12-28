@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./AnketOlustur.css";
 import { FaBars, FaUser, FaChartBar, FaClipboardList, FaSignOutAlt, FaHome, FaMoon, FaSun, FaPlus, FaRobot, FaCopy, FaPaste } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 function AnketOlustur() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,7 +56,7 @@ function AnketOlustur() {
       <nav className="ac-navbar">
         <div className="nav-left">
           <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-          <span className="panel-logo">AnketApp</span>
+          <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
         </div>
 
         <div className="nav-right">
@@ -76,7 +77,7 @@ function AnketOlustur() {
       {/* Sidebar - Harmonized */}
       <div className={`ac-sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
           <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
         </div>
         <ul>

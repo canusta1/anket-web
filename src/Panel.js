@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import "./Panel.css";
 import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaFilter, FaUserEdit, FaMoon, FaSun, FaTrashAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 function Panel() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -319,7 +320,7 @@ function Panel() {
       <nav className="panel-navbar">
         <div className="nav-left">
           <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-          <span className="panel-logo">AnketApp</span>
+          <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
         </div>
 
         <div className="nav-right">
@@ -340,7 +341,7 @@ function Panel() {
       {/* Sol Menü (Sidebar) */}
       <div className={`sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
           <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
         </div>
         <ul>

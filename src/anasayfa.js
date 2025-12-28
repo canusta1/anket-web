@@ -3,6 +3,7 @@ import "./Anasayfa.css";
 import { Link } from "react-router-dom";
 import ParticleBackground from "./components/ParticleBackground";
 import aiLogo from "./res/drawable/unnamed.png";
+import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 function Anasayfa() {
   useEffect(() => {
@@ -14,8 +15,7 @@ function Anasayfa() {
       {/* Navbar */}
       <nav className="landing-navbar">
         <Link to="/" className="landing-logo">
-          <span className="logo-icon">📊</span>
-          <span className="logo-text">AnketApp</span>
+          <img src={SurvAILogo} alt="SurvAI" className="landing-logo-img" />
         </Link>
         <div className="nav-links">
           <Link to="/giris">
@@ -238,7 +238,7 @@ function Anasayfa() {
       <footer className="landing-footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <span className="footer-logo">📊 AnketApp</span>
+            <img src={SurvAILogo} alt="SurvAI" className="footer-logo-img" />
             <p>Profesyonel Anket Yönetim Sistemi</p>
           </div>
           <div className="footer-links">
@@ -263,7 +263,7 @@ function Anasayfa() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© 2025 AnketApp - Tüm hakları saklıdır.</p>
+          <p>© 2025 SurvAI - Tüm hakları saklıdır.</p>
         </div>
       </footer>
     </div>

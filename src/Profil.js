@@ -20,6 +20,7 @@ import {
   FaCheckCircle,
   FaChartPie
 } from "react-icons/fa";
+import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 const BASE_API_URL = process.env.REACT_APP_API_URL + "/api" || 'http://localhost:4000/api';
 
@@ -197,7 +198,7 @@ function Profil() {
             <FaArrowLeft />
           </button>
           <div className="profile-logo">
-            📊 <span>AnketApp</span>
+            <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
           </div>
         </div>
         <div className="nav-right">
@@ -213,7 +214,7 @@ function Profil() {
       {/* Sidebar */}
       <div className={`profile-sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
           <div className="sidebar-subtitle">Profil Yönetimi</div>
         </div>
         <ul>

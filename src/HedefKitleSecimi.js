@@ -20,6 +20,7 @@ import {
     FaMapMarkedAlt,
     FaSearch
 } from "react-icons/fa";
+import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 // Google Maps API Anahtarınız
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA_API_KEY_GIRINIZ";
@@ -415,7 +416,7 @@ function HedefKitleSecimi() {
                 <div className="nav-left">
                     <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
                     <FaArrowLeft className="menu-icon" onClick={handleGeriDon} style={{ marginRight: "15px" }} />
-                    <span className="panel-logo">AnketApp</span>
+                    <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>

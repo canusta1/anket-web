@@ -28,6 +28,7 @@ import {
   Legend 
 } from 'recharts';
 import './AnketDetay.css';
+import SurvAILogo from './assets/SurvAI_Logo.png';
 
 const COLORS = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#14b8a6'];
 
@@ -171,7 +172,7 @@ function AnketDetay() {
             <FaArrowLeft /> Geri
           </button>
           <div className="dashboard-logo">
-            📊 <span>AnketApp</span>
+            <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
           </div>
         </div>
         <div className="nav-right">
