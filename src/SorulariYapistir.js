@@ -803,22 +803,141 @@ function SorulariYapistir() {
                     {/* STEP 4: SUCCESS */}
                     {currentStep === 4 && (
                         <div className="wizard-step step-success animate-in">
-                            <div className="celebration-card">
-                                <div className="check-blob"><FaCheckCircle /></div>
-                                <h1 className="success-title">Anket Başarıyla Oluşturuldu!</h1>
-                                <p>Yapıştırdığınız sorulardan anketiniz yayınlandı.</p>
+                            <div style={{
+                                background: 'var(--w-card, #ffffff)',
+                                borderRadius: '20px',
+                                padding: '40px',
+                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                border: '1px solid var(--w-border, #e2e8f0)',
+                                maxWidth: '600px',
+                                margin: '0 auto',
+                                textAlign: 'center'
+                            }}>
+                                {/* Success Icon */}
+                                <div style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #6366f1 100%)',
+                                    borderRadius: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: '0 auto 24px',
+                                    boxShadow: '0 8px 24px rgba(0, 212, 170, 0.3)'
+                                }}>
+                                    <FaCheckCircle style={{ fontSize: '2.5rem', color: 'white' }} />
+                                </div>
 
-                                <div className="link-copy-area">
-                                    <label>Paylaşım Linki</label>
-                                    <div className="link-box">
-                                        <code>{olusanLink}</code>
-                                        <button onClick={() => { navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!"); }}><FaCopy /></button>
+                                {/* Title */}
+                                <h2 style={{
+                                    fontSize: '1.75rem',
+                                    fontWeight: '800',
+                                    margin: '0 0 12px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 40%, #6366f1 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text'
+                                }}>
+                                    Harika Bir İş Çıkardın!
+                                </h2>
+
+                                <p style={{
+                                    color: 'var(--w-text-muted, #64748b)',
+                                    fontSize: '0.95rem',
+                                    marginBottom: '28px'
+                                }}>
+                                    Yapıştırdığınız sorulardan anketiniz başarıyla yayınlandı.
+                                </p>
+
+                                {/* Link Section */}
+                                <div style={{ marginBottom: '28px' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '700',
+                                        color: 'var(--w-text-muted, #64748b)',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                        marginBottom: '10px'
+                                    }}>
+                                        Paylaşım Linki
+                                    </label>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        background: 'var(--w-bg, #f8fafc)',
+                                        border: '1px solid var(--w-border, #e2e8f0)',
+                                        borderRadius: '12px',
+                                        padding: '12px 16px'
+                                    }}>
+                                        <code style={{
+                                            flex: 1,
+                                            fontSize: '0.9rem',
+                                            color: 'var(--w-text, #1e293b)',
+                                            wordBreak: 'break-all',
+                                            textAlign: 'left'
+                                        }}>
+                                            {olusanLink}
+                                        </code>
+                                        <button
+                                            onClick={() => { navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!"); }}
+                                            style={{
+                                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '10px 16px',
+                                                borderRadius: '8px',
+                                                fontWeight: '600',
+                                                fontSize: '0.85rem',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                transition: 'all 0.2s',
+                                                boxShadow: '0 2px 8px rgba(99, 102, 241, 0.25)'
+                                            }}
+                                        >
+                                            <FaCopy /> Kopyala
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="success-actions">
-                                    <button className="btn-main-finish" onClick={() => navigate("/panel")}>Dashboard'a Dön</button>
-                                    <button className="btn-sec-finish" onClick={() => window.open(olusanLink)}>Anketi Görüntüle</button>
+                                {/* Action Buttons */}
+                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => navigate("/panel")}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.25)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Dashboard'a Dön
+                                    </button>
+                                    <button
+                                        onClick={() => window.open(olusanLink)}
+                                        style={{
+                                            background: 'transparent',
+                                            color: 'var(--w-text, #1e293b)',
+                                            border: '1px solid var(--w-border, #e2e8f0)',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Anketi Görüntüle
+                                    </button>
                                 </div>
                             </div>
                         </div>
