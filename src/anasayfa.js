@@ -15,7 +15,7 @@ function Anasayfa() {
       <nav className="landing-navbar">
         <Link to="/" className="landing-logo">
           <span className="logo-icon">📊</span>
-          <span className="logo-text">AnketApp</span>
+          <span className="logo-text">SurvAI</span>
         </Link>
         <div className="nav-links">
           <Link to="/giris">
@@ -41,7 +41,7 @@ function Anasayfa() {
             alın
           </h1>
           <p className="hero-description">
-            Dakikalar içinde anket oluşturun, AI ile sorular üretin, 
+            Dakikalar içinde anket oluşturun, AI ile sorular üretin,
             sonuçları anlık analiz edin. Üstelik tamamen güvenli ve KVKK uyumlu.
           </p>
           <div className="hero-buttons">
@@ -49,7 +49,7 @@ function Anasayfa() {
               <button className="btn-hero-primary">
                 <span>Hemen Başla</span>
                 <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </Link>
@@ -74,7 +74,7 @@ function Anasayfa() {
             </div>
           </div>
         </div>
-        
+
         {/* AI Logo - Floating Animation */}
         <div className="hero-image-container">
           <img src={aiLogo} alt="AI Anket Logo" className="hero-ai-logo" />
@@ -145,7 +145,7 @@ function Anasayfa() {
             <div className="section-badge">🔒 Güvenlik & Gizlilik</div>
             <h2>Verileriniz Güvende</h2>
             <p>
-              KVKK ve GDPR uyumlu altyapımız ile tüm verileriniz şifreli olarak saklanır. 
+              KVKK ve GDPR uyumlu altyapımız ile tüm verileriniz şifreli olarak saklanır.
               Katılımcı gizliliği bizim için önceliktir.
             </p>
             <ul className="security-list">
@@ -227,7 +227,7 @@ function Anasayfa() {
             <button className="btn-cta">
               Ücretsiz Başla
               <svg viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </Link>
@@ -238,7 +238,7 @@ function Anasayfa() {
       <footer className="landing-footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <span className="footer-logo">📊 AnketApp</span>
+            <span className="footer-logo">📊 SurvAI</span>
             <p>Profesyonel Anket Yönetim Sistemi</p>
           </div>
           <div className="footer-links">
@@ -263,7 +263,7 @@ function Anasayfa() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© 2025 AnketApp - Tüm hakları saklıdır.</p>
+          <p>© 2025 SurvAI - Tüm hakları saklıdır.</p>
         </div>
       </footer>
     </div>

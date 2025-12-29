@@ -5,7 +5,8 @@
 
 .anket-coz-page {
   min-height: 100vh;
-  background-color: var(--panel-bg); /* açık gri / koyu mod uyumlu */
+  background-color: var(--panel-bg);
+  /* açık gri / koyu mod uyumlu */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   padding: 40px 20px;
   color: var(--panel-text);
@@ -24,8 +25,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ==================== KART TASARIMI ==================== */
@@ -80,19 +88,40 @@
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   font-size: 1rem;
-  background: var(--panel-bg-alt);
-  color: var(--panel-text);
+  background: #ffffff !important;
+  color: #1f2937 !important;
   transition: all 0.2s ease;
+  -webkit-text-fill-color: #1f2937 !important;
+}
+
+.form-input::placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--panel-accent);
   box-shadow: 0 0 0 3px var(--panel-accent-light);
+  background: #ffffff !important;
+  color: #1f2937 !important;
 }
 
 .form-input.error {
   border-color: var(--panel-danger);
+  background: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+/* Autofill stillerini override et */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
+.form-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
 }
 
 .error-text {
@@ -154,7 +183,8 @@
   transition: border-color 0.2s;
 }
 
-.question-block:hover, .question-block:focus-within {
+.question-block:hover,
+.question-block:focus-within {
   border-color: var(--panel-accent);
 }
 
@@ -240,7 +270,8 @@
   width: 8px;
   height: 8px;
   background: white;
-  border-radius: 50%; /* Checkbox için farklı olabilir ama şimdilik nokta */
+  border-radius: 50%;
+  /* Checkbox için farklı olabilir ama şimdilik nokta */
 }
 
 .option-label {
@@ -276,7 +307,7 @@
   background: var(--panel-accent);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: transform 0.1s;
 }
 
@@ -388,7 +419,8 @@
 .btn-primary {
   flex: 1;
   height: 56px;
-  background: var(--panel-black, #1e293b); /* Fallback */
+  background: var(--panel-black, #1e293b);
+  /* Fallback */
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: white;
   border: none;
@@ -397,12 +429,102 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== LOADING & ANIMATIONS ==================== */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Button Loading State */
+.btn-verify.loading {
+  background: linear-gradient(135deg, var(--panel-accent) 0%, var(--panel-accent-hover) 100%);
+  cursor: wait;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-verify.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 100%;
+  }
+}
+
+/* ==================== CUSTOM FILE UPLOAD ==================== */
+.upload-box {
+  background: var(--panel-card);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.custom-file-upload {
+  display: block;
+  cursor: pointer;
+}
+
+.file-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border: 2px dashed var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel-bg-alt);
+  color: var(--panel-text-muted);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.file-upload-btn:hover {
+  border-color: var(--panel-accent);
+  background: var(--panel-accent-light);
+  color: var(--panel-accent);
+}
+
+.file-upload-btn.has-file {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-style: solid;
+}
+
+/* ==================== BUTTON ACTIVE STATES ==================== */
+.btn-verify:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-verify:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--panel-accent-light);
 }
 
 /* Responsive */
@@ -410,16 +532,25 @@
   .anket-coz-page {
     padding: 20px 16px;
   }
-  
+
   .survey-card {
     padding: 24px;
   }
-  
+
   .verify-input-group {
     flex-direction: column;
   }
-  
+
   .btn-verify {
     width: 100%;
+  }
+
+  .upload-box {
+    padding: 12px;
+  }
+
+  .file-upload-btn {
+    padding: 12px 16px;
+    font-size: 0.9rem;
   }
 }

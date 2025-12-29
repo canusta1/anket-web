@@ -319,13 +319,14 @@ function Panel() {
       <nav className="panel-navbar">
         <div className="nav-left">
           <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-          <span className="panel-logo">AnketApp</span>
+          <span className="panel-logo">SurvAI</span>
         </div>
 
         <div className="nav-right">
           <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
-          <button 
-            className="theme-toggle" 
+          <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
+          <button
+            className="theme-toggle"
             onClick={() => setDarkMode(!darkMode)}
             title={darkMode ? 'Açık Tema' : 'Koyu Tema'}
           >
@@ -340,7 +341,7 @@ function Panel() {
       {/* Sol Menü (Sidebar) */}
       <div className={`sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-logo">📊 SurvAI</div>
           <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
         </div>
         <ul>
@@ -364,11 +365,30 @@ function Panel() {
 
       {/* Ana İçerik */}
       <main className="panel-main" onClick={handleMainClick}>
-        <div className="panel-header">
-          <div className="header-left">
-            <h1>📋 Anketlerim</h1>
-            <p>Toplam {anketler.length} anket</p>
+        {/* Hero Header - Compact */}
+        <div className="panel-hero-header">
+          <div className="hero-content">
+            <div className="hero-title-row">
+              <div className="hero-icon-wrapper">
+                <FaPoll className="hero-icon" />
+              </div>
+              <h1 className="hero-title">
+                <span className="title-gradient">Anketlerim</span>
+              </h1>
+            </div>
+            <p className="hero-subtitle">
+              Tüm anketlerinizi yönetin, düzenleyin ve sonuçlarını takip edin
+            </p>
           </div>
+          <div className="hero-stats-mini">
+            <div className="mini-stat">
+              <span className="mini-stat-value">{anketler.length}</span>
+              <span className="mini-stat-label">Toplam Anket</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="panel-filter-bar">
 
           {/* Kompakt İstatistik Badge'leri */}
           <div className="stats-badges">
@@ -684,11 +704,11 @@ function Panel() {
             <div className="delete-modal-body">
               <p><strong>"{anketToSil.anketBaslik}"</strong> başlıklı anketi silmek üzeresiniz.</p>
               <p className="danger-text">Bu işlem geri alınamaz. Anketle birlikte tüm sorular, cevaplar ve linkler kalıcı olarak silinecektir.</p>
-              
+
               <div className="confirmation-input-group">
                 <label>Onaylamak için anketin adını aynen yazın:</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Anket adını buraya yazın..."
                   value={silmeOnayInput}
                   onChange={(e) => setSilmeOnayInput(e.target.value)}
@@ -698,8 +718,8 @@ function Panel() {
             </div>
             <div className="delete-modal-footer">
               <button className="btn-cancel" onClick={() => setDeleteModalOpen(false)}>Vazgeç</button>
-              <button 
-                className="btn-confirm-delete" 
+              <button
+                className="btn-confirm-delete"
                 disabled={silmeOnayInput !== anketToSil.anketBaslik || deleting}
                 onClick={confirmDelete}
               >

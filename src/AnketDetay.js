@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  FaArrowLeft, 
-  FaUsers, 
-  FaFileAlt, 
-  FaSpinner, 
-  FaCalendarAlt, 
+import {
+  FaArrowLeft,
+  FaUsers,
+  FaFileAlt,
+  FaSpinner,
+  FaCalendarAlt,
   FaChartBar,
   FaHome,
   FaMoon,
   FaSun,
   FaCheckCircle,
   FaPercentage,
-  FaCopy
+  FaCopy,
+  FaUser
 } from 'react-icons/fa';
-import { 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
-  Legend 
+  Legend
 } from 'recharts';
 import './AnketDetay.css';
 
@@ -92,7 +93,7 @@ function AnketDetay() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         navigate('/giris');
         return;
@@ -110,7 +111,7 @@ function AnketDetay() {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         setSonuclar(result.data);
       } else {
@@ -167,16 +168,19 @@ function AnketDetay() {
       {/* Navbar */}
       <nav className="dashboard-navbar">
         <div className="nav-left">
-          <button className="nav-back-btn" onClick={() => navigate('/panel')}>
+          <button className="nav-back-btn" onClick={() => navigate('/anket-sonuclari')}>
             <FaArrowLeft /> Geri
           </button>
           <div className="dashboard-logo">
-            📊 <span>AnketApp</span>
+            📊 <span>SurvAI</span>
           </div>
         </div>
         <div className="nav-right">
           <Link to="/panel" className="nav-back-btn">
             <FaHome /> Ana Sayfa
+          </Link>
+          <Link to="/profil" className="nav-back-btn">
+            <FaUser /> Profil
           </Link>
           <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
             {darkMode ? <FaSun /> : <FaMoon />}
@@ -194,7 +198,7 @@ function AnketDetay() {
                 <p className="survey-description">{anket.anketAciklama}</p>
               )}
             </div>
-            <div style={{display: 'flex', gap: '12px'}}>
+            <div style={{ display: 'flex', gap: '12px' }}>
               <button className="nav-back-btn" onClick={copyLink}>
                 <FaCopy /> Linki Kopyala
               </button>
@@ -275,8 +279,8 @@ function AnketDetay() {
                 <div className="ai-score-display">
                   <div className="ai-score-number">{aiAnaliz?.puan || 5}/10</div>
                   <div className="ai-score-bar">
-                    <div 
-                      className="ai-score-fill" 
+                    <div
+                      className="ai-score-fill"
                       style={{
                         width: `${(aiAnaliz?.puan || 5) * 10}%`,
                         backgroundColor: (aiAnaliz?.puan || 5) >= 7 ? '#10b981' : (aiAnaliz?.puan || 5) >= 4 ? '#f59e0b' : '#ef4444'
@@ -313,13 +317,13 @@ function AnketDetay() {
 
         {/* Tabs */}
         <div className="dashboard-tabs">
-          <button 
+          <button
             className={`dash-tab ${viewMode === 'statistics' ? 'active' : ''}`}
             onClick={() => setViewMode('statistics')}
           >
             <FaChartBar /> İstatistikler
           </button>
-          <button 
+          <button
             className={`dash-tab ${viewMode === 'responses' ? 'active' : ''}`}
             onClick={() => setViewMode('responses')}
           >
@@ -357,7 +361,7 @@ function AnketDetay() {
                               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                               <XAxis dataKey="isim" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
                               <YAxis tick={{ fontSize: 11 }} />
-                              <Tooltip 
+                              <Tooltip
                                 contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
                                 formatter={(value) => [`${value} cevap`, 'Sayı']}
                               />
@@ -396,7 +400,7 @@ function AnketDetay() {
                         <thead>
                           <tr>
                             <th>Seçenek</th>
-                            <th style={{textAlign:'center'}}>Sayı</th>
+                            <th style={{ textAlign: 'center' }}>Sayı</th>
                             <th className="progress-cell">Oran</th>
                           </tr>
                         </thead>
@@ -478,7 +482,7 @@ function AnketDetay() {
                         <thead>
                           <tr>
                             <th>Puan</th>
-                            <th style={{textAlign:'center'}}>Sayı</th>
+                            <th style={{ textAlign: 'center' }}>Sayı</th>
                             <th className="progress-cell">Oran</th>
                           </tr>
                         </thead>
@@ -523,12 +527,12 @@ function AnketDetay() {
                       {new Date(katilimci.olusturulmaTarihi).toLocaleTimeString('tr-TR')}
                     </span>
                   </div>
-                  
+
                   <div className="response-body">
                     {anket.sorular?.map((soru, sidx) => {
                       const cevap = katilimci.cevaplar[soru._id.toString()];
                       let cevapMetni = '';
-                      
+
                       if (Array.isArray(cevap)) {
                         cevapMetni = cevap.join(', ');
                       } else if (typeof cevap === 'object' && cevap !== null) {
@@ -536,7 +540,7 @@ function AnketDetay() {
                       } else {
                         cevapMetni = String(cevap || '-');
                       }
-                      
+
                       return (
                         <div key={sidx} className="response-row">
                           <div className="response-question">{soru.soruMetni}</div>

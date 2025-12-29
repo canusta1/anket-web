@@ -55,18 +55,21 @@ function AnketOlustur() {
       <nav className="ac-navbar">
         <div className="nav-left">
           <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-          <span className="panel-logo">AnketApp</span>
+          <span className="panel-logo">SurvAI</span>
         </div>
 
         <div className="nav-right">
-          <button className="nav-link" onClick={() => navigate("/panel")} style={{background:'none', border:'none', cursor:'pointer', fontFamily:'inherit'}}>
+          <button className="nav-link" onClick={() => navigate("/panel")} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
             <FaHome /> Ana Sayfa
           </button>
-          <button 
-            className="theme-toggle" 
+          <button className="nav-link" onClick={() => navigate("/profil")} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <FaUser /> Profil
+          </button>
+          <button
+            className="theme-toggle"
             onClick={() => setDarkMode(!darkMode)}
             title={darkMode ? 'Açık Tema' : 'Koyu Tema'}
-            style={{background:'none', border:'1px solid var(--panel-border)', padding:'8px', borderRadius:'8px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center'}}
+            style={{ background: 'none', border: '1px solid var(--panel-border)', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             {darkMode ? <FaSun /> : <FaMoon />}
           </button>
@@ -76,7 +79,7 @@ function AnketOlustur() {
       {/* Sidebar - Harmonized */}
       <div className={`ac-sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-logo">📊 SurvAI</div>
           <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
         </div>
         <ul>
@@ -94,7 +97,7 @@ function AnketOlustur() {
       <main className="anket-main">
         <h1>
           {titleText}
-          <span style={{animation: 'blink 1s infinite'}}>|</span>
+          <span style={{ animation: 'blink 1s infinite' }}>|</span>
         </h1>
 
         <div className="option-cards">

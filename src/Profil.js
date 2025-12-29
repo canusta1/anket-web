@@ -193,11 +193,8 @@ function Profil() {
           <button className="nav-icon-btn" onClick={() => setMenuOpen(!menuOpen)}>
             <FaBars />
           </button>
-          <button className="nav-icon-btn" onClick={() => navigate('/panel')}>
-            <FaArrowLeft />
-          </button>
           <div className="profile-logo">
-            📊 <span>AnketApp</span>
+            📊 <span>SurvAI</span>
           </div>
         </div>
         <div className="nav-right">
@@ -213,7 +210,7 @@ function Profil() {
       {/* Sidebar */}
       <div className={`profile-sidebar ${menuOpen ? "open" : ""}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">📊 AnketApp</div>
+          <div className="sidebar-logo">📊 SurvAI</div>
           <div className="sidebar-subtitle">Profil Yönetimi</div>
         </div>
         <ul>
@@ -290,7 +287,7 @@ function Profil() {
               {editMode ? <><FaTimes /> İptal</> : <><FaEdit /> Düzenle</>}
             </button>
           </div>
-          
+
           <div className="form-grid">
             <div className="form-group">
               <label>Ad</label>
@@ -304,7 +301,7 @@ function Profil() {
                 placeholder="Adınız"
               />
             </div>
-            
+
             <div className="form-group">
               <label>Soyad</label>
               <input

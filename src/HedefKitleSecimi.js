@@ -187,10 +187,25 @@ function HedefKitleSecimi() {
         setKonumModalAcik(false);
     };
 
+    // Mail uzantısı format kontrolü için regex (örn: gmail.com, outlook.com, kurum.com.tr)
+    const mailUzantisiGecerliMi = (uzanti) => {
+        const trimmed = uzanti.trim();
+        // Domain formatı: en az bir . içermeli, TLD en az 2 karakter olmalı
+        // Örnek: gmail.com, outlook.com, kurum.com.tr
+        const pattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
+        return pattern.test(trimmed);
+    };
+
     const handleLinkOlustur = async () => {
-        if (secilenKriterler.mail && !mailUzantisi.trim()) {
-            alert("⚠️ Mail kriteri seçtiniz! Lütfen geçerli bir mail uzantısı girin.");
-            return;
+        if (secilenKriterler.mail) {
+            if (!mailUzantisi.trim()) {
+                alert("⚠️ Mail kriteri seçtiniz! Lütfen bir mail uzantısı girin.");
+                return;
+            }
+            if (!mailUzantisiGecerliMi(mailUzantisi)) {
+                alert("⚠️ Geçersiz mail uzantısı formatı!\n\nÖrnek formatlar:\n• gmail.com\n• outlook.com\n• kurum.com.tr\n\nLütfen geçerli bir domain girin.");
+                return;
+            }
         }
 
         if (secilenKriterler.konum && !kayitliKonumKriteri) {
@@ -415,10 +430,11 @@ function HedefKitleSecimi() {
                 <div className="nav-left">
                     <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
                     <FaArrowLeft className="menu-icon" onClick={handleGeriDon} style={{ marginRight: "15px" }} />
-                    <span className="panel-logo">AnketApp</span>
+                    <span className="panel-logo">SurvAI</span>
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
+                    <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
                     <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
                 </div>
             </nav>
@@ -460,9 +476,16 @@ function HedefKitleSecimi() {
                                     <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Katılımcıdan e-mail adresi istenecek</p>
                                 </div>
                                 {secilenKriterler.mail && (
-                                    <div style={{ marginTop: "15px", padding: "20px", background: "#f0f8ff", borderRadius: "10px", border: "2px dashed #3498db", animation: "slideDown 0.3s ease-out" }}>
-                                        <label style={{ display: "block", fontWeight: 600, color: "#2c3e50", marginBottom: "10px", fontSize: "0.95em" }}>📧 Mail Uzantısı (Domain) Belirleyin:</label>
-                                        <input type="text" value={mailUzantisi} onChange={(e) => setMailUzantisi(e.target.value)} placeholder="Örn: @gmail.com veya @sirket.com" style={{ width: "100%", padding: "12px 15px", border: "2px solid #3498db", borderRadius: "8px", fontSize: "1em", boxSizing: "border-box", outline: "none" }} />
+                                    <div style={{ marginTop: "15px", padding: "20px", background: "#f0f8ff", borderRadius: "10px", border: `2px dashed ${!mailUzantisi.trim() ? "#e74c3c" : "#3498db"}`, animation: "slideDown 0.3s ease-out" }}>
+                                        <label style={{ display: "block", fontWeight: 600, color: "#2c3e50", marginBottom: "10px", fontSize: "0.95em" }}>
+                                            📧 Mail Uzantısı (Domain) Belirleyin: <span style={{ color: "#e74c3c" }}>*</span>
+                                        </label>
+                                        <input type="text" value={mailUzantisi} onChange={(e) => setMailUzantisi(e.target.value)} placeholder="Örn: @gmail.com veya @sirket.com" style={{ width: "100%", padding: "12px 15px", border: `2px solid ${!mailUzantisi.trim() ? "#e74c3c" : "#3498db"}`, borderRadius: "8px", fontSize: "1em", boxSizing: "border-box", outline: "none" }} />
+                                        {!mailUzantisi.trim() && (
+                                            <p style={{ color: "#e74c3c", fontSize: "0.85em", marginTop: "8px", marginBottom: 0, fontWeight: 500 }}>
+                                                ⚠️ Bu alan zorunludur. Devam etmek için mail uzantısı girmelisiniz.
+                                            </p>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -572,20 +595,141 @@ function HedefKitleSecimi() {
                                 </button>
                             </div>
                         ) : (
-                            <div style={{ background: "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)", borderRadius: "20px", padding: "40px", boxShadow: "0 10px 40px rgba(46, 204, 113, 0.3)", animation: "fadeInUp 0.5s ease-out", color: "white" }}>
-                                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "15px", marginBottom: "20px" }}>
-                                    <FaCheckCircle style={{ fontSize: "3em", color: "white" }} />
-                                    <h2 style={{ margin: 0, fontSize: "2em" }}>🎉 Anket Hazır!</h2>
+                            <div className="success-container" style={{
+                                background: 'var(--panel-bg-alt, #ffffff)',
+                                borderRadius: '20px',
+                                padding: '40px',
+                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                border: '1px solid var(--panel-border, #e2e8f0)',
+                                maxWidth: '600px',
+                                margin: '0 auto',
+                                textAlign: 'center'
+                            }}>
+                                {/* Success Icon */}
+                                <div style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #6366f1 100%)',
+                                    borderRadius: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: '0 auto 24px',
+                                    boxShadow: '0 8px 24px rgba(0, 212, 170, 0.3)'
+                                }}>
+                                    <FaCheckCircle style={{ fontSize: '2.5rem', color: 'white' }} />
                                 </div>
-                                <p style={{ fontSize: "1.1em", marginBottom: "25px", opacity: 0.95 }}>Anketiniz başarıyla oluşturuldu! Aşağıdaki linki kopyalayıp hedef kitlenizle paylaşabilirsiniz:</p>
-                                <div style={{ background: "rgba(255, 255, 255, 0.95)", borderRadius: "15px", padding: "20px", display: "flex", alignItems: "center", gap: "15px", flexWrap: "wrap", boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)" }}>
-                                    <a href={olusanLink} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: "250px", color: "#2c3e50", fontSize: "1.05em", fontWeight: 500, textDecoration: "none", wordBreak: "break-all" }}>{olusanLink}</a>
-                                    <button onClick={handleLinkKopyala} style={{ background: "#3498db", color: "white", border: "none", padding: "12px 25px", borderRadius: "10px", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "1em", transition: "all 0.3s" }} onMouseOver={(e) => e.target.style.background = "#2980b9"} onMouseOut={(e) => e.target.style.background = "#3498db"}>
-                                        <FaCopy /> Kopyala
+
+                                {/* Title */}
+                                <h2 style={{
+                                    fontSize: '1.75rem',
+                                    fontWeight: '800',
+                                    margin: '0 0 12px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 40%, #6366f1 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text'
+                                }}>
+                                    Anket Başarıyla Oluşturuldu!
+                                </h2>
+
+                                <p style={{
+                                    color: 'var(--panel-text-muted, #64748b)',
+                                    fontSize: '0.95rem',
+                                    marginBottom: '28px'
+                                }}>
+                                    Anketiniz yayınlandı ve katılımcılarını bekliyor.
+                                </p>
+
+                                {/* Link Section */}
+                                <div style={{ marginBottom: '28px' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '700',
+                                        color: 'var(--panel-text-muted, #64748b)',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                        marginBottom: '10px'
+                                    }}>
+                                        Paylaşım Linki
+                                    </label>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        background: 'var(--panel-bg, #f8fafc)',
+                                        border: '1px solid var(--panel-border, #e2e8f0)',
+                                        borderRadius: '12px',
+                                        padding: '12px 16px'
+                                    }}>
+                                        <code style={{
+                                            flex: 1,
+                                            fontSize: '0.9rem',
+                                            color: 'var(--panel-text, #1e293b)',
+                                            wordBreak: 'break-all',
+                                            textAlign: 'left'
+                                        }}>
+                                            {olusanLink}
+                                        </code>
+                                        <button
+                                            onClick={handleLinkKopyala}
+                                            style={{
+                                                background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '10px 16px',
+                                                borderRadius: '8px',
+                                                fontWeight: '600',
+                                                fontSize: '0.85rem',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                transition: 'all 0.2s',
+                                                boxShadow: '0 2px 8px rgba(0, 212, 170, 0.25)'
+                                            }}
+                                        >
+                                            <FaCopy /> Kopyala
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => navigate("/panel")}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 12px rgba(0, 212, 170, 0.25)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Dashboard'a Dön
                                     </button>
-                                </div>
-                                <div style={{ marginTop: "30px" }}>
-                                    <button onClick={() => navigate("/panel")} style={{ background: "rgba(255, 255, 255, 0.2)", color: "white", border: "2px solid white", padding: "12px 30px", borderRadius: "25px", fontWeight: 600, cursor: "pointer", fontSize: "1em", transition: "all 0.3s" }} onMouseOver={(e) => { e.target.style.background = "white"; e.target.style.color = "#27ae60"; }} onMouseOut={(e) => { e.target.style.background = "rgba(255, 255, 255, 0.2)"; e.target.style.color = "white"; }}>Panele Dön</button>
+                                    <button
+                                        onClick={() => window.open(olusanLink)}
+                                        style={{
+                                            background: 'transparent',
+                                            color: 'var(--panel-text, #1e293b)',
+                                            border: '1px solid var(--panel-border, #e2e8f0)',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Anketi Görüntüle
+                                    </button>
                                 </div>
                             </div>
                         )}

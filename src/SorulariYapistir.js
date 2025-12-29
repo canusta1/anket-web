@@ -144,25 +144,25 @@ function SorulariYapistir() {
     const parseAnketMetni = (text) => {
         const sorular = [];
         const satirlar = text.split('\n');
-        
+
         let aktifSoru = null;
         let soruNumarasi = 0;
-        
+
         for (let i = 0; i < satirlar.length; i++) {
             const satir = satirlar[i].trim();
-            
+
             if (!satir) continue;
-            
-            const soruMatch = satir.match(/^(\d+)\.\s*["""](.+?)["""](.*)/) || 
-                             satir.match(/^["""](.+?)["""](.*)$/);
-            
+
+            const soruMatch = satir.match(/^(\d+)\.\s*["""](.+?)["""](.*)/) ||
+                satir.match(/^["""](.+?)["""](.*)$/);
+
             if (soruMatch) {
                 if (aktifSoru) sorular.push(aktifSoru);
-                
+
                 soruNumarasi++;
                 const soruMetni = soruMatch[2] || soruMatch[1];
                 const soruDevami = soruMatch[3] || soruMatch[2] || '';
-                
+
                 aktifSoru = {
                     id: Date.now() + soruNumarasi + Math.random(),
                     metin: (soruMetni + ' ' + soruDevami).trim(),
@@ -170,7 +170,7 @@ function SorulariYapistir() {
                     secenekler: [],
                     zorunlu: true
                 };
-            } 
+            }
             else if (satir.match(/^[A-Za-z]\)\s*/)) {
                 if (aktifSoru) {
                     const secenekMetni = satir.replace(/^[A-Za-z]\)\s*/, '').trim();
@@ -189,7 +189,7 @@ function SorulariYapistir() {
                 }
             }
         }
-        
+
         if (aktifSoru) sorular.push(aktifSoru);
         return sorular;
     };
@@ -208,18 +208,18 @@ function SorulariYapistir() {
         reader.onload = (e) => {
             try {
                 const jsonData = JSON.parse(e.target.result);
-                
+
                 const baslik = jsonData.anketBaslik || jsonData.anket_adi || jsonData.title;
                 if (baslik) setAnketBaslik(baslik);
-                
+
                 const aciklama = jsonData.anketAciklama || jsonData.anket_aciklamasi || jsonData.description;
                 if (aciklama) setAnketAciklama(aciklama);
-                
+
                 if (jsonData.sorular && Array.isArray(jsonData.sorular)) {
                     const formattedSorular = jsonData.sorular.map((soru, index) => {
                         const soruMetni = soru.soruMetni || soru.soru_metni || soru.metin || soru.soru || '';
                         const cevapTipi = soru.soruTipi || soru.cevap_tipi || soru.tip || 'acik-uclu';
-                        
+
                         let anketTipi = 'acik-uclu';
                         if (cevapTipi === 'tek_secimli' || cevapTipi === 'coktan-tek' || cevapTipi === 'radio') {
                             anketTipi = 'coktan-tek';
@@ -228,12 +228,12 @@ function SorulariYapistir() {
                         } else if (cevapTipi === 'slider' || cevapTipi === 'skala') {
                             anketTipi = 'slider';
                         }
-                        
+
                         const secenekler = (soru.secenekler || []).map(sec => {
                             if (typeof sec === 'string') return sec;
                             return sec.etiket || sec.metin || sec.label || '';
                         });
-                        
+
                         return {
                             id: Date.now() + index + Math.random(),
                             metin: soruMetni,
@@ -244,7 +244,7 @@ function SorulariYapistir() {
                             sliderMax: anketTipi === 'slider' ? 10 : null
                         };
                     });
-                    
+
                     setSorular(formattedSorular);
                     setCurrentStep(2); // Go to question editing
                 } else {
@@ -255,7 +255,7 @@ function SorulariYapistir() {
                 alert("❌ JSON dosyası okunamadı!");
             }
         };
-        
+
         reader.onerror = () => alert("❌ Dosya okuma hatası!");
         reader.readAsText(file);
         event.target.value = '';
@@ -336,8 +336,28 @@ function SorulariYapistir() {
         window.scrollTo(0, 0);
     };
 
+    // Mail uzantısı format kontrolü için regex (örn: gmail.com, outlook.com, kurum.com.tr)
+    const mailUzantisiGecerliMi = (uzanti) => {
+        const trimmed = uzanti.trim();
+        // Domain formatı: en az bir . içermeli, TLD en az 2 karakter olmalı
+        const pattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
+        return pattern.test(trimmed);
+    };
+
     // --- FINAL PUBLISH ---
     const handleFinalYayinla = async () => {
+        // Mail uzantısı validasyonu
+        if (secilenKriterler.mail) {
+            if (!mailUzantisi.trim()) {
+                alert("⚠️ E-posta kısıtlaması seçtiniz! Lütfen bir mail uzantısı girin.");
+                return;
+            }
+            if (!mailUzantisiGecerliMi(mailUzantisi)) {
+                alert("⚠️ Geçersiz mail uzantısı formatı!\n\nÖrnek formatlar:\n• gmail.com\n• outlook.com\n• kurum.com.tr\n\nLütfen geçerli bir domain girin.");
+                return;
+            }
+        }
+
         const token = localStorage.getItem("token");
         if (!token) { navigate("/giris"); return; }
         setLoading(true);
@@ -404,10 +424,11 @@ function SorulariYapistir() {
                 <div className="nav-left">
                     <button className="icon-btn" onClick={() => setMenuOpen(!menuOpen)}><FaBars /></button>
                     <button className="icon-btn back-btn" onClick={handleGeriDon}><FaArrowLeft /></button>
-                    <span className="panel-logo">AnketApp <span className="logo-badge paste-badge">YAPIŞTIR</span></span>
+                    <span className="panel-logo">SurvAI <span className="logo-badge paste-badge">YAPIŞTIR</span></span>
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
+                    <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
                     <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
                         {darkMode ? <FaSun /> : <FaMoon />}
                     </button>
@@ -454,10 +475,10 @@ function SorulariYapistir() {
                     {currentStep === 1 && (
                         <div className="wizard-step step-info animate-in">
                             <div className="step-header-text">
-                                <h2><FaPaste style={{marginRight: '10px', color: 'var(--w-primary)'}} /> Soruları Yapıştır veya Yükle</h2>
+                                <h2><FaPaste style={{ marginRight: '10px', color: 'var(--w-primary)' }} /> Soruları Yapıştır veya Yükle</h2>
                                 <p>Hazır anket sorularınızı buraya yapıştırın veya JSON dosyası yükleyin.</p>
                             </div>
-                            
+
                             <div className="paste-form">
                                 <div className="paste-form-grid">
                                     {/* Left: Survey Info */}
@@ -465,28 +486,28 @@ function SorulariYapistir() {
                                         <h3><FaClipboardList /> Anket Bilgileri</h3>
                                         <div className="fancy-input-group">
                                             <label>Anket Başlığı *</label>
-                                            <input 
-                                                type="text" 
-                                                placeholder="Örn: Temizlik Alışkanlıkları Anketi" 
-                                                value={anketBaslik} 
+                                            <input
+                                                type="text"
+                                                placeholder="Örn: Temizlik Alışkanlıkları Anketi"
+                                                value={anketBaslik}
                                                 onChange={(e) => setAnketBaslik(e.target.value)}
                                                 className="fancy-text-input"
                                             />
                                         </div>
                                         <div className="fancy-input-group">
                                             <label>Açıklama (İsteğe Bağlı)</label>
-                                            <textarea 
-                                                placeholder="Anketin amacını kısaca açıklayın..." 
-                                                value={anketAciklama} 
+                                            <textarea
+                                                placeholder="Anketin amacını kısaca açıklayın..."
+                                                value={anketAciklama}
                                                 onChange={(e) => setAnketAciklama(e.target.value)}
                                                 className="fancy-textarea"
                                                 rows="3"
                                             />
                                         </div>
-                                        
+
                                         {/* JSON Upload */}
                                         <div className="json-upload-section">
-                                            <button 
+                                            <button
                                                 className="json-upload-btn"
                                                 onClick={() => fileInputRef.current?.click()}
                                             >
@@ -502,25 +523,25 @@ function SorulariYapistir() {
                                             <span className="upload-hint">JSON yüklerseniz otomatik olarak sorulara geçilir</span>
                                         </div>
                                     </div>
-                                    
+
                                     {/* Right: Paste Area */}
                                     <div className="paste-form-col paste-col">
                                         <h3><FaFileCode /> Soruları Yapıştır</h3>
                                         <div className="paste-format-hint">
                                             <code>
-                                                1. "Soru metni?"<br/>
-                                                A) Seçenek 1<br/>
+                                                1. "Soru metni?"<br />
+                                                A) Seçenek 1<br />
                                                 B) Seçenek 2
                                             </code>
                                         </div>
-                                        <textarea 
+                                        <textarea
                                             className="paste-textarea"
                                             placeholder='1. "Soru metni?"&#10;A) Seçenek 1&#10;B) Seçenek 2&#10;&#10;2. "İkinci soru?"&#10;A) Cevap 1&#10;B) Cevap 2'
                                             value={metin}
                                             onChange={(e) => setMetin(e.target.value)}
                                             rows="12"
                                         />
-                                        <button 
+                                        <button
                                             className="parse-btn"
                                             onClick={handleParseAndProceed}
                                             disabled={!anketBaslik.trim() || !metin.trim()}
@@ -542,15 +563,15 @@ function SorulariYapistir() {
                                         <h3>Sorular ({sorular.length})</h3>
                                         <div className="question-list-nav">
                                             {sorular.map((s, i) => (
-                                                <div 
-                                                    key={s.id} 
+                                                <div
+                                                    key={s.id}
                                                     className={`nav-item ${activeQuestionId === s.id ? 'active' : ''}`}
                                                     onClick={() => setActiveQuestionId(s.id)}
                                                 >
                                                     <span className="idx">{i + 1}</span>
                                                     <span className="txt">{s.metin || "Adsız Soru"}</span>
                                                     <div className="nav-actions">
-                                                        <button 
+                                                        <button
                                                             className="mini-del-btn"
                                                             onClick={(e) => { e.stopPropagation(); handleSoruSil(s.id); }}
                                                         >
@@ -596,8 +617,8 @@ function SorulariYapistir() {
                                                         <div className="q-workspace-panel animate-in">
                                                             <div className="q-panel-section main-input-section">
                                                                 <label className="section-mini-label">Soru Metni</label>
-                                                                <textarea 
-                                                                    placeholder="Katılımcıya ne sormak istersiniz?" 
+                                                                <textarea
+                                                                    placeholder="Katılımcıya ne sormak istersiniz?"
                                                                     value={activeQ.metin}
                                                                     onChange={(e) => handleSoruDegis(activeQ.id, e.target.value)}
                                                                     className="q-panel-input"
@@ -624,7 +645,7 @@ function SorulariYapistir() {
                                                                             <option value="slider">🎚️ Slider (Puanlama)</option>
                                                                         </select>
                                                                     </div>
-                                                                    
+
                                                                     <div className="q-config-field clickable" onClick={() => handleZorunluToggle(activeQ.id)}>
                                                                         <label>Zorunluluk</label>
                                                                         <div className="compact-toggle-wrap">
@@ -666,9 +687,9 @@ function SorulariYapistir() {
                                                                                 <div className="choice-indicator">
                                                                                     {activeQ.tip === 'coktan-tek' ? <div className="dot-icon" /> : <div className="check-icon" />}
                                                                                 </div>
-                                                                                <input 
-                                                                                    type="text" 
-                                                                                    value={sec} 
+                                                                                <input
+                                                                                    type="text"
+                                                                                    value={sec}
                                                                                     onChange={(e) => handleSecenekDegis(activeQ.id, i, e.target.value)}
                                                                                     placeholder={`Seçenek ${i + 1}`}
                                                                                     className="choice-minimal-input"
@@ -684,7 +705,7 @@ function SorulariYapistir() {
                                                                     </div>
                                                                 </div>
                                                             )}
-                                                            
+
                                                             {activeQ.tip === 'slider' && (
                                                                 <div className="q-panel-section preview-section">
                                                                     <div className="section-header">
@@ -720,7 +741,7 @@ function SorulariYapistir() {
 
                             <div className="audience-grid">
                                 <div className={`audience-card ${secilenKriterler.kimlikDogrulama ? 'expanded' : ''}`} onClick={() => handleKriterToggle("kimlikDogrulama")}>
-                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("kimlikDogrulama")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("kimlikDogrulama") }}><FaCheckCircle /></div>
                                     <FaShieldAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Biyometrik Kimlik & Yüz Doğrulama</h3>
@@ -728,7 +749,7 @@ function SorulariYapistir() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.tcNo ? 'expanded' : ''}`} onClick={() => handleKriterToggle("tcNo")}>
-                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("tcNo")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("tcNo") }}><FaCheckCircle /></div>
                                     <FaIdCard className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>TC Kimlik No Doğrulama</h3>
@@ -736,7 +757,7 @@ function SorulariYapistir() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.telefonNumarasi ? 'expanded' : ''}`} onClick={() => handleKriterToggle("telefonNumarasi")}>
-                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("telefonNumarasi")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("telefonNumarasi") }}><FaCheckCircle /></div>
                                     <FaMobileAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Telefon Doğrulama</h3>
@@ -744,7 +765,7 @@ function SorulariYapistir() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.mail ? 'expanded' : ''}`} onClick={() => handleKriterToggle("mail")}>
-                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("mail")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("mail") }}><FaCheckCircle /></div>
                                     <FaEnvelope className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>E-posta Kısıtlaması</h3>
@@ -757,7 +778,7 @@ function SorulariYapistir() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.konum ? 'expanded' : ''}`} onClick={() => handleKriterToggle("konum")}>
-                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("konum")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("konum") }}><FaCheckCircle /></div>
                                     <FaMapMarkerAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Bölge Kısıtlaması</h3>
@@ -785,12 +806,12 @@ function SorulariYapistir() {
                                 <div className="check-blob"><FaCheckCircle /></div>
                                 <h1 className="success-title">Anket Başarıyla Oluşturuldu!</h1>
                                 <p>Yapıştırdığınız sorulardan anketiniz yayınlandı.</p>
-                                
+
                                 <div className="link-copy-area">
                                     <label>Paylaşım Linki</label>
                                     <div className="link-box">
                                         <code>{olusanLink}</code>
-                                        <button onClick={() => {navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!");}}><FaCopy /></button>
+                                        <button onClick={() => { navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!"); }}><FaCopy /></button>
                                     </div>
                                 </div>
 
