@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  FaArrowLeft, FaUsers, FaCalendarAlt, FaChartBar, 
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import {
+  FaArrowLeft, FaUsers, FaCalendarAlt, FaChartBar,
   FaFileAlt, FaCheckCircle, FaDownload, FaFilter,
-  FaSpinner, FaChartPie 
+  FaSpinner, FaChartPie, FaHome, FaBars, FaSignOutAlt,
+  FaUser, FaMoon, FaSun
 } from 'react-icons/fa';
 import {
-  BarChart, Bar, PieChart, Pie, Cell, 
+  BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import './AnketSonuclari.css';
+import './Panel.css';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
@@ -18,6 +20,12 @@ function AnketSonuclari() {
   const [anketler, setAnketler] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/giris');
+  };
 
   useEffect(() => {
     loadAnketler();
@@ -27,7 +35,7 @@ function AnketSonuclari() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         navigate('/giris');
         return;
@@ -46,7 +54,7 @@ function AnketSonuclari() {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         setAnketler(result.data || []);
         console.log('📊 Anketler yüklendi:', result.data);
@@ -84,7 +92,7 @@ function AnketSonuclari() {
             <div className="question-type-badge open-ended">Açık Uçlu</div>
           </div>
           <h3 className="question-text">{soru.soruMetni}</h3>
-          
+
           <div className="response-count">
             <FaFileAlt /> {soru.cevaplar?.length || 0} yanıt
           </div>
@@ -169,11 +177,11 @@ function AnketSonuclari() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fontSize: 11 }} 
-                  angle={-15} 
-                  textAnchor="end" 
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 11 }}
+                  angle={-15}
+                  textAnchor="end"
                   height={80}
                 />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -266,21 +274,67 @@ function AnketSonuclari() {
   }
 
   return (
-    <div className="results-container">
-      {/* Header */}
-      <div className="results-header">
-        <button onClick={() => navigate('/panel')} className="btn-back">
-          <FaArrowLeft /> Panele Dön
-        </button>
-        
-        <div className="header-content">
-          <h1>📊 Anket Sonuçları</h1>
-          <p className="header-description">Tüm anketlerinizin sonuçlarını görüntüleyin</p>
+    <div className="results-container panel-container">
+      {/* Navbar - Panel Style */}
+      <nav className="panel-navbar">
+        <div className="nav-left">
+          <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
+          <span className="panel-logo">SurvAI</span>
         </div>
-      </div>
 
-      {/* Anketler Listesi */}
-      <div className="results-content">
+        <div className="nav-right">
+          <Link to="/panel" className="nav-link"><FaHome /> Panel</Link>
+          <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
+          <button
+            className="btn-white"
+            onClick={() => navigate('/anket-olustur')}
+          >
+            + Yeni Anket
+          </button>
+        </div>
+      </nav>
+
+      {/* Sidebar */}
+      <div className={`sidebar ${menuOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-logo">📊 SurvAI</div>
+          <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
+        </div>
+        <ul>
+          <li onClick={() => navigate('/panel')}><FaChartBar className="icon" /> Dashboard</li>
+          <li className="active"><FaChartPie className="icon" /> Sonuçları Gör</li>
+          <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
+          <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
+        </ul>
+      </div>
+      {menuOpen && <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>}
+
+      {/* Header */}
+      <div className="panel-main">
+        {/* Header - Compact */}
+        <div className="results-hero-header">
+          <div className="hero-content">
+            <div className="hero-title-row">
+              <div className="hero-icon-wrapper">
+                <FaChartPie className="hero-icon" />
+              </div>
+              <h1 className="hero-title">
+                <span className="title-gradient">Anket Sonuçları</span>
+              </h1>
+            </div>
+            <p className="hero-subtitle">
+              Tüm anketlerinizin detaylı sonuçlarını ve istatistiklerini keşfedin
+            </p>
+          </div>
+          <div className="hero-stats-mini">
+            <div className="mini-stat">
+              <span className="mini-stat-value">{anketler.length}</span>
+              <span className="mini-stat-label">Toplam Anket</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Anketler Listesi */}
         {anketler.length === 0 ? (
           <div className="no-responses">
             <FaFileAlt className="no-responses-icon" />
@@ -288,34 +342,63 @@ function AnketSonuclari() {
             <p>Anket oluşturarak başlayın</p>
           </div>
         ) : (
-          <div className="anketler-grid">
-            {anketler.map((anket) => (
-              <div key={anket._id} className="anket-sonuc-card">
-                <div className="card-header">
-                  <h3>{anket.anketBaslik}</h3>
-                  <span className="durumBadge">{anket.durum}</span>
-                </div>
-                
-                <div className="card-stats">
-                  <div className="stat">
-                    <FaFileAlt /> {anket.sorular?.length || 0} soru
-                  </div>
-                  <div className="stat">
-                    <FaUsers /> {anket.toplamCevapSayisi || 0} cevap
-                  </div>
-                  <div className="stat">
-                    <FaCalendarAlt /> {new Date(anket.olusturulmaTarihi).toLocaleDateString('tr-TR')}
-                  </div>
-                </div>
-                
-                <button 
-                  className="btn-detay"
+          <div className="anketler-list-container">
+            {/* List Header */}
+            <div className="list-header">
+              <div className="list-col col-title">Anket Başlığı</div>
+              <div className="list-col col-questions">Sorular</div>
+              <div className="list-col col-responses">Cevaplar</div>
+              <div className="list-col col-status">Durum</div>
+              <div className="list-col col-actions">İşlem</div>
+            </div>
+
+            {/* List Body */}
+            <div className="list-body">
+              {anketler.map((anket, index) => (
+                <div
+                  key={anket._id}
+                  className="list-row"
+                  style={{ '--row-index': index }}
                   onClick={() => handleAnketDetay(anket._id)}
                 >
-                  Detaylı Sonuçlar <FaChartBar />
-                </button>
-              </div>
-            ))}
+                  <div className="list-col col-title">
+                    <div className="title-content">
+                      <span className="title-text">{anket.anketBaslik}</span>
+                      {anket.anketAciklama && (
+                        <span className="title-desc">{anket.anketAciklama}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="list-col col-questions">
+                    <span className="stat-badge questions">
+                      <FaFileAlt /> {anket.sorular?.length || 0}
+                    </span>
+                  </div>
+                  <div className="list-col col-responses">
+                    <span className="stat-badge responses">
+                      <FaUsers /> {anket.toplamCevapSayisi || 0}
+                    </span>
+                  </div>
+                  <div className="list-col col-status">
+                    <span className={`status-badge ${anket.durum}`}>
+                      {anket.durum === 'aktif' ? <FaCheckCircle /> : null}
+                      {anket.durum}
+                    </span>
+                  </div>
+                  <div className="list-col col-actions">
+                    <button
+                      className="btn-view-results"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAnketDetay(anket._id);
+                      }}
+                    >
+                      Sonuçları Gör
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

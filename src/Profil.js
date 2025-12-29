@@ -194,9 +194,6 @@ function Profil() {
           <button className="nav-icon-btn" onClick={() => setMenuOpen(!menuOpen)}>
             <FaBars />
           </button>
-          <button className="nav-icon-btn" onClick={() => navigate('/panel')}>
-            <FaArrowLeft />
-          </button>
           <div className="profile-logo">
             <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
           </div>
@@ -291,7 +288,7 @@ function Profil() {
               {editMode ? <><FaTimes /> İptal</> : <><FaEdit /> Düzenle</>}
             </button>
           </div>
-          
+
           <div className="form-grid">
             <div className="form-group">
               <label>Ad</label>
@@ -305,7 +302,7 @@ function Profil() {
                 placeholder="Adınız"
               />
             </div>
-            
+
             <div className="form-group">
               <label>Soyad</label>
               <input

@@ -107,6 +107,7 @@
   overflow: hidden;
   background: linear-gradient(180deg, var(--landing-bg) 0%, var(--landing-bg-alt) 100%);
   display: flex;
+  justify-content: flex-start;
   align-items: center;
   min-height: 520px;
 }
@@ -114,9 +115,14 @@
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 700px;
+  max-width: 600px;
+  width: 100%;
   text-align: left;
   margin-left: 60px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .hero-badge {
@@ -141,8 +147,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .hero-title {
@@ -263,9 +276,12 @@
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-20px);
   }
@@ -324,13 +340,27 @@
 }
 
 @keyframes scroll-wheel {
-  0% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
 }
 
 .section-header {
@@ -408,7 +438,7 @@
   margin-bottom: 12px;
 }
 
-.feature-card > p {
+.feature-card>p {
   font-size: 0.9rem;
   color: var(--landing-text-muted);
   margin-bottom: 20px;
@@ -472,7 +502,7 @@
   margin-bottom: 20px;
 }
 
-.security-text > p {
+.security-text>p {
   font-size: 1.1rem;
   color: var(--landing-text-muted);
   line-height: 1.7;
@@ -804,24 +834,25 @@
    RESPONSIVE
 ======================== */
 @media (max-width: 1024px) {
+
   .features-grid,
   .limits-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .security-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .security-list li {
     justify-content: center;
   }
-  
+
   .steps-container {
     flex-direction: column;
   }
-  
+
   .step-arrow {
     transform: rotate(90deg);
   }
@@ -831,34 +862,34 @@
   .landing-navbar {
     padding: 16px 24px;
   }
-  
+
   .hero-section {
     padding: 60px 24px;
   }
-  
+
   .hero-title {
     font-size: 2.2rem;
   }
-  
+
   .hero-buttons {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .hero-stats {
     flex-direction: column;
     gap: 24px;
   }
-  
+
   .stat-divider {
     width: 40px;
     height: 1px;
   }
-  
+
   .hero-image-container {
     display: none;
   }
-  
+
   .features-section,
   .security-section,
   .limits-section,
@@ -866,17 +897,17 @@
   .cta-section {
     padding: 60px 24px;
   }
-  
+
   .features-grid,
   .limits-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .footer-content {
     flex-direction: column;
     gap: 40px;
   }
-  
+
   .footer-links {
     flex-wrap: wrap;
     gap: 40px;

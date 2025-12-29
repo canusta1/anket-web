@@ -38,10 +38,10 @@ const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA
 function SifirdanAnket() {
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     // --- WIZARD STATE ---
     const [currentStep, setCurrentStep] = useState(1); // 1: Info, 2: Questions, 3: Audience/Rules, 4: Success
-    
+
     // --- STEP 1: ANKET BİLGİLERİ ---
     const [anketBaslik, setAnketBaslik] = useState("");
     const [anketAciklama, setAnketAciklama] = useState("");
@@ -56,14 +56,14 @@ function SifirdanAnket() {
         // ... (existing template load logic) ...
         // Note: I will just inject the activeQuestionId update within the existing useEffect above via a separate replacement or assume it picks up on render.
     }, [location.state]);
-    
+
     // Auto-select first question if exists and none selected
     useEffect(() => {
         if (sorular.length > 0 && !activeQuestionId) {
             setActiveQuestionId(sorular[0].id);
         }
     }, [sorular, activeQuestionId]);
-    
+
     // --- STEP 3: HEDEF KİTLE / KRİTERLER (HedefKitleSecimi'nden taşındı) ---
     const [secilenKriterler, setSecilenKriterler] = useState({
         mail: false,
@@ -74,7 +74,7 @@ function SifirdanAnket() {
     });
     const [mailUzantisi, setMailUzantisi] = useState("");
     const [kayitliKonumKriteri, setKayitliKonumKriteri] = useState(null);
-    
+
     // Konum Modal & Google Maps
     const [konumModalAcik, setKonumModalAcik] = useState(false);
     const [scriptLoaded, setScriptLoaded] = useState(false);
@@ -234,8 +234,28 @@ function SifirdanAnket() {
     };
     const prevStep = () => { setCurrentStep(currentStep - 1); window.scrollTo(0, 0); };
 
+    // Mail uzantısı format kontrolü için regex (örn: gmail.com, outlook.com, kurum.com.tr)
+    const mailUzantisiGecerliMi = (uzanti) => {
+        const trimmed = uzanti.trim();
+        // Domain formatı: en az bir . içermeli, TLD en az 2 karakter olmalı
+        const pattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
+        return pattern.test(trimmed);
+    };
+
     // --- FİNAL YAYINLAMA ---
     const handleFinalYayinla = async () => {
+        // Mail uzantısı validasyonu
+        if (secilenKriterler.mail) {
+            if (!mailUzantisi.trim()) {
+                alert("⚠️ E-posta kısıtlaması seçtiniz! Lütfen bir mail uzantısı girin.");
+                return;
+            }
+            if (!mailUzantisiGecerliMi(mailUzantisi)) {
+                alert("⚠️ Geçersiz mail uzantısı formatı!\n\nÖrnek formatlar:\n• gmail.com\n• outlook.com\n• kurum.com.tr\n\nLütfen geçerli bir domain girin.");
+                return;
+            }
+        }
+
         const token = localStorage.getItem("token");
         if (!token) { navigate("/giris"); return; }
         setLoading(true);
@@ -306,6 +326,7 @@ function SifirdanAnket() {
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
+                    <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
                     <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
                         {darkMode ? <FaSun /> : <FaMoon />}
                     </button>
@@ -359,10 +380,10 @@ function SifirdanAnket() {
                             <div className="info-form-fancy">
                                 <div className="fancy-input-group">
                                     <label>Anket Başlığı</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Örn: 2024 Müşteri Deneyimi Araştırması" 
-                                        value={anketBaslik} 
+                                    <input
+                                        type="text"
+                                        placeholder="Örn: 2024 Müşteri Deneyimi Araştırması"
+                                        value={anketBaslik}
                                         onChange={(e) => setAnketBaslik(e.target.value)}
                                         className="fancy-text-input"
                                     />
@@ -370,9 +391,9 @@ function SifirdanAnket() {
                                 </div>
                                 <div className="fancy-input-group">
                                     <label>Açıklama (İsteğe Bağlı)</label>
-                                    <textarea 
-                                        placeholder="Katılımcılara anketin amacından bahsedin..." 
-                                        value={anketAciklama} 
+                                    <textarea
+                                        placeholder="Katılımcılara anketin amacından bahsedin..."
+                                        value={anketAciklama}
                                         onChange={(e) => setAnketAciklama(e.target.value)}
                                         className="fancy-textarea"
                                         rows="5"
@@ -392,15 +413,15 @@ function SifirdanAnket() {
                                         <h3>Sorular ({sorular.length})</h3>
                                         <div className="question-list-nav">
                                             {sorular.map((s, i) => (
-                                                <div 
-                                                    key={s.id} 
+                                                <div
+                                                    key={s.id}
                                                     className={`nav-item ${activeQuestionId === s.id ? 'active' : ''}`}
                                                     onClick={() => setActiveQuestionId(s.id)}
                                                 >
                                                     <span className="idx">{i + 1}</span>
                                                     <span className="txt">{s.metin || "Adsız Soru"}</span>
                                                     <div className="nav-actions">
-                                                        <button 
+                                                        <button
                                                             className="mini-del-btn"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -437,7 +458,7 @@ function SifirdanAnket() {
                                                 const activeQ = sorular.find(s => s.id === activeQuestionId) || sorular[0];
                                                 // Sync if activeQuestionId is invalid (e.g. after delete)
                                                 if (activeQ && activeQuestionId !== activeQ.id) setActiveQuestionId(activeQ.id);
-                                                
+
                                                 if (!activeQ) return null;
 
                                                 const index = sorular.findIndex(s => s.id === activeQ.id);
@@ -457,8 +478,8 @@ function SifirdanAnket() {
                                                         <div className="q-workspace-panel animate-in">
                                                             <div className="q-panel-section main-input-section">
                                                                 <label className="section-mini-label">Soru Metni</label>
-                                                                <textarea 
-                                                                    placeholder="Katılımcıya ne sormak istersiniz?" 
+                                                                <textarea
+                                                                    placeholder="Katılımcıya ne sormak istersiniz?"
                                                                     value={activeQ.metin}
                                                                     onChange={(e) => handleSoruDegis(activeQ.id, e.target.value)}
                                                                     className="q-panel-input"
@@ -485,7 +506,7 @@ function SifirdanAnket() {
                                                                             <option value="slider">🎚️ Slider (Puanlama)</option>
                                                                         </select>
                                                                     </div>
-                                                                    
+
                                                                     <div className="q-config-field clickable" onClick={() => handleZorunluToggle(activeQ.id)}>
                                                                         <label>Zorunluluk</label>
                                                                         <div className="compact-toggle-wrap">
@@ -507,16 +528,16 @@ function SifirdanAnket() {
                                                                         <div className="config-group">
                                                                             <label>Değer Aralığı</label>
                                                                             <div className="range-inputs">
-                                                                                <input 
-                                                                                    type="number" 
-                                                                                    value={activeQ.sliderMin || 1} 
+                                                                                <input
+                                                                                    type="number"
+                                                                                    value={activeQ.sliderMin || 1}
                                                                                     onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMin', parseInt(e.target.value))}
                                                                                     placeholder="Min"
                                                                                 />
                                                                                 <span>-</span>
-                                                                                <input 
-                                                                                    type="number" 
-                                                                                    value={activeQ.sliderMax || 10} 
+                                                                                <input
+                                                                                    type="number"
+                                                                                    value={activeQ.sliderMax || 10}
                                                                                     onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMax', parseInt(e.target.value))}
                                                                                     placeholder="Max"
                                                                                 />
@@ -537,9 +558,9 @@ function SifirdanAnket() {
                                                                                 <div className="choice-indicator">
                                                                                     {activeQ.tip === 'coktan-tek' ? <div className="dot-icon" /> : <div className="check-icon" />}
                                                                                 </div>
-                                                                                <input 
-                                                                                    type="text" 
-                                                                                    value={sec} 
+                                                                                <input
+                                                                                    type="text"
+                                                                                    value={sec}
                                                                                     onChange={(e) => handleSecenekDegis(activeQ.id, i, e.target.value)}
                                                                                     placeholder={`Seçenek ${i + 1}`}
                                                                                     className="choice-minimal-input"
@@ -555,7 +576,7 @@ function SifirdanAnket() {
                                                                     </div>
                                                                 </div>
                                                             )}
-                                                            
+
                                                             {activeQ.tip === 'slider' && (
                                                                 <div className="q-panel-section preview-section">
                                                                     <div className="section-header">
@@ -591,7 +612,7 @@ function SifirdanAnket() {
 
                             <div className="audience-grid">
                                 <div className={`audience-card ${secilenKriterler.kimlikDogrulama ? 'expanded' : ''}`} onClick={() => handleKriterToggle("kimlikDogrulama")}>
-                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("kimlikDogrulama")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("kimlikDogrulama") }}><FaCheckCircle /></div>
                                     <FaShieldAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Biyometrik Kimlik & Yüz Doğrulama</h3>
@@ -599,7 +620,7 @@ function SifirdanAnket() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.tcNo ? 'expanded' : ''}`} onClick={() => handleKriterToggle("tcNo")}>
-                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("tcNo")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("tcNo") }}><FaCheckCircle /></div>
                                     <FaIdCard className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>TC Kimlik No Doğrulama</h3>
@@ -607,7 +628,7 @@ function SifirdanAnket() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.telefonNumarasi ? 'expanded' : ''}`} onClick={() => handleKriterToggle("telefonNumarasi")}>
-                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("telefonNumarasi")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("telefonNumarasi") }}><FaCheckCircle /></div>
                                     <FaMobileAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Telefon Doğrulama</h3>
@@ -615,16 +636,16 @@ function SifirdanAnket() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.mail ? 'expanded' : ''}`} onClick={() => handleKriterToggle("mail")}>
-                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("mail")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("mail") }}><FaCheckCircle /></div>
                                     <FaEnvelope className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>E-posta Kısıtlaması</h3>
                                         <p>Anketinizi sadece belirli kurumsal veya özel e-posta uzantılarına sahip kişilerle sınırlayın.</p>
                                         {secilenKriterler.mail && (
                                             <div className="nested-input" onClick={e => e.stopPropagation()}>
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="@kurum.com" 
+                                                <input
+                                                    type="text"
+                                                    placeholder="@kurum.com"
                                                     value={mailUzantisi}
                                                     onChange={e => setMailUzantisi(e.target.value)}
                                                 />
@@ -633,7 +654,7 @@ function SifirdanAnket() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.konum ? 'expanded' : ''}`} onClick={() => handleKriterToggle("konum")}>
-                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("konum")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("konum") }}><FaCheckCircle /></div>
                                     <FaMapMarkerAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Bölge Kısıtlaması</h3>
@@ -657,22 +678,141 @@ function SifirdanAnket() {
                     {/* STEP 4: SUCCESS */}
                     {currentStep === 4 && (
                         <div className="wizard-step step-success animate-in">
-                            <div className="celebration-card">
-                                <div className="check-blob"><FaCheckCircle /></div>
-                                <h1 className="success-title">Harika Bir İş Çıkardın!</h1>
-                                <p>Anketin başarıyla oluşturuldu ve katılımcılarını bekliyor.</p>
-                                
-                                <div className="link-copy-area">
-                                    <label>Paylaşım Linki</label>
-                                    <div className="link-box">
-                                        <code>{olusanLink}</code>
-                                        <button onClick={() => {navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!")}}><FaCopy /></button>
+                            <div style={{
+                                background: 'var(--w-card, #ffffff)',
+                                borderRadius: '20px',
+                                padding: '40px',
+                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                border: '1px solid var(--w-border, #e2e8f0)',
+                                maxWidth: '600px',
+                                margin: '0 auto',
+                                textAlign: 'center'
+                            }}>
+                                {/* Success Icon */}
+                                <div style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #6366f1 100%)',
+                                    borderRadius: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: '0 auto 24px',
+                                    boxShadow: '0 8px 24px rgba(0, 212, 170, 0.3)'
+                                }}>
+                                    <FaCheckCircle style={{ fontSize: '2.5rem', color: 'white' }} />
+                                </div>
+
+                                {/* Title */}
+                                <h2 style={{
+                                    fontSize: '1.75rem',
+                                    fontWeight: '800',
+                                    margin: '0 0 12px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 40%, #6366f1 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text'
+                                }}>
+                                    Harika Bir İş Çıkardın!
+                                </h2>
+
+                                <p style={{
+                                    color: 'var(--w-text-muted, #64748b)',
+                                    fontSize: '0.95rem',
+                                    marginBottom: '28px'
+                                }}>
+                                    Anketin başarıyla oluşturuldu ve katılımcılarını bekliyor.
+                                </p>
+
+                                {/* Link Section */}
+                                <div style={{ marginBottom: '28px' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '700',
+                                        color: 'var(--w-text-muted, #64748b)',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                        marginBottom: '10px'
+                                    }}>
+                                        Paylaşım Linki
+                                    </label>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        background: 'var(--w-bg, #f8fafc)',
+                                        border: '1px solid var(--w-border, #e2e8f0)',
+                                        borderRadius: '12px',
+                                        padding: '12px 16px'
+                                    }}>
+                                        <code style={{
+                                            flex: 1,
+                                            fontSize: '0.9rem',
+                                            color: 'var(--w-text, #1e293b)',
+                                            wordBreak: 'break-all',
+                                            textAlign: 'left'
+                                        }}>
+                                            {olusanLink}
+                                        </code>
+                                        <button
+                                            onClick={() => { navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!"); }}
+                                            style={{
+                                                background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '10px 16px',
+                                                borderRadius: '8px',
+                                                fontWeight: '600',
+                                                fontSize: '0.85rem',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                transition: 'all 0.2s',
+                                                boxShadow: '0 2px 8px rgba(0, 212, 170, 0.25)'
+                                            }}
+                                        >
+                                            <FaCopy /> Kopyala
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="success-actions">
-                                    <button className="btn-main-finish" onClick={() => navigate("/panel")}>Dashboard'a Dön</button>
-                                    <button className="btn-sec-finish" onClick={() => window.open(olusanLink)}>Anketi Görüntüle</button>
+                                {/* Action Buttons */}
+                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => navigate("/panel")}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 12px rgba(0, 212, 170, 0.25)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Dashboard'a Dön
+                                    </button>
+                                    <button
+                                        onClick={() => window.open(olusanLink)}
+                                        style={{
+                                            background: 'transparent',
+                                            color: 'var(--w-text, #1e293b)',
+                                            border: '1px solid var(--w-border, #e2e8f0)',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Anketi Görüntüle
+                                    </button>
                                 </div>
                             </div>
                         </div>

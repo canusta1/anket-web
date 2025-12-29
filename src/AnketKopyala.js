@@ -30,6 +30,7 @@ import {
 } from "react-icons/fa";
 import "./SifirdanAnket.css"; // SHARED CSS
 import SurvAILogo from "./assets/SurvAI_Logo.png";
+import "./AnketSonuclari.css"; // List styles
 
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA_API_KEY_GIRINIZ";
 
@@ -256,8 +257,28 @@ function AnketKopyala() {
         window.scrollTo(0, 0);
     };
 
+    // Mail uzantısı format kontrolü için regex (örn: gmail.com, outlook.com, kurum.com.tr)
+    const mailUzantisiGecerliMi = (uzanti) => {
+        const trimmed = uzanti.trim();
+        // Domain formatı: en az bir . içermeli, TLD en az 2 karakter olmalı
+        const pattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
+        return pattern.test(trimmed);
+    };
+
     // --- FINAL PUBLISH ---
     const handleFinalYayinla = async () => {
+        // Mail uzantısı validasyonu
+        if (secilenKriterler.mail) {
+            if (!mailUzantisi.trim()) {
+                alert("⚠️ E-posta kısıtlaması seçtiniz! Lütfen bir mail uzantısı girin.");
+                return;
+            }
+            if (!mailUzantisiGecerliMi(mailUzantisi)) {
+                alert("⚠️ Geçersiz mail uzantısı formatı!\n\nÖrnek formatlar:\n• gmail.com\n• outlook.com\n• kurum.com.tr\n\nLütfen geçerli bir domain girin.");
+                return;
+            }
+        }
+
         const token = localStorage.getItem("token");
         if (!token) { navigate("/giris"); return; }
         setLoading(true);
@@ -334,6 +355,7 @@ function AnketKopyala() {
                 </div>
                 <div className="nav-right">
                     <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
+                    <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
                     <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
                         {darkMode ? <FaSun /> : <FaMoon />}
                     </button>
@@ -385,10 +407,10 @@ function AnketKopyala() {
                     {currentStep === 1 && (
                         <div className="wizard-step step-info animate-in">
                             <div className="step-header-text">
-                                <h2><FaCopy style={{marginRight: '10px', color: 'var(--w-primary)'}} /> Kopyalanacak Anketi Seçin</h2>
+                                <h2><FaCopy style={{ marginRight: '10px', color: 'var(--w-primary)' }} /> Kopyalanacak Anketi Seçin</h2>
                                 <p>Daha önce oluşturduğunuz anketlerden birini seçerek yeni bir kopya oluşturun.</p>
                             </div>
-                            
+
                             {loadingTemplates ? (
                                 <div className="template-loading">
                                     <FaSpinner className="spinning" />
@@ -404,43 +426,56 @@ function AnketKopyala() {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="template-grid">
-                                    {templates.map((template) => (
-                                        <div 
-                                            key={template._id} 
-                                            className={`template-card ${selectedTemplate?._id === template._id ? 'selected' : ''}`}
-                                            onClick={() => handleTemplateSelect(template)}
-                                        >
-                                            <div className="template-card-header">
-                                                <FaClipboardList className="template-icon" />
-                                                <h3>{template.anketBaslik || 'Başlıksız Anket'}</h3>
-                                            </div>
-                                            {template.anketAciklama && (
-                                                <p className="template-desc">{template.anketAciklama}</p>
-                                            )}
-                                            <div className="template-stats">
-                                                <div className="stat-item">
-                                                    <FaClipboardList />
-                                                    <span>{template.sorular?.length || 0} Soru</span>
+                                <div className="anketler-list-container">
+                                    {/* List Header */}
+                                    <div className="list-header">
+                                        <div className="list-col col-title">Anket Başlığı</div>
+                                        <div className="list-col col-questions">Sorular</div>
+                                        <div className="list-col col-date">Tarih</div>
+                                        <div className="list-col col-actions">İşlem</div>
+                                    </div>
+
+                                    {/* List Body */}
+                                    <div className="list-body">
+                                        {templates.map((template, index) => (
+                                            <div
+                                                key={template._id}
+                                                className={`list-row ${selectedTemplate?._id === template._id ? 'selected' : ''}`}
+                                                style={{ '--row-index': index }}
+                                                onClick={() => handleTemplateSelect(template)}
+                                            >
+                                                <div className="list-col col-title">
+                                                    <div className="title-content">
+                                                        <span className="title-text">{template.anketBaslik || 'Başlıksız Anket'}</span>
+                                                        {template.anketAciklama && (
+                                                            <span className="title-desc">{template.anketAciklama}</span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                {template.toplamKatilimci > 0 && (
-                                                    <div className="stat-item">
-                                                        <FaUsers />
-                                                        <span>{template.toplamKatilimci} Cevap</span>
-                                                    </div>
-                                                )}
-                                                {template.createdAt && (
-                                                    <div className="stat-item">
-                                                        <FaCalendarAlt />
-                                                        <span>{formatDate(template.createdAt)}</span>
-                                                    </div>
-                                                )}
+                                                <div className="list-col col-questions">
+                                                    <span className="stat-badge questions">
+                                                        <FaClipboardList /> {template.sorular?.length || 0}
+                                                    </span>
+                                                </div>
+                                                <div className="list-col col-date">
+                                                    <span className="date-text">
+                                                        <FaCalendarAlt /> {formatDate(template.createdAt)}
+                                                    </span>
+                                                </div>
+                                                <div className="list-col col-actions">
+                                                    <button
+                                                        className="btn-view-results"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTemplateSelect(template);
+                                                        }}
+                                                    >
+                                                        Seç ve Düzenle
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="template-card-footer">
-                                                <span className="select-hint">Seç ve Düzenle →</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -456,10 +491,10 @@ function AnketKopyala() {
                             <div className="info-form-fancy">
                                 <div className="fancy-input-group">
                                     <label>Anket Başlığı</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Örn: 2024 Müşteri Deneyimi Araştırması" 
-                                        value={anketBaslik} 
+                                    <input
+                                        type="text"
+                                        placeholder="Örn: 2024 Müşteri Deneyimi Araştırması"
+                                        value={anketBaslik}
                                         onChange={(e) => setAnketBaslik(e.target.value)}
                                         className="fancy-text-input"
                                     />
@@ -467,9 +502,9 @@ function AnketKopyala() {
                                 </div>
                                 <div className="fancy-input-group">
                                     <label>Açıklama (İsteğe Bağlı)</label>
-                                    <textarea 
-                                        placeholder="Katılımcılara anketin amacından bahsedin..." 
-                                        value={anketAciklama} 
+                                    <textarea
+                                        placeholder="Katılımcılara anketin amacından bahsedin..."
+                                        value={anketAciklama}
                                         onChange={(e) => setAnketAciklama(e.target.value)}
                                         className="fancy-textarea"
                                         rows="5"
@@ -489,15 +524,15 @@ function AnketKopyala() {
                                         <h3>Sorular ({sorular.length})</h3>
                                         <div className="question-list-nav">
                                             {sorular.map((s, i) => (
-                                                <div 
-                                                    key={s.id} 
+                                                <div
+                                                    key={s.id}
                                                     className={`nav-item ${activeQuestionId === s.id ? 'active' : ''}`}
                                                     onClick={() => setActiveQuestionId(s.id)}
                                                 >
                                                     <span className="idx">{i + 1}</span>
                                                     <span className="txt">{s.metin || "Adsız Soru"}</span>
                                                     <div className="nav-actions">
-                                                        <button 
+                                                        <button
                                                             className="mini-del-btn"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -547,8 +582,8 @@ function AnketKopyala() {
                                                         <div className="q-workspace-panel animate-in">
                                                             <div className="q-panel-section main-input-section">
                                                                 <label className="section-mini-label">Soru Metni</label>
-                                                                <textarea 
-                                                                    placeholder="Katılımcıya ne sormak istersiniz?" 
+                                                                <textarea
+                                                                    placeholder="Katılımcıya ne sormak istersiniz?"
                                                                     value={activeQ.metin}
                                                                     onChange={(e) => handleSoruDegis(activeQ.id, e.target.value)}
                                                                     className="q-panel-input"
@@ -575,7 +610,7 @@ function AnketKopyala() {
                                                                             <option value="slider">🎚️ Slider (Puanlama)</option>
                                                                         </select>
                                                                     </div>
-                                                                    
+
                                                                     <div className="q-config-field clickable" onClick={() => handleZorunluToggle(activeQ.id)}>
                                                                         <label>Zorunluluk</label>
                                                                         <div className="compact-toggle-wrap">
@@ -597,16 +632,16 @@ function AnketKopyala() {
                                                                         <div className="config-group">
                                                                             <label>Değer Aralığı</label>
                                                                             <div className="range-inputs">
-                                                                                <input 
-                                                                                    type="number" 
-                                                                                    value={activeQ.sliderMin || 1} 
+                                                                                <input
+                                                                                    type="number"
+                                                                                    value={activeQ.sliderMin || 1}
                                                                                     onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMin', parseInt(e.target.value))}
                                                                                     placeholder="Min"
                                                                                 />
                                                                                 <span>-</span>
-                                                                                <input 
-                                                                                    type="number" 
-                                                                                    value={activeQ.sliderMax || 10} 
+                                                                                <input
+                                                                                    type="number"
+                                                                                    value={activeQ.sliderMax || 10}
                                                                                     onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMax', parseInt(e.target.value))}
                                                                                     placeholder="Max"
                                                                                 />
@@ -627,9 +662,9 @@ function AnketKopyala() {
                                                                                 <div className="choice-indicator">
                                                                                     {activeQ.tip === 'coktan-tek' ? <div className="dot-icon" /> : <div className="check-icon" />}
                                                                                 </div>
-                                                                                <input 
-                                                                                    type="text" 
-                                                                                    value={sec} 
+                                                                                <input
+                                                                                    type="text"
+                                                                                    value={sec}
                                                                                     onChange={(e) => handleSecenekDegis(activeQ.id, i, e.target.value)}
                                                                                     placeholder={`Seçenek ${i + 1}`}
                                                                                     className="choice-minimal-input"
@@ -645,7 +680,7 @@ function AnketKopyala() {
                                                                     </div>
                                                                 </div>
                                                             )}
-                                                            
+
                                                             {activeQ.tip === 'slider' && (
                                                                 <div className="q-panel-section preview-section">
                                                                     <div className="section-header">
@@ -681,7 +716,7 @@ function AnketKopyala() {
 
                             <div className="audience-grid">
                                 <div className={`audience-card ${secilenKriterler.kimlikDogrulama ? 'expanded' : ''}`} onClick={() => handleKriterToggle("kimlikDogrulama")}>
-                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("kimlikDogrulama")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("kimlikDogrulama") }}><FaCheckCircle /></div>
                                     <FaShieldAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Biyometrik Kimlik & Yüz Doğrulama</h3>
@@ -689,7 +724,7 @@ function AnketKopyala() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.tcNo ? 'expanded' : ''}`} onClick={() => handleKriterToggle("tcNo")}>
-                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("tcNo")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("tcNo") }}><FaCheckCircle /></div>
                                     <FaIdCard className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>TC Kimlik No Doğrulama</h3>
@@ -697,7 +732,7 @@ function AnketKopyala() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.telefonNumarasi ? 'expanded' : ''}`} onClick={() => handleKriterToggle("telefonNumarasi")}>
-                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("telefonNumarasi")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("telefonNumarasi") }}><FaCheckCircle /></div>
                                     <FaMobileAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Telefon Doğrulama</h3>
@@ -705,16 +740,16 @@ function AnketKopyala() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.mail ? 'expanded' : ''}`} onClick={() => handleKriterToggle("mail")}>
-                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("mail")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("mail") }}><FaCheckCircle /></div>
                                     <FaEnvelope className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>E-posta Kısıtlaması</h3>
                                         <p>Anketinizi sadece belirli kurumsal veya özel e-posta uzantılarına sahip kişilerle sınırlayın.</p>
                                         {secilenKriterler.mail && (
                                             <div className="nested-input" onClick={e => e.stopPropagation()}>
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="@kurum.com" 
+                                                <input
+                                                    type="text"
+                                                    placeholder="@kurum.com"
                                                     value={mailUzantisi}
                                                     onChange={e => setMailUzantisi(e.target.value)}
                                                 />
@@ -723,7 +758,7 @@ function AnketKopyala() {
                                     </div>
                                 </div>
                                 <div className={`audience-card ${secilenKriterler.konum ? 'expanded' : ''}`} onClick={() => handleKriterToggle("konum")}>
-                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => {e.stopPropagation(); handleKriterToggle("konum")}}><FaCheckCircle /></div>
+                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("konum") }}><FaCheckCircle /></div>
                                     <FaMapMarkerAlt className="card-icon" />
                                     <div className="card-content-wrap">
                                         <h3>Bölge Kısıtlaması</h3>
@@ -747,22 +782,141 @@ function AnketKopyala() {
                     {/* STEP 5: SUCCESS */}
                     {currentStep === 5 && (
                         <div className="wizard-step step-success animate-in">
-                            <div className="celebration-card">
-                                <div className="check-blob"><FaCheckCircle /></div>
-                                <h1 className="success-title">Anket Başarıyla Kopyalandı!</h1>
-                                <p>Kopyalanan anketiniz yayınlandı ve katılımcılarını bekliyor.</p>
-                                
-                                <div className="link-copy-area">
-                                    <label>Paylaşım Linki</label>
-                                    <div className="link-box">
-                                        <code>{olusanLink}</code>
-                                        <button onClick={() => {navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!");}}><FaCopy /></button>
+                            <div style={{
+                                background: 'var(--w-card, #ffffff)',
+                                borderRadius: '20px',
+                                padding: '40px',
+                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                                border: '1px solid var(--w-border, #e2e8f0)',
+                                maxWidth: '600px',
+                                margin: '0 auto',
+                                textAlign: 'center'
+                            }}>
+                                {/* Success Icon */}
+                                <div style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #6366f1 100%)',
+                                    borderRadius: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: '0 auto 24px',
+                                    boxShadow: '0 8px 24px rgba(0, 212, 170, 0.3)'
+                                }}>
+                                    <FaCheckCircle style={{ fontSize: '2.5rem', color: 'white' }} />
+                                </div>
+
+                                {/* Title */}
+                                <h2 style={{
+                                    fontSize: '1.75rem',
+                                    fontWeight: '800',
+                                    margin: '0 0 12px',
+                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 40%, #6366f1 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text'
+                                }}>
+                                    Anket Başarıyla Kopyalandı!
+                                </h2>
+
+                                <p style={{
+                                    color: 'var(--w-text-muted, #64748b)',
+                                    fontSize: '0.95rem',
+                                    marginBottom: '28px'
+                                }}>
+                                    Kopyalanan anketiniz yayınlandı ve katılımcılarını bekliyor.
+                                </p>
+
+                                {/* Link Section */}
+                                <div style={{ marginBottom: '28px' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '700',
+                                        color: 'var(--w-text-muted, #64748b)',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                        marginBottom: '10px'
+                                    }}>
+                                        Paylaşım Linki
+                                    </label>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        background: 'var(--w-bg, #f8fafc)',
+                                        border: '1px solid var(--w-border, #e2e8f0)',
+                                        borderRadius: '12px',
+                                        padding: '12px 16px'
+                                    }}>
+                                        <code style={{
+                                            flex: 1,
+                                            fontSize: '0.9rem',
+                                            color: 'var(--w-text, #1e293b)',
+                                            wordBreak: 'break-all',
+                                            textAlign: 'left'
+                                        }}>
+                                            {olusanLink}
+                                        </code>
+                                        <button
+                                            onClick={() => { navigator.clipboard.writeText(olusanLink); alert("Link kopyalandı!"); }}
+                                            style={{
+                                                background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '10px 16px',
+                                                borderRadius: '8px',
+                                                fontWeight: '600',
+                                                fontSize: '0.85rem',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                transition: 'all 0.2s',
+                                                boxShadow: '0 2px 8px rgba(0, 212, 170, 0.25)'
+                                            }}
+                                        >
+                                            <FaCopy /> Kopyala
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="success-actions">
-                                    <button className="btn-main-finish" onClick={() => navigate("/panel")}>Dashboard'a Dön</button>
-                                    <button className="btn-sec-finish" onClick={() => window.open(olusanLink)}>Anketi Görüntüle</button>
+                                {/* Action Buttons */}
+                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => navigate("/panel")}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 12px rgba(0, 212, 170, 0.25)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Dashboard'a Dön
+                                    </button>
+                                    <button
+                                        onClick={() => window.open(olusanLink)}
+                                        style={{
+                                            background: 'transparent',
+                                            color: 'var(--w-text, #1e293b)',
+                                            border: '1px solid var(--w-border, #e2e8f0)',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Anketi Görüntüle
+                                    </button>
                                 </div>
                             </div>
                         </div>
