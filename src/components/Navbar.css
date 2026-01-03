@@ -1,0 +1,228 @@
+/* ========================
+   GLOBAL NAVBAR - Tüm sayfalar için tek navbar stili
+======================== */
+
+/* Navbar */
+.global-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 32px;
+  background: var(--panel-bg-alt);
+  border-bottom: 1px solid var(--panel-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--panel-shadow);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menu-icon {
+  font-size: 2.1rem;
+  color: var(--panel-text-muted);
+  cursor: pointer;
+  padding: 10px;
+  border-radius: var(--panel-radius);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-icon:hover {
+  background: var(--panel-accent-light);
+  color: var(--panel-accent);
+}
+
+.navbar-logo-img {
+  height: 32px;
+  width: auto;
+}
+
+.nav-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.global-navbar .nav-link {
+  color: var(--panel-text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--panel-radius);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.global-navbar .nav-link:hover {
+  color: var(--panel-accent);
+  background: var(--panel-accent-light);
+}
+
+.global-navbar .nav-link.active {
+  color: var(--panel-accent);
+  background: var(--panel-accent-light);
+}
+
+/* Dark mode nav-link fix */
+body.dark-mode .global-navbar .nav-link {
+  color: #cbd5e1;
+}
+
+body.dark-mode .global-navbar .nav-link:hover,
+body.dark-mode .global-navbar .nav-link.active {
+  color: var(--panel-accent);
+  background: rgba(0, 212, 170, 0.15);
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text-muted);
+  border-radius: var(--panel-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.theme-toggle:hover {
+  background: var(--panel-accent-light);
+  border-color: var(--panel-accent);
+  color: var(--panel-accent);
+}
+
+.nav-btn-primary {
+  background: var(--panel-accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--panel-radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 212, 170, 0.25);
+}
+
+.nav-btn-primary:hover {
+  background: var(--panel-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.35);
+}
+
+/* ========================
+   SIDEBAR
+======================== */
+.global-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: var(--panel-bg-alt);
+  border-right: 1px solid var(--panel-border);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 9999;
+  overflow-y: auto;
+  box-shadow: var(--panel-shadow-lg);
+}
+
+.global-sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.sidebar-logo {
+  margin-bottom: 4px;
+}
+
+.sidebar-logo-img {
+  height: 36px;
+  width: auto;
+}
+
+.sidebar-subtitle {
+  font-size: 0.8rem;
+  color: var(--panel-text-muted);
+}
+
+.global-sidebar ul {
+  list-style: none;
+  padding: 12px;
+  margin: 0;
+}
+
+.global-sidebar li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--panel-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  color: var(--panel-text-muted);
+  margin-bottom: 4px;
+}
+
+.global-sidebar li:hover,
+.global-sidebar li.active {
+  background: var(--panel-accent-light);
+  color: var(--panel-accent);
+}
+
+.global-sidebar li .icon {
+  font-size: 1rem;
+  color: inherit;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 9998;
+}
+
+/* ========================
+   RESPONSIVE
+======================== */
+@media (max-width: 768px) {
+  .global-navbar {
+    padding: 12px 16px;
+  }
+
+  .global-navbar .nav-link span {
+    display: none;
+  }
+
+  .nav-btn-primary {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+}

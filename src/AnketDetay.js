@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   FaArrowLeft,
   FaUsers,
@@ -7,13 +7,9 @@ import {
   FaSpinner,
   FaCalendarAlt,
   FaChartBar,
-  FaHome,
-  FaMoon,
-  FaSun,
   FaCheckCircle,
   FaPercentage,
-  FaCopy,
-  FaUser
+  FaCopy
 } from 'react-icons/fa';
 import {
   BarChart,
@@ -29,7 +25,7 @@ import {
   Legend
 } from 'recharts';
 import './AnketDetay.css';
-import SurvAILogo from './assets/SurvAI_Logo.png';
+import Navbar from './components/Navbar';
 
 const COLORS = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#14b8a6'];
 
@@ -42,22 +38,8 @@ function AnketDetay() {
   const [analizYukleniyor, setAnalizYukleniyor] = useState(false);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('statistics');
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('panelDarkMode');
-    return saved === 'true';
-  });
 
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
-
-  // Dark mode effect
-  useEffect(() => {
-    localStorage.setItem('panelDarkMode', darkMode);
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }, [darkMode]);
 
   useEffect(() => {
     loadSonuclar();
@@ -165,29 +147,9 @@ function AnketDetay() {
   const { anket, istatistikler } = sonuclar;
 
   return (
-    <div className="dashboard-page">
-      {/* Navbar */}
-      <nav className="dashboard-navbar">
-        <div className="nav-left">
-          <button className="nav-back-btn" onClick={() => navigate('/anket-sonuclari')}>
-            <FaArrowLeft /> Geri
-          </button>
-          <div className="dashboard-logo">
-            <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
-          </div>
-        </div>
-        <div className="nav-right">
-          <Link to="/panel" className="nav-back-btn">
-            <FaHome /> Ana Sayfa
-          </Link>
-          <Link to="/profil" className="nav-back-btn">
-            <FaUser /> Profil
-          </Link>
-          <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <FaSun /> : <FaMoon />}
-          </button>
-        </div>
-      </nav>
+    <div className="dashboard-page panel-container">
+      {/* Global Navbar */}
+      <Navbar activePage="sonuclar" showCreateButton={false} />
 
       <main className="dashboard-main">
         {/* Survey Header */}

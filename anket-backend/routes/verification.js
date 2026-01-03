@@ -81,7 +81,7 @@ async function cleanupTempFiles(filePaths) {
 function runFaceVerification(idCardPath, selfiePath) {
   return new Promise((resolve, reject) => {
     const pythonScript = path.join(__dirname, "..", "services", "faceVerify.py");
-    
+
     // Virtual environment'daki Python executable'ını kullan
     const pythonExecutable = path.join(__dirname, "..", "..", ".venv", "Scripts", "python.exe");
 
@@ -97,9 +97,11 @@ function runFaceVerification(idCardPath, selfiePath) {
 
     pythonProcess.stderr.on("data", (data) => {
       stderr += data.toString();
+      console.log("Python stderr:", data.toString().trim());
     });
 
     pythonProcess.on("close", (code) => {
+      console.log(`Python script exit code: ${code}`);
       try {
         // stdout'tan JSON parse et
         const result = JSON.parse(stdout.trim());
@@ -360,14 +362,16 @@ router.post("/verify-identity", upload.fields([
     uploadedFiles.push(idCardFile.path, selfieFile.path);
 
     console.log("Kimlik doğrulama başlatıldı:");
-    console.log(`  - Kimlik: ${idCardFile.filename}`);
-    console.log(`  - Selfie: ${selfieFile.filename}`);
+    console.log(`  - Kimlik: ${idCardFile.filename} (${(idCardFile.size / 1024).toFixed(2)} KB)`);
+    console.log(`  - Selfie: ${selfieFile.filename} (${(selfieFile.size / 1024).toFixed(2)} KB)`);
+    console.log(`  - Kimlik boyut: ${idCardFile.mimetype}`);
+    console.log(`  - Selfie boyut: ${selfieFile.mimetype}`);
 
     // ADIM 1: Python script ile yüz karşılaştırması
     console.log("Yüz karşılaştırması yapılıyor...");
     const faceResult = await runFaceVerification(idCardFile.path, selfieFile.path);
 
-    console.log("Yüz karşılaştırma sonucu:", faceResult);
+    console.log("Yüz karşılaştırma sonucu:", JSON.stringify(faceResult, null, 2));
 
     // Yüz eşleşmedi ise
     if (!faceResult.match) {
@@ -421,117 +425,87 @@ router.post("/verify-identity", upload.fields([
 
 /**
  * POST /api/verification/verify-tc-ocr
- * TC Kimlik No OCR Doğrulama
+ * TC Kimlik No OCR Doğrulaması
  * 
- * Beklenen veriler:
- * - tcNo: Kullanıcının manuel girdiği TC Kimlik No (form-data)
- * - idCard: Kimlik kartı fotoğrafı (file)
- * 
- * İş Akışı:
- * 1. Kimlik fotoğrafını al ve geçici klasöre kaydet
- * 2. OCR ile kimlik kartından TC Kimlik No oku
- * 3. Manuel girilen TC ile OCR'dan okunan TC'yi karşılaştır
- * 4. Sonucu dön ve dosyayı sil (güvenlik)
+ * Beklenen:
+ * - tcNo: Kullanıcının girdiği TC Kimlik No
+ * - idCard: Kimlik kartı fotoğrafı
  */
 router.post("/verify-tc-ocr", upload.single("idCard"), async (req, res) => {
-  // Yüklenen dosya yolu - cleanup için
-  const uploadedFile = req.file?.path;
+  const uploadedFiles = [];
 
   try {
     const { tcNo } = req.body;
 
-    // Validasyon: TC Kimlik No kontrolü
-    if (!tcNo || tcNo.trim().length !== 11) {
-      // Dosyayı temizle
-      if (uploadedFile) await cleanupTempFiles([uploadedFile]);
-
+    // Validasyon
+    if (!tcNo || tcNo.length !== 11) {
       return res.status(400).json({
         success: false,
-        error: "Geçerli bir TC Kimlik No giriniz (11 haneli)"
+        error: "Geçerli bir 11 haneli TC Kimlik No gereklidir"
       });
     }
 
-    // Validasyon: Dosya kontrolü
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        error: "Kimlik kartı fotoğrafı yüklemeniz gerekmektedir"
+        error: "Kimlik kartı fotoğrafı gereklidir"
       });
     }
 
-    console.log("🔍 TC OCR Doğrulama başlatıldı:");
-    console.log(`  - Manuel Girilen TC: ${tcNo.substring(0, 3)}*****${tcNo.substring(8)}`);
-    console.log(`  - Dosya: ${req.file.filename}`);
+    uploadedFiles.push(req.file.path);
 
-    // OCR ile TC Kimlik No'yu oku
-    const ocrResult = await readTCFromIdCard(uploadedFile, tcNo && tcNo.trim());
+    console.log("TC OCR doğrulama başlatıldı:");
+    console.log(`  - Girilen TC: ${tcNo}`);
+    console.log(`  - Kimlik kartı: ${req.file.filename}`);
 
-    console.log("📄 OCR Sonucu:", {
-      success: ocrResult.success,
-      tcKimlikNo: ocrResult.tcKimlikNo ? `${ocrResult.tcKimlikNo.substring(0, 3)}*****` : null,
-      error: ocrResult.error
-    });
+    // OCR ile TC Kimlik No oku
+    console.log("OCR ile TC Kimlik No okunuyor...");
+    const ocrResult = await readTCFromIdCard(req.file.path);
 
-    // OCR başarısız oldu
+    console.log("OCR sonucu:", ocrResult);
+
+    // OCR başarısız olduysa
     if (!ocrResult.success || !ocrResult.tcKimlikNo) {
-      // Dosyayı temizle
-      await cleanupTempFiles([uploadedFile]);
+      await cleanupTempFiles(uploadedFiles);
 
       return res.status(400).json({
         success: false,
-        error: ocrResult.error || "Kimlik kartından TC Kimlik No okunamadı. Lütfen daha net bir fotoğraf yükleyin.",
-        details: {
-          ocrSuccess: false
-        }
+        error: ocrResult.error || "Kimlik kartından TC Kimlik No okunamadı. Lütfen daha net bir fotoğraf yükleyin."
       });
     }
 
-    // TC Numaralarını karşılaştır
-    const manuelTc = tcNo.trim();
-    const ocrTc = ocrResult.tcKimlikNo.trim();
-    const tcEslesti = manuelTc === ocrTc;
+    // TC eşleşiyor mu kontrol et
+    if (ocrResult.tcKimlikNo !== tcNo) {
+      await cleanupTempFiles(uploadedFiles);
 
-    console.log(`🔐 TC Karşılaştırma: ${tcEslesti ? 'EŞLEŞTİ ✅' : 'EŞLEŞMEDİ ❌'}`);
-
-    // Dosyayı temizle (her durumda)
-    await cleanupTempFiles([uploadedFile]);
-
-    if (!tcEslesti) {
       return res.status(400).json({
         success: false,
-        error: "Girdiğiniz TC Kimlik No ile kimlik kartındaki numara eşleşmiyor.",
-        details: {
-          ocrSuccess: true,
-          tcMatch: false
-        }
+        error: "Girdiğiniz TC Kimlik No ile kimlik kartınızdaki numara eşleşmiyor!"
       });
     }
 
-    // Başarılı doğrulama
-    const verificationToken = `tc:${manuelTc.substring(0, 3)}****:${Date.now()}`;
+    // Dosyaları temizle
+    await cleanupTempFiles(uploadedFiles);
+
+    // TC doğrulama başarılı
+    const verificationToken = `tc:${tcNo}:${Date.now()}`;
 
     res.json({
       success: true,
-      message: "TC Kimlik No doğrulaması başarılı",
+      message: "TC Kimlik No başarıyla doğrulandı",
       data: {
-        tcKimlikNo: `${manuelTc.substring(0, 3)}*****${manuelTc.substring(8)}`, // Maskelenmiş TC
-        verificationToken: verificationToken,
-        ocrSuccess: true,
-        tcMatch: true
+        tcKimlikNo: tcNo,
+        verificationToken: verificationToken
       }
     });
 
   } catch (error) {
-    console.error("❌ TC OCR Doğrulama Hatası:", error);
-
-    // Hata durumunda da dosyayı temizle
-    if (uploadedFile) {
-      await cleanupTempFiles([uploadedFile]);
-    }
+    console.error("TC OCR doğrulama hatası:", error);
+    await cleanupTempFiles(uploadedFiles);
 
     res.status(500).json({
       success: false,
-      error: error.message || "TC Kimlik No doğrulama işlemi başarısız"
+      error: error.message || "TC doğrulama işlemi başarısız"
     });
   }
 });

@@ -1,280 +1,181 @@
-/* --- COMPACT CARD LAYOUT (YENİ) --- */
-.compact-center-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: calc(100vh - 80px);
-    /* Navbar payı */
-    padding: 20px;
-    background-color: #f8f9fa;
-    /* Hafif gri arka plan */
+/* ============================================================
+   AI ANKET - ADDITIONAL STYLES FOR AI WIZARD
+============================================================ */
+
+/* AI Badge in Logo */
+.logo-badge.ai-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.compact-card {
-    display: flex;
-    width: 100%;
-    max-width: 1000px;
-    /* Geniş ama çok da yayvan değil */
-    height: 600px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+/* AI Prompt Form (Step 1) */
+.ai-prompt-form {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
 }
 
-.compact-col {
-    flex: 1;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
+.ai-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
 }
 
-.left-col {
-    border-right: 1px solid #eee;
+.ai-form-col {
+    background: var(--w-card);
+    border-radius: 16px;
+    padding: 28px;
+    border: 1px solid var(--w-border);
+    box-shadow: var(--w-shadow-sm);
 }
 
-.compact-header {
+.ai-form-col h3 {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--w-text);
 }
 
-.compact-header h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #333;
+.ai-form-col.ai-col {
+    border-color: rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
 }
 
-.compact-header p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #888;
+.ai-form-col.ai-col h3 {
+    color: #667eea;
 }
 
-.small-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e3f2fd;
-    /* Mavi ton */
+.ai-textarea {
+    border-color: rgba(102, 126, 234, 0.3) !important;
+    background: rgba(102, 126, 234, 0.03);
 }
 
-.ai-bg {
-    background-color: #e8f5e9;
-    /* Yeşil ton */
+.ai-textarea:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
 }
 
-.ai-color {
-    color: #2e7d32;
-}
-
-.compact-input,
-.compact-textarea {
-    background-color: #fdfdfd;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 0.95rem;
-    transition: all 0.2s;
-}
-
-.compact-textarea {
-    resize: none;
-    height: 100%;
-}
-
-.compact-input:focus,
-.compact-textarea:focus {
-    border-color: #2e7d32;
-    /* Odaklanınca yeşil */
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
-}
-
-/* --- YENİ FOOTER VE COUNTER YAPISI --- */
-.ai-footer-row {
+/* AI Count Row */
+.ai-count-row {
     display: flex;
     align-items: flex-end;
-    /* Alt hizalama */
-    justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
     margin-top: 20px;
 }
 
 .question-count-control {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    flex: 1;
 }
 
 .question-count-control label {
+    display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #555;
+    color: var(--w-text-muted);
+    margin-bottom: 8px;
 }
 
 .counter-wrapper {
     display: flex;
     align-items: center;
-    background: white;
-    border: 1px solid #ddd;
+    gap: 0;
+    background: var(--w-bg);
+    border: 1px solid var(--w-border);
     border-radius: 10px;
-    padding: 4px;
+    overflow: hidden;
 }
 
 .counter-btn {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
+    background: transparent;
     border: none;
-    background: #f5f5f5;
-    border-radius: 8px;
+    color: var(--w-text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #555;
-    transition: 0.2s;
+    transition: all 0.2s;
 }
 
 .counter-btn:hover:not(:disabled) {
-    background: #e0e0e0;
+    background: var(--w-accent-light);
+    color: var(--w-primary);
 }
 
 .counter-input {
     width: 50px;
-    border: none;
     text-align: center;
-    font-weight: bold;
+    border: none;
+    background: transparent;
     font-size: 1rem;
-    color: #333;
+    font-weight: 700;
+    color: var(--w-text);
+    padding: 8px 0;
+}
+
+.counter-input:focus {
     outline: none;
-    -moz-appearance: textfield;
-    /* Firefox'ta okları gizle */
 }
 
-.counter-input::-webkit-outer-spin-button,
-.counter-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
+/* AI Generate Button */
 .ai-generate-btn {
-    flex: 1;
-    height: 44px;
-    /* Counter ile aynı yükseklik */
-    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    flex: 2;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    border-radius: 10px;
-    font-weight: 600;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
-    transition: transform 0.2s;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
-.ai-generate-btn:hover {
+.ai-generate-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(45, 106, 79, 0.4);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .ai-generate-btn:disabled {
-    background: #ccc;
+    opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
-/* Başarı Kutusu (Yeşil Alan) */
-.anket-basari-kutusu {
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #4CAF50;
-    border-radius: 12px;
-    background-color: #f0fdf4;
-    /* Çok açık yeşil */
-    text-align: center;
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* Başlık */
-.anket-basari-kutusu h3 {
-    color: #166534;
-    /* Koyu yeşil */
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.4rem;
-}
-
-.anket-basari-kutusu p {
-    color: #4b5563;
-    margin-bottom: 15px;
-}
-
-/* Link ve Butonun olduğu satır */
-.link-satiri {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    padding: 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* Linkin Kendisi */
-.olusan-link {
-    flex: 1;
-    /* Alanı kapla */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Çok uzunsa ... koy */
-    white-space: nowrap;
-    color: #2563eb;
-    /* Mavi */
-    font-weight: 600;
-    text-decoration: none;
-    padding: 5px;
-}
-
-.olusan-link:hover {
-    text-decoration: underline;
-}
-
-/* Kopyala Butonu */
-.link-kopyala-btn {
-    cursor: pointer;
-    padding: 8px 16px;
-    border: none;
-    background-color: #f3f4f6;
-    color: #374151;
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.link-kopyala-btn:hover {
-    background-color: #e5e7eb;
-    color: #111827;
-}
-
-/* Ufak bir animasyon efekti */
-@keyframes fadeIn {
+/* Spinning Animation for Loading */
+@keyframes spin {
     from {
-        opacity: 0;
-        transform: translateY(-10px);
+        transform: rotate(0deg);
     }
 
     to {
-        opacity: 1;
-        transform: translateY(0);
+        transform: rotate(360deg);
+    }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive for AI Form */
+@media (max-width: 900px) {
+    .ai-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-count-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ai-generate-btn {
+        width: 100%;
     }
 }

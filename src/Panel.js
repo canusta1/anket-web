@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./Panel.css";
-import { FaBars, FaUser, FaHome, FaChartBar, FaClipboardList, FaSignOutAlt, FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaFilter, FaUserEdit, FaMoon, FaSun, FaTrashAlt } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import SurvAILogo from "./assets/SurvAI_Logo.png";
+import { FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaUserEdit, FaTrashAlt, FaChartBar } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
 
 function Panel() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [anketler, setAnketler] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,21 +19,10 @@ function Panel() {
   const itemsPerPage = 15;
   const navigate = useNavigate();
   const [filterType, setFilterType] = useState('hepsi'); // hepsi, aktif, pasif, ai, manuel
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('panelDarkMode');
-    return saved === 'true';
-  });
-
-  // Dark mode toggle
-  useEffect(() => {
-    localStorage.setItem('panelDarkMode', darkMode);
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }, [darkMode]);
-
+  
+  // Anket oluşturma sayfasına yönlendir
+  const handleAnketOlustur = () => navigate("/anket-olustur");
+  
   // Dinamik istatistikler hesaplama
   const stats = useMemo(() => {
     return {
@@ -45,35 +33,6 @@ function Panel() {
       manuel: anketler.filter(a => !a.aiIleOlusturuldu).length
     };
   }, [anketler]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/anasayfa");
-  };
-
-  const handleAnketOlustur = () => {
-    navigate("/anket-olustur");
-  };
-
-  const handleProfil = () => {
-    navigate("/profil");
-  };
-
-  const handleSonuclariGor = () => {
-    navigate("/anket-sonuclari");
-  };
-
-  // Menüyü kapatma fonksiyonu
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
-
-  // Ana içeriğe tıklanınca menüyü kapat
-  const handleMainClick = () => {
-    if (menuOpen) {
-      setMenuOpen(false);
-    }
-  };
 
   // MongoDB'den anketleri çek
   useEffect(() => {
@@ -316,122 +275,69 @@ function Panel() {
           {toastMessage.text}
         </div>
       )}
-      {/* Üst Navbar */}
-      <nav className="panel-navbar">
-        <div className="nav-left">
-          <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-          <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
-        </div>
-
-        <div className="nav-right">
-          <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
-          <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
-          <button
-            className="theme-toggle"
-            onClick={() => setDarkMode(!darkMode)}
-            title={darkMode ? 'Açık Tema' : 'Koyu Tema'}
-          >
-            {darkMode ? <FaSun /> : <FaMoon />}
-          </button>
-          <button className="btn-white" onClick={handleAnketOlustur}>
-            Anket Oluştur
-          </button>
-        </div>
-      </nav>
-
-      {/* Sol Menü (Sidebar) */}
-      <div className={`sidebar ${menuOpen ? "open" : ""}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
-          <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
-        </div>
-        <ul>
-          <li onClick={handleProfil}>
-            <FaUser className="icon" /> Profil
-          </li>
-          <li onClick={handleAnketOlustur}>
-            <FaClipboardList className="icon" /> Anket Oluştur
-          </li>
-          <li onClick={handleSonuclariGor}>
-            <FaChartBar className="icon" /> Sonuçları Gör
-          </li>
-          <li onClick={handleLogout}>
-            <FaSignOutAlt className="icon" /> Çıkış Yap
-          </li>
-        </ul>
-      </div>
-
-      {/* Overlay - menü açıkken tıklanınca kapatmak için */}
-      {menuOpen && <div className="sidebar-overlay" onClick={closeMenu}></div>}
+      
+      {/* Global Navbar */}
+      <Navbar activePage="panel" />
 
       {/* Ana İçerik */}
-      <main className="panel-main" onClick={handleMainClick}>
+      <main className="panel-main">
         {/* Hero Header - Compact */}
-        <div className="panel-hero-header">
-          <div className="hero-content">
+        <div className="panel-hero-header-compact">
+          <div className="hero-left">
             <div className="hero-title-row">
               <div className="hero-icon-wrapper">
                 <FaPoll className="hero-icon" />
               </div>
-              <h1 className="hero-title">
-                <span className="title-gradient">Anketlerim</span>
-              </h1>
-            </div>
-            <p className="hero-subtitle">
-              Tüm anketlerinizi yönetin, düzenleyin ve sonuçlarını takip edin
-            </p>
-          </div>
-          <div className="hero-stats-mini">
-            <div className="mini-stat">
-              <span className="mini-stat-value">{anketler.length}</span>
-              <span className="mini-stat-label">Toplam Anket</span>
+              <div className="hero-title-content">
+                <h1 className="hero-title">
+                  <span className="title-gradient">Anketlerim</span>
+                </h1>
+                <span className="hero-total-count">{anketler.length} anket</span>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="panel-filter-bar">
-
-          {/* Kompakt İstatistik Badge'leri */}
-          <div className="stats-badges">
-            <span
-              className={`stat-badge ${filterType === 'hepsi' ? 'active' : ''}`}
-              onClick={() => { setFilterType('hepsi'); setCurrentPage(1); }}
-            >
-              <span className="badge-dot all"></span>
-              Tümü: <strong>{stats.toplam}</strong>
-            </span>
-            <span
-              className={`stat-badge ${filterType === 'aktif' ? 'active' : ''}`}
-              onClick={() => { setFilterType('aktif'); setCurrentPage(1); }}
-            >
-              <span className="badge-dot success"></span>
-              Aktif: <strong>{stats.aktif}</strong>
-            </span>
-            <span
-              className={`stat-badge ${filterType === 'pasif' ? 'active' : ''}`}
-              onClick={() => { setFilterType('pasif'); setCurrentPage(1); }}
-            >
-              <span className="badge-dot muted"></span>
-              Pasif: <strong>{stats.pasif}</strong>
-            </span>
-            <span
-              className={`stat-badge ${filterType === 'ai' ? 'active' : ''}`}
-              onClick={() => { setFilterType('ai'); setCurrentPage(1); }}
-            >
-              <span className="badge-dot ai"></span>
-              AI: <strong>{stats.ai}</strong>
-            </span>
-            <span
-              className={`stat-badge ${filterType === 'manuel' ? 'active' : ''}`}
-              onClick={() => { setFilterType('manuel'); setCurrentPage(1); }}
-            >
-              <span className="badge-dot human"></span>
-              Manuel: <strong>{stats.manuel}</strong>
-            </span>
-          </div>
-
-          <div className="header-right">
-            <div className="search-box">
+          
+          <div className="hero-right">
+            {/* Kompakt İstatistik Badge'leri */}
+            <div className="stats-badges-inline">
+              <span
+                className={`stat-badge-mini ${filterType === 'hepsi' ? 'active' : ''}`}
+                onClick={() => { setFilterType('hepsi'); setCurrentPage(1); }}
+              >
+                <span className="badge-dot all"></span>
+                Tümü: <strong>{stats.toplam}</strong>
+              </span>
+              <span
+                className={`stat-badge-mini ${filterType === 'aktif' ? 'active' : ''}`}
+                onClick={() => { setFilterType('aktif'); setCurrentPage(1); }}
+              >
+                <span className="badge-dot success"></span>
+                Aktif: <strong>{stats.aktif}</strong>
+              </span>
+              <span
+                className={`stat-badge-mini ${filterType === 'pasif' ? 'active' : ''}`}
+                onClick={() => { setFilterType('pasif'); setCurrentPage(1); }}
+              >
+                <span className="badge-dot muted"></span>
+                Pasif: <strong>{stats.pasif}</strong>
+              </span>
+              <span
+                className={`stat-badge-mini ${filterType === 'ai' ? 'active' : ''}`}
+                onClick={() => { setFilterType('ai'); setCurrentPage(1); }}
+              >
+                <span className="badge-dot ai"></span>
+                AI: <strong>{stats.ai}</strong>
+              </span>
+              <span
+                className={`stat-badge-mini ${filterType === 'manuel' ? 'active' : ''}`}
+                onClick={() => { setFilterType('manuel'); setCurrentPage(1); }}
+              >
+                <span className="badge-dot human"></span>
+                Manuel: <strong>{stats.manuel}</strong>
+              </span>
+            </div>
+            
+            <div className="search-box-compact">
               <input
                 type="text"
                 placeholder="🔍 Anket ara..."

@@ -8,8 +8,28 @@ const aiRoutes = require('./aiRoutes');
 
 const app = express();
 
-// --- 1. CORS Ayarları ---
-app.use(cors());
+// --- 1. CORS Ayarları (Mobil + Localhost için) ---
+const corsOptions = {
+  origin: function (origin, callback) {
+    // origin undefined ise (postman, curl) veya izin verilen kaynaklardan biriyse
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://192.168.1.28:3000',
+      'http://127.0.0.1:3000'
+    ];
+
+    if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://192.168.')) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Her origin'e izin ver (development için)
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 // --- 2. JSON Parser ---
 app.use(express.json());

@@ -1,64 +1,42 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-    FaBars,
-    FaUser,
-    FaChartBar,
-    FaClipboardList,
-    FaSignOutAlt,
-    FaArrowLeft,
     FaPlus,
     FaTrash,
-    FaHome,
-    FaMoon,
-    FaSun,
     FaCheckCircle,
     FaLayerGroup,
-    FaChevronRight,
-    FaChevronLeft,
-    FaEnvelope,
-    FaIdCard,
-    FaMapMarkerAlt,
-    FaMobileAlt,
-    FaShieldAlt,
     FaCopy,
-    FaSearch,
-    FaMapMarkedAlt,
     FaSpinner,
     FaCalendarAlt,
-    FaUsers
+    FaClipboardList,
+    FaChevronLeft,
+    FaChevronRight,
+    FaSlidersH
 } from "react-icons/fa";
-import "./SifirdanAnket.css"; // SHARED CSS
-import SurvAILogo from "./assets/SurvAI_Logo.png";
-import "./AnketSonuclari.css"; // List styles
-
-const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA_API_KEY_GIRINIZ";
+import "./SifirdanAnket.css";
+import "./AnketKopyala.css";
+import Navbar from "./components/Navbar";
+import HedefKitleSecimi from "./HedefKitleSecimi";
+import "./AnketSonuclari.css";
 
 function AnketKopyala() {
     const navigate = useNavigate();
 
-    // --- WIZARD STATE ---
-    const [currentStep, setCurrentStep] = useState(1); // 1: Select, 2: Rename, 3: Questions, 4: Audience, 5: Success
-
-    // --- STEP 1: Survey Selection ---
+    const [currentStep, setCurrentStep] = useState(1);
     const [templates, setTemplates] = useState([]);
     const [loadingTemplates, setLoadingTemplates] = useState(true);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
-
-    // --- STEP 2: Survey Info & Questions ---
     const [anketBaslik, setAnketBaslik] = useState("");
     const [anketAciklama, setAnketAciklama] = useState("");
     const [sorular, setSorular] = useState([]);
     const [activeQuestionId, setActiveQuestionId] = useState(null);
 
-    // Auto-select first question
     useEffect(() => {
         if (sorular.length > 0 && !activeQuestionId) {
             setActiveQuestionId(sorular[0].id);
         }
     }, [sorular, activeQuestionId]);
 
-    // --- STEP 3: Audience ---
     const [secilenKriterler, setSecilenKriterler] = useState({
         mail: false,
         tcNo: false,
@@ -68,38 +46,11 @@ function AnketKopyala() {
     });
     const [mailUzantisi, setMailUzantisi] = useState("");
     const [kayitliKonumKriteri, setKayitliKonumKriteri] = useState(null);
-
-    // Location Modal & Google Maps
-    const [konumModalAcik, setKonumModalAcik] = useState(false);
-    const [scriptLoaded, setScriptLoaded] = useState(false);
-    const [googleYeri, setGoogleYeri] = useState(null);
-    const [kisitlamaTuru, setKisitlamaTuru] = useState("sehir");
-    const [radiusDegeri, setRadiusDegeri] = useState("50");
-    const [mapSearchInput, setMapSearchInput] = useState("");
-    const autoCompleteRef = useRef(null);
-
-    // --- GLOBAL STATES ---
-    const [menuOpen, setMenuOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [olusanLink, setOlusanLink] = useState(null);
-    const [darkMode, setDarkMode] = useState(() => {
-        const saved = localStorage.getItem('panelDarkMode');
-        return saved === 'true';
-    });
 
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
 
-    // --- EFFECTS ---
-    useEffect(() => {
-        localStorage.setItem('panelDarkMode', darkMode);
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-    }, [darkMode]);
-
-    // Load templates on mount
     useEffect(() => {
         loadTemplates();
     }, []);
@@ -125,47 +76,7 @@ function AnketKopyala() {
         }
     };
 
-    // Google Maps Script
-    useEffect(() => {
-        if (konumModalAcik && !scriptLoaded) {
-            if (window.google && window.google.maps && window.google.maps.places) {
-                setScriptLoaded(true);
-                return;
-            }
-            const script = document.createElement("script");
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-            script.async = true;
-            script.defer = true;
-            script.onload = () => setScriptLoaded(true);
-            document.head.appendChild(script);
-        }
-    }, [konumModalAcik, scriptLoaded]);
-
-    useEffect(() => {
-        if (scriptLoaded && konumModalAcik && autoCompleteRef.current) {
-            const autocomplete = new window.google.maps.places.Autocomplete(autoCompleteRef.current, {
-                types: ['geocode'],
-                componentRestrictions: { country: "tr" },
-                fields: ["address_components", "geometry", "formatted_address", "name"]
-            });
-            autocomplete.addListener("place_changed", () => {
-                const place = autocomplete.getPlace();
-                if (place.geometry) {
-                    let il = "", ilce = "", mahalle = "";
-                    place.address_components.forEach(cp => {
-                        if (cp.types.includes("administrative_area_level_1")) il = cp.long_name;
-                        if (cp.types.includes("administrative_area_level_2")) ilce = cp.long_name;
-                        if (cp.types.includes("neighborhood") || cp.types.includes("sublocality")) mahalle = cp.long_name;
-                    });
-                    setGoogleYeri({ tamAdres: place.formatted_address, il, ilce, mahalle, lat: place.geometry.location.lat(), lng: place.geometry.location.lng() });
-                }
-            });
-        }
-    }, [scriptLoaded, konumModalAcik]);
-
     // --- HANDLERS ---
-    const handleLogout = () => navigate("/giris");
-    const handleGeriDon = () => navigate("/anket-olustur");
 
     // Template Selection - go to Step 2 (Rename)
     const handleTemplateSelect = (template) => {
@@ -193,10 +104,9 @@ function AnketKopyala() {
             };
         });
         setSorular(converted);
-        setCurrentStep(2); // Go to Rename step
+        setCurrentStep(2);
     };
 
-    // Question Handlers
     const handleSoruDegis = (id, metin) => setSorular(sorular.map(s => s.id === id ? { ...s, metin } : s));
     const handleTipDegis = (id, tip) => setSorular(sorular.map(s => {
         if (s.id === id) {
@@ -228,13 +138,6 @@ function AnketKopyala() {
         const yeniSoru = { id: yeniId, metin: "", tip: "acik-uclu", secenekler: [], zorunlu: false };
         setSorular([...sorular, yeniSoru]);
         setActiveQuestionId(yeniId);
-    };
-
-    // Audience Handlers
-    const handleKriterToggle = (kriter) => setSecilenKriterler({ ...secilenKriterler, [kriter]: !secilenKriterler[kriter] });
-    const handleKonumKaydet = () => {
-        setKayitliKonumKriteri({ tip: kisitlamaTuru, target: googleYeri, radius: radiusDegeri, label: googleYeri.tamAdres });
-        setKonumModalAcik(false);
     };
 
     // --- WIZARD NAVIGATION ---
@@ -346,35 +249,8 @@ function AnketKopyala() {
 
     return (
         <div className="wizard-page panel-container">
-            {/* Navbar */}
-            <nav className="panel-navbar">
-                <div className="nav-left">
-                    <button className="icon-btn" onClick={() => setMenuOpen(!menuOpen)}><FaBars /></button>
-                    <button className="icon-btn back-btn" onClick={handleGeriDon}><FaArrowLeft /></button>
-                    <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" /> <span className="logo-badge copy-badge">KOPYA</span>
-                </div>
-                <div className="nav-right">
-                    <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
-                    <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
-                    <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-                        {darkMode ? <FaSun /> : <FaMoon />}
-                    </button>
-                </div>
-            </nav>
-
-            {/* Sidebar */}
-            <div className={`sidebar ${menuOpen ? "open" : ""}`}>
-                <div className="sidebar-header">
-                    <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
-                </div>
-                <ul>
-                    <li onClick={() => navigate('/panel')}><FaChartBar className="icon" /> Dashboard</li>
-                    <li className="active"><FaCopy className="icon" /> Anketi Kopyala</li>
-                    <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
-                    <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış</li>
-                </ul>
-            </div>
-            {menuOpen && <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>}
+            {/* Global Navbar */}
+            <Navbar activePage="olustur" showCreateButton={false} />
 
             <main className="wizard-main">
                 {/* Stepper */}
@@ -626,7 +502,7 @@ function AnketKopyala() {
                                                             {activeQ.tip === 'slider' && (
                                                                 <div className="q-panel-section slider-config-section animate-in">
                                                                     <div className="section-header">
-                                                                        <FaSearch /> <span>Slider Yapılandırması</span>
+                                                                        <FaSlidersH /> <span>Slider Yapılandırması</span>
                                                                     </div>
                                                                     <div className="slider-config-grid">
                                                                         <div className="config-group">
@@ -684,7 +560,7 @@ function AnketKopyala() {
                                                             {activeQ.tip === 'slider' && (
                                                                 <div className="q-panel-section preview-section">
                                                                     <div className="section-header">
-                                                                        <FaSearch /> <span>Slider Önizleme</span>
+                                                                        <FaSlidersH /> <span>Slider Önizleme</span>
                                                                     </div>
                                                                     <div className="slider-preview-box">
                                                                         <input type="range" min={activeQ.sliderMin || 1} max={activeQ.sliderMax || 10} disabled />
@@ -706,7 +582,7 @@ function AnketKopyala() {
                         </div>
                     )}
 
-                    {/* STEP 4: AUDIENCE (Same as SifirdanAnket) */}
+                    {/* STEP 4: AUDIENCE */}
                     {currentStep === 4 && (
                         <div className="wizard-step step-audience animate-in">
                             <div className="step-header-text">
@@ -714,68 +590,14 @@ function AnketKopyala() {
                                 <p>Anketinizin kimler tarafından ve hangi kurallarla doldurulacağını belirleyin.</p>
                             </div>
 
-                            <div className="audience-grid">
-                                <div className={`audience-card ${secilenKriterler.kimlikDogrulama ? 'expanded' : ''}`} onClick={() => handleKriterToggle("kimlikDogrulama")}>
-                                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("kimlikDogrulama") }}><FaCheckCircle /></div>
-                                    <FaShieldAlt className="card-icon" />
-                                    <div className="card-content-wrap">
-                                        <h3>Biyometrik Kimlik & Yüz Doğrulama</h3>
-                                        <p>AI destekli yüz tanıma ve canlılık testi ile en yüksek güvenlik seviyesini sağlar.</p>
-                                    </div>
-                                </div>
-                                <div className={`audience-card ${secilenKriterler.tcNo ? 'expanded' : ''}`} onClick={() => handleKriterToggle("tcNo")}>
-                                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("tcNo") }}><FaCheckCircle /></div>
-                                    <FaIdCard className="card-icon" />
-                                    <div className="card-content-wrap">
-                                        <h3>TC Kimlik No Doğrulama</h3>
-                                        <p>Nüfus ve Vatandaşlık İşleri (NVİ) üzerinden kimlik bilgilerinin doğruluğu kontrol edilir.</p>
-                                    </div>
-                                </div>
-                                <div className={`audience-card ${secilenKriterler.telefonNumarasi ? 'expanded' : ''}`} onClick={() => handleKriterToggle("telefonNumarasi")}>
-                                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("telefonNumarasi") }}><FaCheckCircle /></div>
-                                    <FaMobileAlt className="card-icon" />
-                                    <div className="card-content-wrap">
-                                        <h3>Telefon Doğrulama</h3>
-                                        <p>Bot saldırılarını engellemek için katılımcıların telefon numarası SMS ile onaylanır.</p>
-                                    </div>
-                                </div>
-                                <div className={`audience-card ${secilenKriterler.mail ? 'expanded' : ''}`} onClick={() => handleKriterToggle("mail")}>
-                                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("mail") }}><FaCheckCircle /></div>
-                                    <FaEnvelope className="card-icon" />
-                                    <div className="card-content-wrap">
-                                        <h3>E-posta Kısıtlaması</h3>
-                                        <p>Anketinizi sadece belirli kurumsal veya özel e-posta uzantılarına sahip kişilerle sınırlayın.</p>
-                                        {secilenKriterler.mail && (
-                                            <div className="nested-input" onClick={e => e.stopPropagation()}>
-                                                <input
-                                                    type="text"
-                                                    placeholder="@kurum.com"
-                                                    value={mailUzantisi}
-                                                    onChange={e => setMailUzantisi(e.target.value)}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className={`audience-card ${secilenKriterler.konum ? 'expanded' : ''}`} onClick={() => handleKriterToggle("konum")}>
-                                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("konum") }}><FaCheckCircle /></div>
-                                    <FaMapMarkerAlt className="card-icon" />
-                                    <div className="card-content-wrap">
-                                        <h3>Bölge Kısıtlaması</h3>
-                                        <p>Anketin sadece sizin belirlediğiniz il, ilce veya özel bir radius alanı içinden cevaplanmasını sağlar.</p>
-                                        {secilenKriterler.konum && (
-                                            <div className="nested-actions">
-                                                {kayitliKonumKriteri ? (
-                                                    <span className="location-badge">{kayitliKonumKriteri.label}</span>
-                                                ) : (
-                                                    <span className="no-location">Konum seçilmedi</span>
-                                                )}
-                                                <button className="select-map-btn" onClick={() => setKonumModalAcik(true)}>Haritada Seç</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <HedefKitleSecimi
+                                secilenKriterler={secilenKriterler}
+                                setSecilenKriterler={setSecilenKriterler}
+                                mailUzantisi={mailUzantisi}
+                                setMailUzantisi={setMailUzantisi}
+                                kayitliKonumKriteri={kayitliKonumKriteri}
+                                setKayitliKonumKriteri={setKayitliKonumKriteri}
+                            />
                         </div>
                     )}
 
@@ -945,48 +767,6 @@ function AnketKopyala() {
                     </div>
                 )}
             </main>
-
-            {/* Google Maps Modal */}
-            {konumModalAcik && (
-                <div className="maps-modal-overlay">
-                    <div className="maps-modal">
-                        <div className="modal-head">
-                            <h3><FaMapMarkedAlt /> Lokasyon Hedefleme</h3>
-                            <button className="close-btn" onClick={() => setKonumModalAcik(false)}>✕</button>
-                        </div>
-                        <div className="modal-body">
-                            <div className="search-box-map">
-                                <FaSearch className="s-icon" />
-                                <input ref={autoCompleteRef} type="text" placeholder="Şehir, ilçe veya mahalle aratın..." value={mapSearchInput} onChange={e => setMapSearchInput(e.target.value)} />
-                            </div>
-                            {googleYeri && (
-                                <div className="location-settings">
-                                    <div className="selected-preview">Seçilen: <strong>{googleYeri.tamAdres}</strong></div>
-                                    <div className="config-row">
-                                        <button className={kisitlamaTuru === "sehir" ? 'active' : ''} onClick={() => setKisitlamaTuru("sehir")}>Şehir ({googleYeri.il})</button>
-                                        {googleYeri.ilce && <button className={kisitlamaTuru === "ilce" ? 'active' : ''} onClick={() => setKisitlamaTuru("ilce")}>İlçe ({googleYeri.ilce})</button>}
-                                        <button className={kisitlamaTuru === "radius" ? 'active' : ''} onClick={() => setKisitlamaTuru("radius")}>Mesafe (Radius)</button>
-                                    </div>
-                                    {kisitlamaTuru === "radius" && (
-                                        <div className="radius-pick">
-                                            <label>Yarıçap (Metre):</label>
-                                            <select value={radiusDegeri} onChange={e => setRadiusDegeri(e.target.value)}>
-                                                <option value="100">100m</option>
-                                                <option value="500">500m</option>
-                                                <option value="1000">1km</option>
-                                                <option value="5000">5km</option>
-                                            </select>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn-confirm" onClick={handleKonumKaydet} disabled={!googleYeri}>Seçimi Onayla</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

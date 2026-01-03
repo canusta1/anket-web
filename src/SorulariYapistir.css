@@ -1,309 +1,156 @@
-/* ===== SORULARI YAPISTIR - AnketKopyala Stili ===== */
-.yapistir-container {
-    max-width: 1400px;
+/* ============================================================
+   PASTE QUESTIONS WIZARD STYLES
+============================================================ */
+
+/* Paste Badge in Logo */
+.logo-badge.paste-badge {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+/* Paste Form */
+.paste-form {
+    max-width: 1100px;
     margin: 0 auto;
+    padding: 20px 0;
 }
 
-.yapistir-content {
+.paste-form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 32px;
 }
 
-/* ===== KART YAPISI (AnketKopyala ile Aynı) ===== */
-.yapistir-input-card,
-.yapistir-preview-card {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
-    display: flex;
-    flex-direction: column;
-    animation: fadeIn 0.3s ease-out;
+.paste-form-col {
+    background: var(--w-card);
+    border: 1px solid var(--w-border);
+    border-radius: 16px;
+    padding: 28px;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ===== INPUT ALANLARI ===== */
-.yapistir-input-group {
-    margin-bottom: 16px;
-}
-
-.yapistir-input-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #1f2937;
-    font-size: 0.9rem;
-}
-
-.yapistir-input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    font-family: inherit;
-}
-
-.yapistir-input:focus {
-    outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.yapistir-textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    resize: vertical;
-    font-family: inherit;
-    transition: all 0.3s ease;
-}
-
-.yapistir-textarea:focus {
-    outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.yapistir-divider {
-    height: 1px;
-    background: #e5e7eb;
-    margin: 20px 0;
-}
-
-/* ===== JSON YÜKLEME BÖLÜMÜ ===== */
-.yapistir-upload-section {
+.paste-form-col h3 {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding: 12px;
-    background: #f9fafb;
-    border-radius: 8px;
-    border: 2px dashed #d1d5db;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: var(--w-text);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--w-border);
 }
 
-.yapistir-upload-btn {
-    display: flex;
+.paste-form-col h3 svg {
+    color: var(--w-primary);
+}
+
+/* JSON Upload Section */
+.json-upload-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--w-border);
+    text-align: center;
+}
+
+.json-upload-btn {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--w-primary) 0%, #4f46e5 100%);
     color: white;
     border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s;
 }
 
-.yapistir-upload-btn:hover {
+.json-upload-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
 }
 
-.yapistir-upload-btn:active {
-    transform: translateY(0);
+.upload-hint {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--w-text-muted);
 }
 
-.yapistir-upload-info {
+/* Paste Format Hint */
+.paste-format-hint {
+    background: var(--w-bg);
+    border: 1px dashed var(--w-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+}
+
+.paste-format-hint code {
     font-size: 0.85rem;
-    color: #6b7280;
-    font-style: italic;
-}
-
-.yapistir-aciklama {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin: 0 0 10px 0;
-}
-
-.yapistir-format-ornegi {
-    background: #f0fdf4;
-    border-left: 4px solid #10b981;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 12px;
-}
-
-.yapistir-format-ornegi code {
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-    color: #1f2937;
+    color: var(--w-text-muted);
     line-height: 1.6;
 }
 
-.yapistir-metin-alani {
+/* Paste Textarea */
+.paste-textarea {
     width: 100%;
-    padding: 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-family: 'Courier New', monospace;
-    resize: vertical;
-    min-height: 280px;
-    transition: all 0.3s ease;
-}
-
-.yapistir-metin-alani:focus {
-    outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* ===== ÖNİZLEME BÖLÜMÜ ===== */
-.yapistir-preview-card {
-    min-height: 600px;
-}
-
-.yapistir-preview-body {
-    max-height: 650px;
-    overflow-y: auto;
-}
-
-.yapistir-preview-title {
-    background: #f0fdf4;
     padding: 16px;
-    border-radius: 8px;
-    border-left: 4px solid #10b981;
-    margin-bottom: 16px;
-}
-
-.yapistir-preview-title h4 {
-    margin: 0 0 8px 0;
-    font-size: 1.3rem;
-    color: #1f2937;
-    font-weight: 700;
-}
-
-.yapistir-preview-title p {
-    margin: 0;
-    color: #4b5563;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.yapistir-preview-questions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.yapistir-question-item {
-    background: #f9fafb;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-}
-
-.yapistir-question-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.yapistir-q-number {
-    font-weight: 700;
-    color: #10b981;
-    font-size: 0.9rem;
-}
-
-.yapistir-q-type {
-    background: #e0f2fe;
-    color: #0284c7;
-    padding: 4px 10px;
+    border: 2px solid var(--w-border);
     border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.yapistir-question-text {
+    background: var(--w-bg);
+    color: var(--w-text);
     font-size: 0.95rem;
-    color: #1f2937;
-    margin: 0 0 12px 0;
-    line-height: 1.5;
+    font-family: 'Consolas', 'Monaco', monospace;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 200px;
+    transition: all 0.3s;
 }
 
-.yapistir-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.paste-textarea:focus {
+    outline: none;
+    border-color: var(--w-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
 
-.yapistir-option {
+.paste-textarea::placeholder {
+    color: var(--w-text-muted);
+    opacity: 0.6;
+}
+
+/* Parse Button */
+.parse-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    padding: 8px 12px;
-    background: white;
-    border-radius: 6px;
-    border: 1px solid #e5e7eb;
-    transition: all 0.2s ease;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
 }
 
-.yapistir-option:hover {
-    border-color: #10b981;
-    background: #f0fdf4;
+.parse-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
 }
 
-.yapistir-radio {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #10b981;
-    border-radius: 50%;
-    margin-right: 10px;
-    flex-shrink: 0;
+.parse-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.yapistir-option span {
-    font-size: 0.9rem;
-    color: #4b5563;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-    .yapistir-content {
+/* Responsive for Paste Form */
+@media (max-width: 900px) {
+    .paste-form-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .yapistir-preview-card {
-        min-height: auto;
-    }
-}
-
-@media (max-width: 768px) {
-    .yapistir-content {
-        gap: 16px;
-    }
-
-    .yapistir-preview-body {
-        max-height: 500px;
-    }
-
-    .yapistir-preview-title h4 {
-        font-size: 1.1rem;
-    }
-
-    .yapistir-question-text {
-        font-size: 0.9rem;
     }
 }

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
-  FaArrowLeft, FaUsers, FaCalendarAlt, FaChartBar,
-  FaFileAlt, FaCheckCircle, FaDownload, FaFilter,
-  FaSpinner, FaChartPie, FaHome, FaBars, FaSignOutAlt,
-  FaUser, FaMoon, FaSun
+  FaArrowLeft, FaUsers, FaChartBar,
+  FaFileAlt, FaCheckCircle, FaSpinner, FaChartPie
 } from 'react-icons/fa';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -12,6 +10,7 @@ import {
 } from 'recharts';
 import './AnketSonuclari.css';
 import './Panel.css';
+import Navbar from './components/Navbar';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
@@ -20,12 +19,6 @@ function AnketSonuclari() {
   const [anketler, setAnketler] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/giris');
-  };
 
   useEffect(() => {
     loadAnketler();
@@ -275,61 +268,24 @@ function AnketSonuclari() {
 
   return (
     <div className="results-container panel-container">
-      {/* Navbar - Panel Style */}
-      <nav className="panel-navbar">
-        <div className="nav-left">
-          <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-          <span className="panel-logo">SurvAI</span>
-        </div>
+      {/* Global Navbar */}
+      <Navbar activePage="sonuclar" />
 
-        <div className="nav-right">
-          <Link to="/panel" className="nav-link"><FaHome /> Panel</Link>
-          <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
-          <button
-            className="btn-white"
-            onClick={() => navigate('/anket-olustur')}
-          >
-            + Yeni Anket
-          </button>
-        </div>
-      </nav>
-
-      {/* Sidebar */}
-      <div className={`sidebar ${menuOpen ? "open" : ""}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-logo">📊 SurvAI</div>
-          <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>
-        </div>
-        <ul>
-          <li onClick={() => navigate('/panel')}><FaChartBar className="icon" /> Dashboard</li>
-          <li className="active"><FaChartPie className="icon" /> Sonuçları Gör</li>
-          <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
-          <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
-        </ul>
-      </div>
-      {menuOpen && <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>}
-
-      {/* Header */}
+      {/* Main Content */}
       <div className="panel-main">
         {/* Header - Compact */}
-        <div className="results-hero-header">
-          <div className="hero-content">
+        <div className="results-hero-compact">
+          <div className="hero-left">
             <div className="hero-title-row">
               <div className="hero-icon-wrapper">
                 <FaChartPie className="hero-icon" />
               </div>
-              <h1 className="hero-title">
-                <span className="title-gradient">Anket Sonuçları</span>
-              </h1>
-            </div>
-            <p className="hero-subtitle">
-              Tüm anketlerinizin detaylı sonuçlarını ve istatistiklerini keşfedin
-            </p>
-          </div>
-          <div className="hero-stats-mini">
-            <div className="mini-stat">
-              <span className="mini-stat-value">{anketler.length}</span>
-              <span className="mini-stat-label">Toplam Anket</span>
+              <div className="hero-title-content">
+                <h1 className="hero-title">
+                  <span className="title-gradient">Anket Sonuçları</span>
+                </h1>
+                <span className="hero-total-count">{anketler.length} anket</span>
+              </div>
             </div>
           </div>
         </div>

@@ -1,75 +1,44 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
-    FaBars,
-    FaUser,
-    FaChartBar,
-    FaClipboardList,
-    FaSignOutAlt,
-    FaArrowLeft,
     FaEnvelope,
     FaIdCard,
     FaMapMarkerAlt,
     FaShieldAlt,
-    FaLink,
-    FaCheckCircle,
     FaMobileAlt,
-    FaSpinner,
-    FaCopy,
-    FaHome,
+    FaCheckCircle,
     FaMapMarkedAlt,
     FaSearch
 } from "react-icons/fa";
-import SurvAILogo from "./assets/SurvAI_Logo.png";
+import "./HedefKitleSecimi.css";
 
-// Google Maps API Anahtarınız
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "BURAYA_API_KEY_GIRINIZ";
 
-function HedefKitleSecimi() {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const gelenVeri = location.state;
-    const navigationChecked = useRef(false);
-
-    // --- GOOGLE MAPS STATE'LERİ ---
-    const [scriptLoaded, setScriptLoaded] = useState(false);
-    const autoCompleteRef = useRef(null); // Input referansı
-    const [mapSearchInput, setMapSearchInput] = useState("");
-
-    // --- APP STATE'LERİ ---
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [olusanLink, setOlusanLink] = useState(null);
-
-    // KRİTERLER
-    const [secilenKriterler, setSecilenKriterler] = useState({
-        mail: false,
-        tcNo: false,
-        konum: false,
-        kimlikDogrulama: false,
-        telefonNumarasi: false
-    });
-
-    const [mailUzantisi, setMailUzantisi] = useState("");
-
-    // Konum Modal
+/**
+ * HedefKitleSecimi - Reusable Audience Selection Component
+ * 
+ * Handles audience criteria selection for surveys including:
+ * - Biometric identity verification (face recognition)
+ * - TC ID verification
+ * - Phone verification
+ * - Email domain restrictions
+ * - Location-based restrictions (city/district/neighborhood/radius)
+ */
+function HedefKitleSecimi({
+    secilenKriterler,
+    setSecilenKriterler,
+    mailUzantisi,
+    setMailUzantisi,
+    kayitliKonumKriteri,
+    setKayitliKonumKriteri
+}) {
     const [konumModalAcik, setKonumModalAcik] = useState(false);
-    const [googleYeri, setGoogleYeri] = useState(null); // Google'dan gelen ham veri
-    const [kisitlamaTuru, setKisitlamaTuru] = useState("sehir"); // sehir, ilce, mahalle, radius
-    const [radiusDegeri, setRadiusDegeri] = useState("50"); // metre
+    const [scriptLoaded, setScriptLoaded] = useState(false);
+    const [googleYeri, setGoogleYeri] = useState(null);
+    const [kisitlamaTuru, setKisitlamaTuru] = useState("sehir");
+    const [radiusDegeri, setRadiusDegeri] = useState("50");
+    const [mapSearchInput, setMapSearchInput] = useState("");
+    const autoCompleteRef = useRef(null);
 
-    // Veritabanına Kaydedilecek Nihai Konum Objesi
-    const [kayitliKonumKriteri, setKayitliKonumKriteri] = useState(null);
-
-    // Mount Kontrolü
-    useEffect(() => {
-        if (!navigationChecked.current) {
-            navigationChecked.current = true;
-            if (!gelenVeri) navigate("/");
-        }
-    }, [gelenVeri, navigate]);
-
-    // Google Maps Script Yükleme
     useEffect(() => {
         if (konumModalAcik && !scriptLoaded) {
             if (window.google && window.google.maps && window.google.maps.places) {
@@ -85,320 +54,127 @@ function HedefKitleSecimi() {
         }
     }, [konumModalAcik, scriptLoaded]);
 
-    // Autocomplete Başlatma
     useEffect(() => {
         if (scriptLoaded && konumModalAcik && autoCompleteRef.current) {
             const autocomplete = new window.google.maps.places.Autocomplete(autoCompleteRef.current, {
-                types: ['geocode'], // Sadece coğrafi yerler (İşletmeleri filtrele)
-                componentRestrictions: { country: "tr" }, // Sadece Türkiye
+                types: ['geocode'],
+                componentRestrictions: { country: "tr" },
                 fields: ["address_components", "geometry", "formatted_address", "name"]
             });
-
             autocomplete.addListener("place_changed", () => {
                 const place = autocomplete.getPlace();
-                handlePlaceSelect(place);
+                if (place.geometry) {
+                    let il = "", ilce = "", mahalle = "";
+                    place.address_components.forEach(cp => {
+                        if (cp.types.includes("administrative_area_level_1")) il = cp.long_name;
+                        if (cp.types.includes("administrative_area_level_2")) ilce = cp.long_name;
+                        if (cp.types.includes("neighborhood") || cp.types.includes("sublocality")) mahalle = cp.long_name;
+                    });
+                    setGoogleYeri({
+                        tamAdres: place.formatted_address,
+                        il,
+                        ilce,
+                        mahalle,
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng()
+                    });
+                    setMapSearchInput(place.formatted_address);
+                }
             });
         }
     }, [scriptLoaded, konumModalAcik]);
 
-    // Google Place Verisini İşleme
-    const handlePlaceSelect = (place) => {
-        if (!place.geometry) {
-            alert("Bu konum için detaylı bilgi bulunamadı.");
-            return;
-        }
-
-        // Adres bileşenlerini ayrıştır
-        let il = "", ilce = "", mahalle = "";
-
-        place.address_components.forEach(component => {
-            const types = component.types;
-            if (types.includes("administrative_area_level_1")) il = component.long_name;
-            if (types.includes("administrative_area_level_2")) ilce = component.long_name;
-            if (types.includes("administrative_area_level_4") || types.includes("neighborhood")) mahalle = component.long_name;
-        });
-
-        // Google Verisini State'e At
-        setGoogleYeri({
-            tamAdres: place.formatted_address,
-            il,
-            ilce,
-            mahalle,
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
-        });
-        setMapSearchInput(place.formatted_address); // Input'a tam adı yaz
-    };
-
-    const handleLogout = () => navigate("/giris");
-    const handleGeriDon = () => navigate(-1);
-    const handleAnketOlustur = () => navigate("/anket-olustur");
-    const handlePaneleDon = () => navigate("/panel");
-
-    // Kriter Toggle
     const handleKriterToggle = (kriter) => {
-        const yeniDurum = !secilenKriterler[kriter];
-        setSecilenKriterler({ ...secilenKriterler, [kriter]: yeniDurum });
-
-        if (kriter === "mail" && !yeniDurum) setMailUzantisi("");
-
-        if (kriter === "konum") {
-            if (yeniDurum) {
-                setKonumModalAcik(true);
-            } else {
-                setKayitliKonumKriteri(null);
-                setGoogleYeri(null);
-                setMapSearchInput("");
-            }
-        }
+        setSecilenKriterler({ ...secilenKriterler, [kriter]: !secilenKriterler[kriter] });
     };
 
-    // Konumu Kaydet
     const handleKonumKaydet = () => {
         if (!googleYeri) {
-            alert("Lütfen önce arama kutusundan bir konum seçiniz.");
+            alert("Lütfen önce bir konum seçin.");
             return;
         }
-
-        // Seçilen kısıtlama türüne göre objeyi hazırla
-        const kriterObjesi = {
-            tip: kisitlamaTuru, // 'sehir', 'ilce', 'mahalle', 'radius'
-            hedef: {
-                il: googleYeri.il,
-                ilce: (kisitlamaTuru === 'ilce' || kisitlamaTuru === 'mahalle') ? googleYeri.ilce : null,
-                mahalle: (kisitlamaTuru === 'mahalle') ? googleYeri.mahalle : null,
-                lat: googleYeri.lat,
-                lng: googleYeri.lng
-            },
-            radius: kisitlamaTuru === 'radius' ? parseInt(radiusDegeri) : null,
-            aciklama: googleYeri.tamAdres // UI'da göstermek için
-        };
-
-        // Mantıksal kontroller
-        if (kisitlamaTuru === 'ilce' && !googleYeri.ilce) {
-            alert("Seçtiğiniz konumda 'İlçe' verisi bulunamadı. Lütfen bir ilçe aratın.");
-            return;
-        }
-        if (kisitlamaTuru === 'mahalle' && !googleYeri.mahalle) {
-            alert("Seçtiğiniz konumda 'Mahalle' verisi bulunamadı. Lütfen bir mahalle aratın.");
-            return;
-        }
-
-        setKayitliKonumKriteri(kriterObjesi);
+        setKayitliKonumKriteri({
+            tip: kisitlamaTuru,
+            target: googleYeri,
+            radius: radiusDegeri,
+            label: googleYeri.tamAdres
+        });
         setKonumModalAcik(false);
     };
 
-    // Mail uzantısı format kontrolü için regex (örn: gmail.com, outlook.com, kurum.com.tr)
-    const mailUzantisiGecerliMi = (uzanti) => {
-        const trimmed = uzanti.trim();
-        // Domain formatı: en az bir . içermeli, TLD en az 2 karakter olmalı
-        // Örnek: gmail.com, outlook.com, kurum.com.tr
-        const pattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
-        return pattern.test(trimmed);
-    };
-
-    const handleLinkOlustur = async () => {
-        if (secilenKriterler.mail) {
-            if (!mailUzantisi.trim()) {
-                alert("⚠️ Mail kriteri seçtiniz! Lütfen bir mail uzantısı girin.");
-                return;
-            }
-            if (!mailUzantisiGecerliMi(mailUzantisi)) {
-                alert("⚠️ Geçersiz mail uzantısı formatı!\n\nÖrnek formatlar:\n• gmail.com\n• outlook.com\n• kurum.com.tr\n\nLütfen geçerli bir domain girin.");
-                return;
-            }
-        }
-
-        if (secilenKriterler.konum && !kayitliKonumKriteri) {
-            alert("⚠️ Konum kriteri seçtiniz! Lütfen bir konum belirleyin.");
-            setKonumModalAcik(true);
-            return;
-        }
-
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert("Oturum süreniz dolmuş.");
-            navigate("/giris");
-            return;
-        }
-
-        setLoading(true);
-
-        const finalVeri = {
-            ...gelenVeri,
-            hedefKitleKriterleri: {
-                ...secilenKriterler,
-                mailUzantisi: mailUzantisi,
-                // Backend için veri yapısı
-                konumHedefi: secilenKriterler.konum ? kayitliKonumKriteri : null
-            }
-        };
-
-        console.log("🚀 Frontend'den gönderilen secilenKriterler:", secilenKriterler);
-        console.log("🚀 Frontend'den gönderilen finalVeri:", finalVeri);
-
-        try {
-            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
-            const response = await fetch(`${apiUrl}/api/surveys`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(finalVeri)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                const gelenLink = result.data.paylasimLinki;
-                const linkParcalari = gelenLink.split('/');
-                const anketKodu = linkParcalari[linkParcalari.length - 1];
-                const dinamikLink = `${window.location.origin}/anket-coz/${anketKodu}`;
-
-                setOlusanLink(dinamikLink);
-                alert("✅ Anket başarıyla oluşturuldu!");
-            } else {
-                alert("Hata: " + (result.error || "Anket oluşturulamadı."));
-            }
-
-        } catch (error) {
-            console.error("Kayıt hatası:", error);
-            alert("Sunucuya bağlanılamadı.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleLinkKopyala = () => {
-        navigator.clipboard.writeText(olusanLink);
-        alert("📋 Link kopyalandı!");
-    };
-
-    if (!gelenVeri) return null;
-
     return (
-        <div className="panel-container" style={{ minHeight: "100vh", background: "#f5f6fa" }}>
-
-            {/* --- GOOGLE MAPS LOCATION MODAL --- */}
+        <>
+            {/* Google Maps Modal */}
             {konumModalAcik && (
-                <div style={{
-                    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-                    background: "rgba(0, 0, 0, 0.6)",
-                    display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000,
-                    backdropFilter: "blur(3px)"
-                }}>
-                    <div style={{
-                        background: "white", borderRadius: "16px",
-                        boxShadow: "0 20px 60px rgba(0, 0, 0, 0.4)",
-                        maxWidth: "600px", width: "90%", overflow: "hidden",
-                        animation: "fadeInUp 0.3s ease-out"
-                    }}>
-                        {/* Header */}
-                        <div style={{
-                            background: "linear-gradient(135deg, #4285F4 0%, #34A853 100%)",
-                            padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", color: "white"
-                        }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                <FaMapMarkedAlt size={24} />
-                                <h3 style={{ margin: 0, fontWeight: 600 }}>Google Maps ile Konum Seç</h3>
+                <div className="hks-modal-overlay">
+                    <div className="hks-modal">
+                        <div className="hks-modal-header">
+                            <div className="hks-modal-title">
+                                <FaMapMarkedAlt />
+                                <h3>Google Maps ile Konum Seç</h3>
                             </div>
-                            <button onClick={() => setKonumModalAcik(false)} style={{ background: "none", border: "none", color: "white", fontSize: "1.5em", cursor: "pointer" }}>✕</button>
+                            <button className="hks-modal-close" onClick={() => setKonumModalAcik(false)}>✕</button>
                         </div>
-
-                        {/* Body */}
-                        <div style={{ padding: "30px" }}>
-                            <p style={{ color: "#555", marginBottom: "15px", fontSize: "0.95em" }}>
+                        <div className="hks-modal-body">
+                            <p className="hks-modal-info">
                                 Lütfen anketin uygulanacağı bölgeyi aratın (Örn: "Kadıköy", "Ankara", "Bağdat Caddesi")
                             </p>
 
-                            {/* Google Autocomplete Input */}
-                            <div style={{ position: "relative", marginBottom: "25px" }}>
-                                <FaSearch style={{ position: "absolute", top: "14px", left: "15px", color: "#999" }} />
+                            <div className="hks-search-box">
+                                <FaSearch className="hks-search-icon" />
                                 <input
                                     ref={autoCompleteRef}
                                     type="text"
                                     placeholder="Konum arayın..."
                                     value={mapSearchInput}
                                     onChange={(e) => setMapSearchInput(e.target.value)}
-                                    style={{
-                                        width: "100%", padding: "12px 12px 12px 40px", borderRadius: "8px",
-                                        border: "2px solid #ddd", fontSize: "1em", outline: "none",
-                                        boxSizing: "border-box"
-                                    }}
+                                    className="hks-search-input"
                                 />
                             </div>
 
-                            {/* Seçim Yapıldıysa Gösterilecek Ayarlar */}
                             {googleYeri && (
-                                <div style={{ background: "#f8f9fa", padding: "20px", borderRadius: "10px", border: "1px solid #e0e0e0" }}>
-                                    <div style={{ marginBottom: "15px", fontSize: "0.9em", color: "#333" }}>
+                                <div className="hks-location-config">
+                                    <div className="hks-found-location">
                                         <strong>Bulunan Yer:</strong> {googleYeri.tamAdres}
                                     </div>
 
-                                    <label style={{ display: "block", fontWeight: 600, color: "#2c3e50", marginBottom: "10px" }}>
-                                        🎯 Bu konum için kısıtlama türü:
-                                    </label>
+                                    <label className="hks-config-label">🎯 Bu konum için kısıtlama türü:</label>
 
-                                    <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "15px" }}>
+                                    <div className="hks-restriction-buttons">
                                         <button
+                                            className={`hks-restriction-btn ${kisitlamaTuru === "sehir" ? "active" : ""}`}
                                             onClick={() => setKisitlamaTuru("sehir")}
-                                            style={{
-                                                padding: "8px 12px", borderRadius: "20px", border: "1px solid #ddd", cursor: "pointer",
-                                                background: kisitlamaTuru === "sehir" ? "#4285F4" : "white",
-                                                color: kisitlamaTuru === "sehir" ? "white" : "#555"
-                                            }}
                                         >
                                             Şehir Geneli ({googleYeri.il})
                                         </button>
-
                                         {googleYeri.ilce && (
                                             <button
+                                                className={`hks-restriction-btn ${kisitlamaTuru === "ilce" ? "active" : ""}`}
                                                 onClick={() => setKisitlamaTuru("ilce")}
-                                                style={{
-                                                    padding: "8px 12px", borderRadius: "20px", border: "1px solid #ddd", cursor: "pointer",
-                                                    background: kisitlamaTuru === "ilce" ? "#4285F4" : "white",
-                                                    color: kisitlamaTuru === "ilce" ? "white" : "#555"
-                                                }}
                                             >
                                                 İlçe Geneli ({googleYeri.ilce})
                                             </button>
                                         )}
-
                                         {googleYeri.mahalle && (
                                             <button
+                                                className={`hks-restriction-btn ${kisitlamaTuru === "mahalle" ? "active" : ""}`}
                                                 onClick={() => setKisitlamaTuru("mahalle")}
-                                                style={{
-                                                    padding: "8px 12px", borderRadius: "20px", border: "1px solid #ddd", cursor: "pointer",
-                                                    background: kisitlamaTuru === "mahalle" ? "#4285F4" : "white",
-                                                    color: kisitlamaTuru === "mahalle" ? "white" : "#555"
-                                                }}
                                             >
                                                 Mahalle ({googleYeri.mahalle})
                                             </button>
                                         )}
-
                                         <button
+                                            className={`hks-restriction-btn radius ${kisitlamaTuru === "radius" ? "active" : ""}`}
                                             onClick={() => setKisitlamaTuru("radius")}
-                                            style={{
-                                                padding: "8px 12px", borderRadius: "20px", border: "1px solid #ddd", cursor: "pointer",
-                                                background: kisitlamaTuru === "radius" ? "#EA4335" : "white",
-                                                color: kisitlamaTuru === "radius" ? "white" : "#555"
-                                            }}
                                         >
                                             📍 Yarıçap (Mesafe)
                                         </button>
                                     </div>
 
-                                    {/* Yarıçap Seçildiyse Mesafe Inputu */}
                                     {kisitlamaTuru === "radius" && (
-                                        <div style={{ marginTop: "10px", padding: "10px", background: "#fff", border: "1px solid #EA4335", borderRadius: "8px" }}>
-                                            <label style={{ fontSize: "0.9em", display: "block", marginBottom: "5px" }}>Merkezden kaç metre uzağa kadar?</label>
-                                            <select
-                                                value={radiusDegeri}
-                                                onChange={(e) => setRadiusDegeri(e.target.value)}
-                                                style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
-                                            >
+                                        <div className="hks-radius-config">
+                                            <label>Merkezden kaç metre uzağa kadar?</label>
+                                            <select value={radiusDegeri} onChange={(e) => setRadiusDegeri(e.target.value)}>
                                                 <option value="50">50 Metre</option>
                                                 <option value="100">100 Metre</option>
                                                 <option value="500">500 Metre</option>
@@ -410,15 +186,10 @@ function HedefKitleSecimi() {
                                 </div>
                             )}
 
-                            {/* Kaydet Butonu */}
                             <button
+                                className={`hks-save-btn ${!googleYeri ? "disabled" : ""}`}
                                 onClick={handleKonumKaydet}
                                 disabled={!googleYeri}
-                                style={{
-                                    width: "100%", padding: "15px", borderRadius: "10px", border: "none", marginTop: "20px",
-                                    background: googleYeri ? "#34A853" : "#bdc3c7", color: "white", fontWeight: "bold", fontSize: "1.1em",
-                                    cursor: googleYeri ? "pointer" : "not-allowed", transition: "all 0.3s"
-                                }}
                             >
                                 ✓ Konum Kriterini Kaydet
                             </button>
@@ -427,325 +198,79 @@ function HedefKitleSecimi() {
                 </div>
             )}
 
-            <nav className="panel-navbar">
-                <div className="nav-left">
-                    <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-                    <FaArrowLeft className="menu-icon" onClick={handleGeriDon} style={{ marginRight: "15px" }} />
-                    <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
+            {/* Audience Selection Grid */}
+            <div className="audience-grid">
+                {/* Biyometrik Kimlik */}
+                <div className={`audience-card ${secilenKriterler.kimlikDogrulama ? 'expanded' : ''}`} onClick={() => handleKriterToggle("kimlikDogrulama")}>
+                    <div className={`check-indicator ${secilenKriterler.kimlikDogrulama ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("kimlikDogrulama") }}><FaCheckCircle /></div>
+                    <FaShieldAlt className="card-icon" />
+                    <div className="card-content-wrap">
+                        <h3>Biyometrik Kimlik & Yüz Doğrulama</h3>
+                        <p>AI destekli yüz tanıma ve canlılık testi ile en yüksek güvenlik seviyesini sağlar.</p>
+                    </div>
                 </div>
-                <div className="nav-right">
-                    <Link to="/panel" className="nav-link"><FaHome /> Ana Sayfa</Link>
-                    <Link to="/profil" className="nav-link"><FaUser /> Profil</Link>
-                    <button className="btn-white" onClick={handleAnketOlustur}>Anket Oluştur</button>
-                </div>
-            </nav>
 
-            <div className={`sidebar ${menuOpen ? "open" : ""}`}>
-                <ul>
-                    <li onClick={() => navigate('/profil')}><FaUser className="icon" /> Profil</li>
-                    <li><FaClipboardList className="icon" /> Anket Oluştur</li>
-                    <li><FaChartBar className="icon" /> Sonuçları Gör</li>
-                    <li onClick={handleLogout}><FaSignOutAlt className="icon" /> Çıkış Yap</li>
-                </ul>
+                {/* TC Kimlik */}
+                <div className={`audience-card ${secilenKriterler.tcNo ? 'expanded' : ''}`} onClick={() => handleKriterToggle("tcNo")}>
+                    <div className={`check-indicator ${secilenKriterler.tcNo ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("tcNo") }}><FaCheckCircle /></div>
+                    <FaIdCard className="card-icon" />
+                    <div className="card-content-wrap">
+                        <h3>TC Kimlik No Doğrulama</h3>
+                        <p>Nüfus ve Vatandaşlık İşleri (NVİ) üzerinden kimlik bilgilerinin doğruluğu kontrol edilir.</p>
+                    </div>
+                </div>
+
+                {/* Telefon */}
+                <div className={`audience-card ${secilenKriterler.telefonNumarasi ? 'expanded' : ''}`} onClick={() => handleKriterToggle("telefonNumarasi")}>
+                    <div className={`check-indicator ${secilenKriterler.telefonNumarasi ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("telefonNumarasi") }}><FaCheckCircle /></div>
+                    <FaMobileAlt className="card-icon" />
+                    <div className="card-content-wrap">
+                        <h3>Telefon Doğrulama</h3>
+                        <p>Bot saldırılarını engellemek için katılımcıların telefon numarası SMS ile onaylanır.</p>
+                    </div>
+                </div>
+
+                {/* E-posta */}
+                <div className={`audience-card ${secilenKriterler.mail ? 'expanded' : ''}`} onClick={() => handleKriterToggle("mail")}>
+                    <div className={`check-indicator ${secilenKriterler.mail ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("mail") }}><FaCheckCircle /></div>
+                    <FaEnvelope className="card-icon" />
+                    <div className="card-content-wrap">
+                        <h3>E-posta Kısıtlaması</h3>
+                        <p>Anketinizi sadece belirli kurumsal veya özel e-posta uzantılarına sahip kişilerle sınırlayın.</p>
+                        {secilenKriterler.mail && (
+                            <div className="nested-input" onClick={e => e.stopPropagation()}>
+                                <input
+                                    type="text"
+                                    placeholder="@kurum.com"
+                                    value={mailUzantisi}
+                                    onChange={e => setMailUzantisi(e.target.value)}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Konum */}
+                <div className={`audience-card ${secilenKriterler.konum ? 'expanded' : ''}`} onClick={() => handleKriterToggle("konum")}>
+                    <div className={`check-indicator ${secilenKriterler.konum ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleKriterToggle("konum") }}><FaCheckCircle /></div>
+                    <FaMapMarkerAlt className="card-icon" />
+                    <div className="card-content-wrap">
+                        <h3>Bölge Kısıtlaması</h3>
+                        <p>Anketin sadece sizin belirlediğiniz il, ilce veya özel bir radius alanı içinden cevaplanmasını sağlar.</p>
+                        {secilenKriterler.konum && (
+                            <div className="nested-actions">
+                                {kayitliKonumKriteri ? (
+                                    <span className="location-badge">{kayitliKonumKriteri.label}</span>
+                                ) : (
+                                    <span className="no-location">Konum seçilmedi</span>
+                                )}
+                                <button className="select-map-btn" onClick={(e) => { e.stopPropagation(); setKonumModalAcik(true); }}>Haritada Seç</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-
-            <main className="anket-main" style={{ padding: "40px 20px" }}>
-                <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-                    <div style={{ textAlign: "center", marginBottom: "40px" }}>
-                        <h1 style={{ fontSize: "2.5em", color: "#2c3e50", marginBottom: "10px" }}>🎯 Hedef Kitle Seçimi</h1>
-                        <p style={{ color: "#7f8c8d", fontSize: "1.1em" }}>Katılımcılardan hangi bilgileri istediğinizi seçin</p>
-                    </div>
-
-                    {/* ZORUNLU KRİTER */}
-                    {/* SEÇİLEBİLİR KRİTERLER */}
-                    <div className="guvenli-alan" style={{ background: "white", borderRadius: "16px", padding: "30px", marginBottom: "25px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                            <FaShieldAlt style={{ fontSize: "1.5em", color: "#3498db" }} />
-                            <h3 style={{ fontSize: "1.4em", color: "#2c3e50", margin: 0 }}>Ek Doğrulama Kriterleri</h3>
-                        </div>
-                        <p style={{ color: "#7f8c8d", marginBottom: "20px" }}>İsteğe bağlı olarak aşağıdaki bilgileri de katılımcılardan isteyebilirsiniz.</p>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", marginTop: "20px" }}>
-                            {/* Mail Kriteri */}
-                            <div style={{ gridColumn: secilenKriterler.mail ? "1 / -1" : "auto" }}>
-                                <div onClick={() => handleKriterToggle("mail")} style={{ background: secilenKriterler.mail ? "#ebf5fb" : "#f8f9fa", border: `2px solid ${secilenKriterler.mail ? "#3498db" : "#e0e0e0"}`, borderRadius: "12px", padding: "20px", cursor: "pointer", transition: "all 0.3s", boxShadow: secilenKriterler.mail ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                        <input type="checkbox" checked={secilenKriterler.mail} onChange={() => { }} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
-                                        <FaEnvelope style={{ fontSize: "1.3em", color: "#3498db" }} />
-                                        <span style={{ fontWeight: 600, color: "#2c3e50", fontSize: "1.05em" }}>E-Mail Adresi</span>
-                                    </div>
-                                    <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Katılımcıdan e-mail adresi istenecek</p>
-                                </div>
-                                {secilenKriterler.mail && (
-                                    <div style={{ marginTop: "15px", padding: "20px", background: "#f0f8ff", borderRadius: "10px", border: `2px dashed ${!mailUzantisi.trim() ? "#e74c3c" : "#3498db"}`, animation: "slideDown 0.3s ease-out" }}>
-                                        <label style={{ display: "block", fontWeight: 600, color: "#2c3e50", marginBottom: "10px", fontSize: "0.95em" }}>
-                                            📧 Mail Uzantısı (Domain) Belirleyin: <span style={{ color: "#e74c3c" }}>*</span>
-                                        </label>
-                                        <input type="text" value={mailUzantisi} onChange={(e) => setMailUzantisi(e.target.value)} placeholder="Örn: @gmail.com veya @sirket.com" style={{ width: "100%", padding: "12px 15px", border: `2px solid ${!mailUzantisi.trim() ? "#e74c3c" : "#3498db"}`, borderRadius: "8px", fontSize: "1em", boxSizing: "border-box", outline: "none" }} />
-                                        {!mailUzantisi.trim() && (
-                                            <p style={{ color: "#e74c3c", fontSize: "0.85em", marginTop: "8px", marginBottom: 0, fontWeight: 500 }}>
-                                                ⚠️ Bu alan zorunludur. Devam etmek için mail uzantısı girmelisiniz.
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* TC Kriteri */}
-                            <div onClick={() => handleKriterToggle("tcNo")} style={{ background: secilenKriterler.tcNo ? "#ebf5fb" : "#f8f9fa", border: `2px solid ${secilenKriterler.tcNo ? "#3498db" : "#e0e0e0"}`, borderRadius: "12px", padding: "20px", cursor: "pointer", transition: "all 0.3s", boxShadow: secilenKriterler.tcNo ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                    <input type="checkbox" checked={secilenKriterler.tcNo} onChange={() => { }} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
-                                    <FaIdCard style={{ fontSize: "1.3em", color: "#3498db" }} />
-                                    <span style={{ fontWeight: 600, color: "#2c3e50", fontSize: "1.05em" }}>TC Kimlik No</span>
-                                </div>
-                                <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Katılımcıdan TC kimlik numarası istenecek</p>
-                            </div>
-
-                            {/* TELEFON NUMARASI KRİTERİ */}
-                            <div onClick={() => handleKriterToggle("telefonNumarasi")} style={{ background: secilenKriterler.telefonNumarasi ? "#ebf5fb" : "#f8f9fa", border: `2px solid ${secilenKriterler.telefonNumarasi ? "#3498db" : "#e0e0e0"}`, borderRadius: "12px", padding: "20px", cursor: "pointer", transition: "all 0.3s", boxShadow: secilenKriterler.telefonNumarasi ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                    <input type="checkbox" checked={secilenKriterler.telefonNumarasi} onChange={() => { }} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
-                                    <FaMobileAlt style={{ fontSize: "1.3em", color: "#3498db" }} />
-                                    <span style={{ fontWeight: 600, color: "#2c3e50", fontSize: "1.05em" }}>Telefon Numarası</span>
-                                </div>
-                                <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Katılımcıdan telefon numarası istenecek</p>
-                            </div>
-
-                            {/* KONUM KRİTERİ (Google Maps Entegreli) */}
-                            <div style={{ gridColumn: secilenKriterler.konum ? "1 / -1" : "auto" }}>
-                                <div onClick={() => handleKriterToggle("konum")} style={{ background: secilenKriterler.konum ? "#ebf5fb" : "#f8f9fa", border: `2px solid ${secilenKriterler.konum ? "#3498db" : "#e0e0e0"}`, borderRadius: "12px", padding: "20px", cursor: "pointer", transition: "all 0.3s", boxShadow: secilenKriterler.konum ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                        <input type="checkbox" checked={secilenKriterler.konum} onChange={() => { }} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
-                                        <FaMapMarkerAlt style={{ fontSize: "1.3em", color: "#3498db" }} />
-                                        <span style={{ fontWeight: 600, color: "#2c3e50", fontSize: "1.05em" }}>Bölge Kısıtlaması</span>
-                                    </div>
-                                    <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Sadece belirlediğiniz bölgedeki kullanıcılar katılabilir</p>
-                                </div>
-
-                                {secilenKriterler.konum && (
-                                    <div style={{ marginTop: "15px", padding: "20px", background: "#f0f8ff", borderRadius: "10px", border: "2px dashed #3498db", animation: "slideDown 0.3s ease-out" }}>
-                                        {!kayitliKonumKriteri ? (
-                                            <div style={{ textAlign: 'center' }}>
-                                                <p style={{ color: '#e67e22', fontWeight: 600, marginBottom: '15px' }}>Henüz bir bölge seçilmedi.</p>
-                                                <button
-                                                    onClick={() => setKonumModalAcik(true)}
-                                                    style={{ background: '#3498db', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                                                >
-                                                    <FaSearch /> Google Maps ile Bölge Seç
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '15px', borderRadius: '8px', borderLeft: '4px solid #2ecc71' }}>
-                                                <div>
-                                                    <h4 style={{ margin: '0 0 5px 0', color: '#27ae60' }}>✓ Seçilen Hedef Bölge:</h4>
-                                                    <div style={{ fontSize: '1em', color: '#555', marginBottom: '4px' }}>
-                                                        <strong>Adres:</strong> {kayitliKonumKriteri.aciklama}
-                                                    </div>
-                                                    <span style={{ fontSize: '0.85em', fontWeight: 600, background: '#d1f2eb', color: '#16a085', padding: '3px 8px', borderRadius: '4px' }}>
-                                                        Kısıtlama: {kayitliKonumKriteri.tip === 'radius' ? `Merkeze ${kayitliKonumKriteri.radius}m yakınlık` : `${kayitliKonumKriteri.tip.toUpperCase()} geneli`}
-                                                    </span>
-                                                </div>
-                                                <button
-                                                    onClick={() => setKonumModalAcik(true)}
-                                                    style={{ background: '#f39c12', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
-                                                >
-                                                    Düzenle
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Kimlik Kriteri */}
-                            <div onClick={() => handleKriterToggle("kimlikDogrulama")} style={{ background: secilenKriterler.kimlikDogrulama ? "#ebf5fb" : "#f8f9fa", border: `2px solid ${secilenKriterler.kimlikDogrulama ? "#3498db" : "#e0e0e0"}`, borderRadius: "12px", padding: "20px", cursor: "pointer", transition: "all 0.3s", boxShadow: secilenKriterler.kimlikDogrulama ? "0 4px 12px rgba(52, 152, 219, 0.2)" : "none" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                    <input type="checkbox" checked={secilenKriterler.kimlikDogrulama} onChange={() => { }} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
-                                    <FaShieldAlt style={{ fontSize: "1.3em", color: "#3498db" }} />
-                                    <span style={{ fontWeight: 600, color: "#2c3e50", fontSize: "1.05em" }}>Kimlik Belgesi</span>
-                                </div>
-                                <p style={{ margin: "10px 0 0 44px", fontSize: "0.9em", color: "#7f8c8d" }}>Katılımcıdan kimlik belgesi fotoğrafı istenecek</p>
-                            </div>
-                        </div>
-
-                        {/* Özet */}
-                        {Object.values(secilenKriterler).some(v => v) && (
-                            <div style={{ marginTop: "25px", padding: "15px", background: "#e8f5e9", borderRadius: "10px", borderLeft: "4px solid #4caf50" }}>
-                                <strong style={{ color: "#2e7d32" }}>✓ Seçilen Ek Kriterler:</strong>
-                                <div style={{ marginTop: "8px", color: "#1b5e20" }}>
-                                    {secilenKriterler.mail && <div>• E-Mail Adresi {mailUzantisi && `(${mailUzantisi})`}</div>}
-                                    {secilenKriterler.tcNo && <div>• TC Kimlik No</div>}
-                                    {secilenKriterler.telefonNumarasi && <div>• Telefon Numarası</div>}
-                                    {secilenKriterler.konum && <div>• Bölge Kısıtlaması: {kayitliKonumKriteri ? `${kayitliKonumKriteri.aciklama}` : '(Seçim bekleniyor)'}</div>}
-                                    {secilenKriterler.kimlikDogrulama && <div>• Kimlik Belgesi</div>}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* BUTONLAR */}
-                    <div style={{ textAlign: "center", margin: "40px 0" }}>
-                        {!olusanLink ? (
-                            <div style={{ display: "flex", gap: "15px", justifyContent: "center", flexWrap: "wrap" }}>
-                                <button onClick={handleLinkOlustur} disabled={loading} style={{ background: loading ? "#95a5a6" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", border: "none", padding: "18px 50px", fontSize: "1.2em", fontWeight: 600, borderRadius: "50px", cursor: loading ? "not-allowed" : "pointer", display: "inline-flex", alignItems: "center", boxShadow: loading ? "none" : "0 4px 15px rgba(102, 126, 234, 0.4)", transition: "all 0.3s", opacity: loading ? 0.7 : 1 }}>
-                                    {loading ? <FaSpinner className="fa-spin" style={{ marginRight: "10px" }} /> : <FaLink style={{ marginRight: "10px" }} />}
-                                    {loading ? "Oluşturuluyor..." : "Anketi Yayınla ve Link Al"}
-                                </button>
-                                <button onClick={handlePaneleDon} disabled={loading} style={{ background: "linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)", color: "white", border: "none", padding: "18px 50px", fontSize: "1.2em", fontWeight: 600, borderRadius: "50px", cursor: "pointer", display: "inline-flex", alignItems: "center", boxShadow: "0 4px 15px rgba(149, 165, 166, 0.4)", transition: "all 0.3s" }}>
-                                    İptal / Panele Dön
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="success-container" style={{
-                                background: 'var(--panel-bg-alt, #ffffff)',
-                                borderRadius: '20px',
-                                padding: '40px',
-                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                                border: '1px solid var(--panel-border, #e2e8f0)',
-                                maxWidth: '600px',
-                                margin: '0 auto',
-                                textAlign: 'center'
-                            }}>
-                                {/* Success Icon */}
-                                <div style={{
-                                    width: '80px',
-                                    height: '80px',
-                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #6366f1 100%)',
-                                    borderRadius: '20px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto 24px',
-                                    boxShadow: '0 8px 24px rgba(0, 212, 170, 0.3)'
-                                }}>
-                                    <FaCheckCircle style={{ fontSize: '2.5rem', color: 'white' }} />
-                                </div>
-
-                                {/* Title */}
-                                <h2 style={{
-                                    fontSize: '1.75rem',
-                                    fontWeight: '800',
-                                    margin: '0 0 12px',
-                                    background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 40%, #6366f1 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text'
-                                }}>
-                                    Anket Başarıyla Oluşturuldu!
-                                </h2>
-
-                                <p style={{
-                                    color: 'var(--panel-text-muted, #64748b)',
-                                    fontSize: '0.95rem',
-                                    marginBottom: '28px'
-                                }}>
-                                    Anketiniz yayınlandı ve katılımcılarını bekliyor.
-                                </p>
-
-                                {/* Link Section */}
-                                <div style={{ marginBottom: '28px' }}>
-                                    <label style={{
-                                        display: 'block',
-                                        fontSize: '0.75rem',
-                                        fontWeight: '700',
-                                        color: 'var(--panel-text-muted, #64748b)',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.5px',
-                                        marginBottom: '10px'
-                                    }}>
-                                        Paylaşım Linki
-                                    </label>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        background: 'var(--panel-bg, #f8fafc)',
-                                        border: '1px solid var(--panel-border, #e2e8f0)',
-                                        borderRadius: '12px',
-                                        padding: '12px 16px'
-                                    }}>
-                                        <code style={{
-                                            flex: 1,
-                                            fontSize: '0.9rem',
-                                            color: 'var(--panel-text, #1e293b)',
-                                            wordBreak: 'break-all',
-                                            textAlign: 'left'
-                                        }}>
-                                            {olusanLink}
-                                        </code>
-                                        <button
-                                            onClick={handleLinkKopyala}
-                                            style={{
-                                                background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '10px 16px',
-                                                borderRadius: '8px',
-                                                fontWeight: '600',
-                                                fontSize: '0.85rem',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                transition: 'all 0.2s',
-                                                boxShadow: '0 2px 8px rgba(0, 212, 170, 0.25)'
-                                            }}
-                                        >
-                                            <FaCopy /> Kopyala
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                                    <button
-                                        onClick={() => navigate("/panel")}
-                                        style={{
-                                            background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '14px 28px',
-                                            borderRadius: '10px',
-                                            fontWeight: '600',
-                                            fontSize: '0.95rem',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 4px 12px rgba(0, 212, 170, 0.25)',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        Dashboard'a Dön
-                                    </button>
-                                    <button
-                                        onClick={() => window.open(olusanLink)}
-                                        style={{
-                                            background: 'transparent',
-                                            color: 'var(--panel-text, #1e293b)',
-                                            border: '1px solid var(--panel-border, #e2e8f0)',
-                                            padding: '14px 28px',
-                                            borderRadius: '10px',
-                                            fontWeight: '600',
-                                            fontSize: '0.95rem',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        Anketi Görüntüle
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </main>
-
-            <style>{`
-                .guvenli-alan { opacity: 1 !important; visibility: visible !important; animation: none !important; transition: none !important; height: auto !important; display: block !important; }
-                @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-                @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-                .fa-spin { animation: spin 1s infinite linear; }
-                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-            `}</style>
-        </div>
+        </>
     );
 }
 

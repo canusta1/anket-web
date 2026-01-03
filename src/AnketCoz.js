@@ -288,23 +288,46 @@ const AnketCoz = () => {
   const handleIdentityVerification = async (e) => {
     e.preventDefault();
     setIdentityVerificationLoading(true);
+    setIdentityVerificationError('');
+
+    console.log('🔍 Kimlik doğrulama başlatılıyor...');
+    console.log('📁 Kimlik dosyası:', idCardFile?.name, idCardFile?.size, 'bytes');
+    console.log('📁 Selfie dosyası:', selfieFile?.name, selfieFile?.size, 'bytes');
+
     try {
       const formData = new FormData();
       formData.append('idCard', idCardFile);
       formData.append('selfie', selfieFile);
 
       const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
-      const response = await fetch(`${apiUrl}/api/verification/verify-identity`, { method: 'POST', body: formData });
-      const data = await response.json();
+      const requestUrl = `${apiUrl}/api/verification/verify-identity`;
 
-      if (!response.ok) throw new Error('Doğrulama başarısız');
+      console.log('🌐 API URL:', requestUrl);
+      console.log('📤 Request gönderiliyor...');
+
+      const response = await fetch(requestUrl, {
+        method: 'POST',
+        body: formData
+      });
+
+      console.log('📥 Response alındı:', response.status, response.statusText);
+
+      const data = await response.json();
+      console.log('📦 Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}: Doğrulama başarısız`);
+      }
 
       setVerifiedTcNo(data.data.tcKimlikNo);
       setIdentityVerificationToken(data.data.verificationToken);
       setIdentityVerificationStep('verified');
       setDogrulamaBilgileri(prev => ({ ...prev, kimlikDogrulama: data.data.tcKimlikNo }));
+      console.log('✅ Kimlik doğrulama başarılı!');
     } catch (err) {
-      setIdentityVerificationError(err.message);
+      console.error('❌ Kimlik doğrulama hatası:', err);
+      console.error('Hata detayı:', err.message);
+      setIdentityVerificationError(err.message || 'Bağlantı hatası - Backend erişilemiyor');
     } finally {
       setIdentityVerificationLoading(false);
     }
@@ -313,24 +336,53 @@ const AnketCoz = () => {
   const handleTcOcrVerification = async (e) => {
     e.preventDefault();
     setTcVerificationLoading(true);
+    setTcVerificationError('');
+
+    console.log('🔍 TC Kimlik doğrulama başlatılıyor...');
+    console.log('📝 TC No:', dogrulamaBilgileri.tcNo);
+    console.log('📁 Kimlik dosyası:', tcIdCardFile?.name, tcIdCardFile?.size, 'bytes');
+
     try {
-      if (!dogrulamaBilgileri.tcNo || dogrulamaBilgileri.tcNo.length !== 11) throw new Error('Geçersiz TC');
+      if (!dogrulamaBilgileri.tcNo || dogrulamaBilgileri.tcNo.length !== 11) {
+        throw new Error('11 haneli geçerli TC Kimlik No giriniz');
+      }
+
+      if (!tcIdCardFile) {
+        throw new Error('Kimlik kartı fotoğrafı yükleyiniz');
+      }
 
       const formData = new FormData();
       formData.append('tcNo', dogrulamaBilgileri.tcNo);
       formData.append('idCard', tcIdCardFile);
 
       const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.28:4000';
-      const response = await fetch(`${apiUrl}/api/verification/verify-tc-ocr`, { method: 'POST', body: formData });
-      const data = await response.json();
+      const requestUrl = `${apiUrl}/api/verification/verify-tc-ocr`;
 
-      if (!response.ok) throw new Error('Doğrulama başarısız');
+      console.log('🌐 API URL:', requestUrl);
+      console.log('📤 Request gönderiliyor...');
+
+      const response = await fetch(requestUrl, {
+        method: 'POST',
+        body: formData
+      });
+
+      console.log('📥 Response alındı:', response.status, response.statusText);
+
+      const data = await response.json();
+      console.log('📦 Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}: Doğrulama başarısız`);
+      }
 
       setVerifiedTcNoOcr(data.data.tcKimlikNo);
       setTcVerificationToken(data.data.verificationToken);
       setTcVerificationStep('verified');
+      console.log('✅ TC Kimlik doğrulama başarılı!');
     } catch (err) {
-      setTcVerificationError(err.message);
+      console.error('❌ TC doğrulama hatası:', err);
+      console.error('Hata detayı:', err.message);
+      setTcVerificationError(err.message || 'Bağlantı hatası - Backend erişilemiyor');
     } finally {
       setTcVerificationLoading(false);
     }

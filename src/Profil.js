@@ -1,38 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./Profil.css";
 import {
-  FaBars,
   FaUser,
-  FaChartBar,
-  FaClipboardList,
-  FaSignOutAlt,
-  FaArrowLeft,
   FaEdit,
   FaSave,
   FaTimes,
   FaUsers,
   FaPoll,
   FaEnvelope,
-  FaHome,
-  FaMoon,
-  FaSun,
   FaCheckCircle,
   FaChartPie
 } from "react-icons/fa";
-import SurvAILogo from "./assets/SurvAI_Logo.png";
+import Navbar from "./components/Navbar";
 
 const BASE_API_URL = process.env.REACT_APP_API_URL + "/api" || 'http://localhost:4000/api';
 
 function Profil() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('panelDarkMode');
-    return saved === 'true';
-  });
 
   // Kullanıcı bilgileri
   const [userData, setUserData] = useState({
@@ -51,16 +38,6 @@ function Profil() {
   });
 
   const navigate = useNavigate();
-
-  // Dark mode effect
-  useEffect(() => {
-    localStorage.setItem('panelDarkMode', darkMode);
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }, [darkMode]);
 
   // Verileri çek
   useEffect(() => {
@@ -188,48 +165,8 @@ function Profil() {
 
   return (
     <div className="profile-page">
-      {/* Navbar */}
-      <nav className="profile-navbar">
-        <div className="nav-left">
-          <button className="nav-icon-btn" onClick={() => setMenuOpen(!menuOpen)}>
-            <FaBars />
-          </button>
-          <div className="profile-logo">
-            <img src={SurvAILogo} alt="SurvAI" className="panel-logo-img" />
-          </div>
-        </div>
-        <div className="nav-right">
-          <Link to="/panel" className="nav-link">
-            <FaHome /> Anasayfa
-          </Link>
-          <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <FaSun /> : <FaMoon />}
-          </button>
-        </div>
-      </nav>
-
-      {/* Sidebar */}
-      <div className={`profile-sidebar ${menuOpen ? "open" : ""}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-logo"><img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" /></div>
-          <div className="sidebar-subtitle">Profil Yönetimi</div>
-        </div>
-        <ul>
-          <li className="active" onClick={() => setMenuOpen(false)}>
-            <FaUser className="icon" /> Profil
-          </li>
-          <li onClick={() => navigate('/panel')}>
-            <FaChartBar className="icon" /> Dashboard
-          </li>
-          <li onClick={() => navigate('/anket-olustur')}>
-            <FaClipboardList className="icon" /> Anket Oluştur
-          </li>
-          <li onClick={handleLogout}>
-            <FaSignOutAlt className="icon" /> Çıkış Yap
-          </li>
-        </ul>
-      </div>
-      {menuOpen && <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>}
+      {/* Global Navbar */}
+      <Navbar activePage="profil" showCreateButton={false} />
 
       {/* Main Content */}
       <main className="profile-main">
