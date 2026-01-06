@@ -3,6 +3,7 @@ import "./Panel.css";
 import { FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaUserEdit, FaTrashAlt, FaChartBar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import apiClient from "./api/apiClient";
 
 function Panel() {
   const [anketler, setAnketler] = useState([]);
@@ -37,33 +38,12 @@ function Panel() {
   // MongoDB'den anketleri çek
   useEffect(() => {
     const anketleriGetir = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        navigate("/giris");
-        return;
-      }
-
       try {
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
-        const response = await fetch(`${apiUrl}/api/surveys`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        const result = await response.json();
+        const response = await apiClient.get('/surveys');
+        const result = response.data;
 
         if (result.success) {
           console.log("📊 Anketler geldi:", result.data);
-          // Her anketin soru sayısını kontrol et
-          result.data.forEach((anket, i) => {
-            console.log(`Anket ${i + 1}:`, {
-              baslik: anket.anketBaslik,
-              soruSayisi: anket.sorular?.length || 0,
-              sorular: anket.sorular
-            });
-          });
           setAnketler(result.data);
         } else {
           console.error("Anketler getirilemedi:", result.error);
@@ -114,7 +94,6 @@ function Panel() {
   // Anket durumunu değiştir (Aktif/Pasif)
   const handleStatusChange = async (anketId, currentDurum) => {
     const yeniDurum = currentDurum === 'aktif' ? 'pasif' : 'aktif';
-    const token = localStorage.getItem("token");
 
     // Optimistic UI update
     setUpdatingStatus(anketId);
@@ -123,17 +102,8 @@ function Panel() {
     ));
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${apiUrl}/api/surveys/${anketId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ durum: yeniDurum })
-      });
-
-      const result = await response.json();
+      const response = await apiClient.patch(`/surveys/${anketId}/status`, { durum: yeniDurum });
+      const result = response.data;
 
       if (result.success) {
         // Başarı mesajı göster
@@ -147,24 +117,17 @@ function Panel() {
         // 3 saniye sonra toast'u kapat
         setTimeout(() => setToastMessage(null), 3000);
       } else {
-        // Hata durumunda geri al
-        setAnketler(prev => prev.map(anket =>
-          anket._id === anketId ? { ...anket, durum: currentDurum } : anket
-        ));
-        setToastMessage({
-          type: 'error',
-          text: '❌ Durum güncellenemedi: ' + result.error
-        });
-        setTimeout(() => setToastMessage(null), 3000);
+        throw new Error(result.error);
       }
     } catch (error) {
       // Hata durumunda geri al
       setAnketler(prev => prev.map(anket =>
         anket._id === anketId ? { ...anket, durum: currentDurum } : anket
       ));
+      const message = error.response?.data?.error || error.message || "Durum güncellenemedi";
       setToastMessage({
         type: 'error',
-        text: '❌ Bağlantı hatası: ' + error.message
+        text: '❌ ' + message
       });
       setTimeout(() => setToastMessage(null), 3000);
     } finally {
@@ -184,20 +147,12 @@ function Panel() {
     if (!anketToSil || silmeOnayInput !== anketToSil.anketBaslik) return;
 
     setDeleting(true);
-    const token = localStorage.getItem("token");
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
-      const response = await fetch(`${apiUrl}/api/surveys/${anketToSil._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.delete(`/surveys/${anketToSil._id}`);
+      const result = response.data;
 
-      const result = await response.json().catch(() => ({ success: false, error: "Sunucudan geçersiz yanıt geldi." }));
-
-      if (response.ok && result.success) {
+      if (result.success) {
         // Listeden kaldır
         setAnketler(prev => prev.filter(a => a._id !== anketToSil._id));
         setDeleteModalOpen(false);
@@ -209,11 +164,12 @@ function Panel() {
         });
         setTimeout(() => setToastMessage(null), 3000);
       } else {
-        alert("Silme hatası: " + (result.error || response.statusText));
+        alert("Silme hatası: " + (result.error || "Bilinmeyen hata"));
       }
     } catch (error) {
       console.error("Silme hatası:", error);
-      alert("Silme işlemi sırasında bir bağlantı hatası oluştu: " + error.message);
+      const message = error.response?.data?.error || error.message;
+      alert("Silme işlemi sırasında bir hata oluştu: " + message);
     } finally {
       setDeleting(false);
     }

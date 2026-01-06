@@ -536,6 +536,198 @@ body.dark-mode .profile-stat-card:hover {
   cursor: wait;
 }
 
+/* ========================
+   UNIFIED PROFILE CARD
+   All information in single card
+======================== */
+
+.profile-unified-card {
+  background: var(--profile-card);
+  border-radius: 16px;
+  box-shadow: var(--profile-shadow);
+  border: 1px solid var(--profile-border);
+  overflow: hidden;
+}
+
+/* Card Header - Avatar & Name */
+.profile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%);
+}
+
+.profile-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-unified-card .avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+}
+
+.profile-unified-card .profile-name h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: var(--profile-text);
+}
+
+.profile-unified-card .profile-name p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--profile-text-muted);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.profile-unified-card .profile-name p svg {
+  color: var(--profile-primary);
+}
+
+/* Divider */
+.profile-divider {
+  height: 1px;
+  background: var(--profile-border);
+  margin: 0 32px;
+}
+
+/* Stats Section - Inline */
+.profile-stats-inline {
+  display: flex;
+  justify-content: space-around;
+  padding: 24px 32px;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: var(--profile-bg);
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.stat-item .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+}
+
+.stat-item .stat-info h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--profile-text);
+}
+
+.stat-item .stat-info p {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 4px 0 0 0;
+  color: var(--profile-text-muted);
+}
+
+/* Personal Info Section */
+.profile-info-section {
+  padding: 28px 32px;
+}
+
+.profile-info-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--profile-text);
+  margin: 0 0 24px 0;
+}
+
+.profile-info-section h2 svg {
+  color: var(--profile-primary);
+}
+
+/* Responsive for Unified Card */
+@media (max-width: 768px) {
+  .profile-card-header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    padding: 24px 20px;
+  }
+
+  .profile-avatar-section {
+    flex-direction: column;
+  }
+
+  .profile-stats-inline {
+    flex-direction: column;
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .stat-item {
+    justify-content: center;
+  }
+
+  .profile-divider {
+    margin: 0 20px;
+  }
+
+  .profile-info-section {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-unified-card .avatar-circle {
+    width: 64px;
+    height: 64px;
+    font-size: 1.4rem;
+  }
+
+  .profile-unified-card .profile-name h1 {
+    font-size: 1.3rem;
+  }
+
+  .stat-item .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .stat-item .stat-info h3 {
+    font-size: 1.25rem;
+  }
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .profile-stats-grid {

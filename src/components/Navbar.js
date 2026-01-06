@@ -11,6 +11,7 @@ import {
   FaSun
 } from 'react-icons/fa';
 import SurvAILogo from '../assets/SurvAI_Logo.png';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 /**
@@ -22,6 +23,7 @@ import './Navbar.css';
  */
 function Navbar({ activePage = '', showCreateButton = true }) {
   const navigate = useNavigate();
+  const { logout } = useAuth(); // AuthContext'ten logout al
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('panelDarkMode');
@@ -39,8 +41,8 @@ function Navbar({ activePage = '', showCreateButton = true }) {
   }, [darkMode]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/anasayfa');
+    logout();
+    navigate('/giris', { replace: true });
   };
 
   const closeMenu = () => setMenuOpen(false);

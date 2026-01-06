@@ -8,43 +8,13 @@
 }
 
 /* AI Prompt Form (Step 1) */
-.ai-prompt-form {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 24px;
-}
-
-.ai-form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-}
-
-.ai-form-col {
-    background: var(--w-card);
-    border-radius: 16px;
-    padding: 28px;
-    border: 1px solid var(--w-border);
-    box-shadow: var(--w-shadow-sm);
-}
-
-.ai-form-col h3 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--w-text);
-}
+/* AI Prompt Form Styles Removed - Uses Wizard.css Unified Card */
+/* Only keep custom AI coloring if needed, but Wizard handle structure */
 
 .ai-form-col.ai-col {
-    border-color: rgba(102, 126, 234, 0.3);
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
-}
-
-.ai-form-col.ai-col h3 {
-    color: #667eea;
+    /* Keeping only specific coloring, overriding Wizard partials if needed */
+    /* border-color: rgba(102, 126, 234, 0.3); handled by Wizard last-child? */
+    /* background: linear-gradient... handled by Wizard? */
 }
 
 .ai-textarea {
@@ -177,5 +147,668 @@
 
     .ai-generate-btn {
         width: 100%;
+    }
+}
+
+/* ============================================================
+   COMPACT STEP 2 LAYOUT - Space Optimization
+============================================================ */
+
+/* Compact Step Header */
+.compact-step-header {
+    margin-bottom: 16px;
+}
+
+.compact-stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.step-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--w-bg);
+    border: 1px solid var(--w-border);
+    color: var(--w-text-muted);
+    transition: all 0.2s;
+}
+
+.step-pill.active {
+    background: var(--w-primary);
+    border-color: var(--w-primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.step-pill.completed {
+    background: var(--w-accent-light);
+    border-color: var(--w-primary);
+    color: var(--w-primary);
+    cursor: pointer;
+}
+
+.step-pill.completed:hover {
+    background: var(--w-primary);
+    color: white;
+}
+
+.step-pill svg {
+    font-size: 0.75rem;
+}
+
+/* Compact Step Questions */
+.step-questions-compact {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    min-height: 500px;
+}
+
+/* Questions Layout - Taller Version */
+.questions-layout-compact {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.questions-layout-compact .questions-sidebar {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.questions-layout-compact .questions-editor {
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Inline Navigation Row */
+.inline-nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    margin-top: auto;
+    border-top: 1px solid var(--w-border);
+}
+
+/* No Bar Version - Plain Buttons, Compact */
+.inline-nav-row.no-bar {
+    border-top: none;
+    padding: 8px 0 0 0;
+    margin-top: 16px;
+    background: transparent;
+    gap: 12px;
+}
+
+.btn-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-inline.prev {
+    background: transparent;
+    border: 1px solid var(--w-border);
+    color: var(--w-text-muted);
+}
+
+.btn-inline.prev:hover {
+    border-color: var(--w-primary);
+    color: var(--w-primary);
+}
+
+.btn-inline.next {
+    background: var(--w-primary);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 212, 170, 0.25);
+}
+
+.btn-inline.next:hover {
+    background: var(--w-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 212, 170, 0.35);
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .compact-stepper {
+        justify-content: center;
+    }
+    
+    .step-pill {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+    
+    .questions-layout-compact {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .step-questions-compact {
+        height: auto;
+        min-height: calc(100vh - 180px);
+    }
+    
+    .inline-nav-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .btn-inline {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============================================================
+   COMPACT QUESTION EDITOR - Professional Minimal Design
+============================================================ */
+
+/* Override q-panel-section for tighter layout */
+.step-questions-compact .q-panel-section {
+    padding: 16px 24px;
+}
+
+/* Compact Section Headers - Inline small labels */
+.step-questions-compact .section-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--w-text-muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    background: var(--w-bg);
+    border-radius: 6px;
+    border: 1px solid var(--w-border);
+}
+
+.step-questions-compact .section-header svg {
+    font-size: 0.7rem;
+    color: var(--w-primary);
+}
+
+.step-questions-compact .section-header span {
+    opacity: 1;
+}
+
+/* Compact settings grid - tighter gaps */
+.step-questions-compact .q-config-grid {
+    gap: 20px;
+}
+
+/* Compact choices section */
+.step-questions-compact .choices-section {
+    padding-top: 12px;
+}
+
+/* Slider config more compact */
+.step-questions-compact .slider-config-section {
+    padding: 12px 24px;
+}
+
+.step-questions-compact .slider-config-grid {
+    gap: 16px;
+}
+
+/* Tighter choice rows */
+.step-questions-compact .choice-compact-row {
+    padding: 0 12px;
+}
+
+.step-questions-compact .choice-minimal-input {
+    padding: 10px 0;
+}
+
+/* Smaller add choice button */
+.step-questions-compact .add-choice-minimal {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+}
+
+/* Compact slider preview */
+.step-questions-compact .slider-preview-box {
+    padding: 16px;
+}
+
+/* Hide main-input-section background for cleaner look */
+.step-questions-compact .main-input-section {
+    background: transparent;
+    padding: 20px 24px 12px;
+}
+
+/* Smaller question text input */
+.step-questions-compact .q-panel-input {
+    font-size: 1.4rem;
+}
+
+/* Compact config field labels */
+.step-questions-compact .q-config-field label {
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+}
+
+.step-questions-compact .q-config-field select {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+
+/* ============================================================
+   MINIMAL QUESTION EDITOR - Ultra Compact Design
+============================================================ */
+
+.q-workspace-minimal {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+}
+
+/* Question Input Row */
+.q-input-row {
+    width: 100%;
+}
+
+.q-main-input {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: 2px solid var(--w-border);
+    border-radius: 12px;
+    background: var(--w-card);
+    color: var(--w-text);
+    resize: vertical;
+    min-height: 60px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.q-main-input:focus {
+    outline: none;
+    border-color: var(--w-primary);
+}
+
+/* Settings Row - Horizontal */
+.q-settings-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.q-setting-item select {
+    padding: 8px 14px;
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    background: var(--w-card);
+    color: var(--w-text);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.q-toggle-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    background: var(--w-card);
+    color: var(--w-text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.q-toggle-btn.active {
+    background: var(--w-primary);
+    border-color: var(--w-primary);
+    color: white;
+}
+
+/* Slider Row */
+.q-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--w-text-muted);
+}
+
+.q-slider-row input {
+    width: 70px;
+    padding: 8px 10px;
+    border: 1px solid var(--w-border);
+    border-radius: 6px;
+    background: var(--w-card);
+    color: var(--w-text);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Options List */
+.q-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.q-option-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.q-option-indicator {
+    width: 20px;
+    text-align: center;
+    color: var(--w-primary);
+    font-size: 1rem;
+}
+
+.q-option-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    background: var(--w-card);
+    color: var(--w-text);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.q-option-row input:focus {
+    outline: none;
+    border-color: var(--w-primary);
+}
+
+.q-option-row button {
+    padding: 8px;
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.q-option-row button:hover {
+    opacity: 1;
+}
+
+.q-add-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px dashed var(--w-primary);
+    border-radius: 8px;
+    color: var(--w-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    width: fit-content;
+    margin-top: 4px;
+    transition: all 0.2s;
+}
+
+.q-add-option:hover {
+    background: var(--w-primary);
+    color: white;
+    border-style: solid;
+}
+
+/* Navigation Buttons - Inside Editor */
+/* q-nav-buttons MOVED TO Wizard.css */
+
+/* ============================================================
+   IMPROVED DROPDOWN & PREVIEW STYLES
+============================================================ */
+
+/* Type Select Dropdown */
+.q-type-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.q-type-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--w-text-muted);
+}
+
+.q-type-select select {
+    padding: 10px 16px;
+    border: 2px solid var(--w-border);
+    border-radius: 10px;
+    background: var(--w-card);
+    color: var(--w-text);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-width: 150px;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300d4aa' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.q-type-select select:hover {
+    border-color: var(--w-primary);
+}
+
+.q-type-select select:focus {
+    outline: none;
+    border-color: var(--w-primary);
+    box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15);
+}
+
+/* Preview Section */
+.q-preview-section {
+    background: var(--w-bg);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--w-border);
+    flex: 1;
+    min-height: 120px;
+}
+
+.q-preview-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--w-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+/* Open-ended Preview */
+.q-preview-text textarea {
+    width: 100%;
+    padding: 14px;
+    font-size: 0.95rem;
+    border: 2px dashed var(--w-border);
+    border-radius: 10px;
+    background: var(--w-card);
+    color: var(--w-text-muted);
+    resize: none;
+    font-family: inherit;
+}
+
+/* Slider Preview */
+.q-preview-slider {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.q-slider-config {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--w-text-muted);
+}
+
+.q-slider-config input {
+    width: 70px;
+    padding: 8px 10px;
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    background: var(--w-card);
+    color: var(--w-text);
+    font-weight: 600;
+    text-align: center;
+}
+
+.q-slider-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.q-slider-preview input[type="range"] {
+    width: 100%;
+    height: 8px;
+    background: var(--w-border);
+    border-radius: 4px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.q-slider-preview input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--w-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.4);
+}
+
+.q-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--w-text-muted);
+}
+
+/* Auto-resize textarea fix */
+.q-main-input {
+    min-height: 50px;
+    overflow: hidden;
+}
+
+/* ============================================================
+   MINI STEPPER - Compact Step Indicator
+============================================================ */
+
+.mini-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--w-card);
+    border-radius: 12px;
+    border: 1px solid var(--w-border);
+    margin-bottom: 16px;
+}
+
+.mini-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mini-step:hover {
+    background: var(--w-bg);
+}
+
+.mini-step-num {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--w-bg);
+    border: 2px solid var(--w-border);
+    color: var(--w-text-muted);
+}
+
+.mini-step-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--w-text-muted);
+}
+
+.mini-step.active .mini-step-num {
+    background: var(--w-primary);
+    border-color: var(--w-primary);
+    color: white;
+}
+
+.mini-step.active .mini-step-text {
+    color: var(--w-primary);
+    font-weight: 700;
+}
+
+.mini-step.completed .mini-step-num {
+    background: var(--w-accent-light);
+    border-color: var(--w-primary);
+    color: var(--w-primary);
+}
+
+.mini-step.completed .mini-step-text {
+    color: var(--w-text);
+}
+
+.mini-step-line {
+    width: 30px;
+    height: 2px;
+    background: var(--w-border);
+}
+
+@media (max-width: 600px) {
+    .mini-step-text {
+        display: none;
+    }
+    
+    .mini-stepper {
+        gap: 4px;
     }
 }

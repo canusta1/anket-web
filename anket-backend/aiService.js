@@ -38,37 +38,37 @@ const generateSurveyQuestions = async (topic, questionCount) => {
         questionTypes = ["coktan-tek", "coktan-coklu"];
     }
 
-    const prompt = `Sen profesyonel bir anket uzmanısın. "${topic}" konusunda ${questionCount} adet anket sorusu oluştur.
+    const systemMessage = `Sen bir anket oluşturma API'sisin. SADECE geçerli JSON döndür. Markdown, açıklama, başlık veya ek metin ASLA ekleme. Çıktın doğrudan JSON.parse() ile işlenecek.`;
 
-SADECE bu JSON formatında yanıt ver, başka metin EKLEME:
-{
-  "anketBaslik": "Başlık",
-  "sorular": [
-    {"metin": "Soru 1", "tip": "acik-uclu", "secenekler": [], "zorunlu": true},
-    {"metin": "Soru 2", "tip": "acik-uclu", "secenekler": [], "zorunlu": true}
-  ]
-}
+    const userMessage = `"${topic}" konusunda ${questionCount} soruluk profesyonel bir anket oluştur.
 
 KURALLAR:
-- ${questionCount} adet soru oluştur
-- Türkçe yazılı, net ve anlaşılır olsun
-- Soru tipleri: ${JSON.stringify(questionTypes)}
-- Hiçbir açıklama veya metin ekleme, sadece JSON`;
+- Soru tipleri: single_select, multi_select, rating, text
+- Sorular Türkçe ve yönlendirmeden uzak olmalı
+- SADECE aşağıdaki JSON formatında yanıt ver, BAŞKA HİÇBİR ŞEY YAZMA
+
+{"surveyTitle":"...","surveyDescription":"...","questions":[{"id":1,"text":"...","type":"single_select","options":["A","B","C"],"isRequired":true}]}`;
 
     try {
         console.log('📤 Groq API isteği gönderiliyor...');
 
         const resp = await client.chat.completions.create({
             model: GROQ_MODEL,
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 1500,
-            temperature: 0.7,
+            messages: [
+                { role: "system", content: systemMessage },
+                { role: "user", content: userMessage }
+            ],
+            max_tokens: 3500,
+            temperature: 0.4,
         });
 
         console.log('✅ Groq API yanıtı alındı');
 
-        const text = resp.choices[0].message.content;
+        let text = resp.choices[0].message.content;
         console.log('📝 AI Yanıtı (ilk 500 karakter):', text.substring(0, 500));
+
+        // Markdown code block temizle
+        text = text.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
 
         // JSON bulup çıkart - daha esnek regex
         let jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -88,15 +88,34 @@ KURALLAR:
                 .replace(/\s+/g, ' ')
                 .trim();
 
+            // Kesik JSON'u tamamlamaya çalış
+            let openBraces = (jsonStr.match(/\{/g) || []).length;
+            let closeBraces = (jsonStr.match(/\}/g) || []).length;
+            let openBrackets = (jsonStr.match(/\[/g) || []).length;
+            let closeBrackets = (jsonStr.match(/\]/g) || []).length;
+
+            // Eksik parantezleri ekle
+            while (closeBrackets < openBrackets) {
+                jsonStr += ']';
+                closeBrackets++;
+            }
+            while (closeBraces < openBraces) {
+                jsonStr += '}';
+                closeBraces++;
+            }
+
+            // Trailing comma düzelt
+            jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+
             parsedData = JSON.parse(jsonStr);
             console.log('✅ JSON parse başarılı');
 
-            // Validasyon: sorular array mi?
-            if (!Array.isArray(parsedData.sorular)) {
-                throw new Error("Sorular array olmalı");
+            // Validasyon: questions array mi?
+            if (!Array.isArray(parsedData.questions)) {
+                throw new Error("Questions array olmalı");
             }
 
-            if (parsedData.sorular.length === 0) {
+            if (parsedData.questions.length === 0) {
                 throw new Error("En az 1 soru olmalı");
             }
         } catch (parseError) {
@@ -106,10 +125,15 @@ KURALLAR:
         }
 
         // İstenen soru sayısına kes (AI fazla soru üretebiliyor)
-        const sorularKesik = (parsedData.sorular || []).slice(0, questionCount);
+        const questionsSliced = (parsedData.questions || []).slice(0, questionCount);
 
-        // Tip normalizasyonu - AI yanlış tip üretirse düzelt
+        // Tip normalizasyonu - AI yanlış tip üretirse düzelt (İngilizce -> Türkçe)
         const tipMapping = {
+            "single_select": "coktan-tek",
+            "multi_select": "coktan-coklu",
+            "rating": "slider",
+            "text": "acik-uclu",
+            // Eski Türkçe tipler için backward compatibility
             "acik-uclu": "acik-uclu",
             "açık-uçlu": "acik-uclu",
             "açık uçlu": "acik-uclu",
@@ -117,30 +141,27 @@ KURALLAR:
             "çoktan-tek": "coktan-tek",
             "çoktan seçmeli": "coktan-tek",
             "tek-seçmeli": "coktan-tek",
-            "tek-seçenekli": "coktan-tek",
-            "tek-seçeneksiz": "acik-uclu", // Yanlış tip, açık uçluya çevir
             "coktan-coklu": "coktan-coklu",
             "çoktan-çoklu": "coktan-coklu",
             "çok-seçmeli": "coktan-coklu",
-            "çok seçmeli": "coktan-coklu",
             "slider": "slider"
         };
 
-        const sorularWithIds = sorularKesik.map((soru, index) => {
-            const normalizedTip = tipMapping[soru.tip?.toLowerCase()] || "acik-uclu";
+        const sorularWithIds = questionsSliced.map((question, index) => {
+            const normalizedTip = tipMapping[question.type?.toLowerCase()] || "acik-uclu";
 
             return {
                 id: Date.now() + index,
-                metin: soru.metin || "",
+                metin: question.text || "",
                 tip: normalizedTip,
-                secenekler: soru.secenekler || [],
-                zorunlu: soru.zorunlu !== false,
+                secenekler: question.options || [],
+                zorunlu: question.isRequired !== false,
             };
         });
 
         console.log('🎉 Anket başarıyla oluşturuldu, istenilen soru:', questionCount, 'alınan soru:', sorularWithIds.length);
         return {
-            anketBaslik: parsedData.anketBaslik || topic,
+            anketBaslik: parsedData.surveyTitle || topic,
             sorular: sorularWithIds,
         };
 

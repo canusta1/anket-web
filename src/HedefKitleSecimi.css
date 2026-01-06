@@ -229,21 +229,38 @@
 ======================== */
 .audience-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 16px;
+}
+
+@media (max-width: 1200px) {
+    .audience-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .audience-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .audience-card {
     background: var(--w-card, #ffffff);
     border: 2px solid var(--w-border, #e2e8f0);
     border-radius: 16px;
-    padding: 20px;
+    padding: 24px; /* Padding artırıldı */
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column; /* Column yapıldı */
+    align-items: center; /* İkon ve içerik ortalandı */
+    justify-content: center;
+    text-align: center; /* Metin ortalandı */
     gap: 16px;
+    min-height: 220px;
+    height: 100%; /* Yükseklik eşitlendi */
 }
 
 .audience-card:hover {
@@ -258,6 +275,9 @@
 }
 
 .check-indicator {
+    position: absolute; /* Absolute pozisyon korundu */
+    top: 14px;
+    right: 14px;
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -278,9 +298,10 @@
 }
 
 .card-icon {
-    font-size: 1.75rem;
+    font-size: 3.5rem; /* İkon büyütüldü */
     color: var(--w-primary, #6366f1);
     flex-shrink: 0;
+    margin-bottom: 8px;
 }
 
 .card-content-wrap {

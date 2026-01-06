@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./UyeOl.css";
 import { Link, useNavigate } from "react-router-dom";
 import ParticleBackground from "./components/ParticleBackground";
+import { useAuth } from "./context/AuthContext";
+import AuthService from "./services/authService"; // Import AuthService
 
 function UyeOl() {
   // Form state
@@ -61,6 +63,9 @@ function UyeOl() {
     setPhone(formatted);
   };
 
+  // useAuth - Context üzerinden metotları al
+  const { register } = useAuth();
+  
   // Doğrulama kodu gönder
   const sendCode = async () => {
     setError("");
@@ -95,22 +100,17 @@ function UyeOl() {
 
     setLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
-      const res = await fetch(`${apiUrl}/api/auth/send-code`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, firstName }),
-      });
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error || "Kod gönderilemedi");
+      // AuthService kullanımı
+      await AuthService.sendCode(email, firstName);
       
       setSuccess("Doğrulama kodu e-posta adresinize gönderildi.");
       setStep(2);
-      setCountdown(60); // 60 saniye bekle yeniden gönder için
+      setCountdown(60); // 60 saniye bekle
       
     } catch (err) {
-      setError(err.message);
+       // Axios error handling
+       const message = err.response?.data?.error || err.message || "Kod gönderilemedi";
+       setError(message);
     } finally {
       setLoading(false);
     }
@@ -134,30 +134,24 @@ function UyeOl() {
 
     setLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
       const cleanPhone = phone.replace(/\D/g, '');
       
-      const res = await fetch(`${apiUrl}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          firstName, 
-          lastName, 
-          phone: cleanPhone, 
-          email, 
-          password,
-          verificationCode 
-        }),
+      // AuthContext register metodu kullanımı
+      await register({ 
+        firstName, 
+        lastName, 
+        phone: cleanPhone, 
+        email, 
+        password,
+        verificationCode 
       });
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error || "Kayıt başarısız");
       
       setSuccess("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...");
       setTimeout(() => navigate("/giris"), 2000);
       
     } catch (err) {
-      setError(err.message);
+      const message = err.response?.data?.error || err.message || "Kayıt başarısız";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -226,7 +220,7 @@ function UyeOl() {
         </div>
         
         <div className="branding-footer">
-          <p>© 2024 Anket Platformu · Tüm hakları saklıdır</p>
+          <p>© 2025 Anket Platformu · Tüm hakları saklıdır</p>
         </div>
       </div>
 

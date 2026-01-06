@@ -3,93 +3,72 @@ import "./Giris.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import ParticleBackground from "./components/ParticleBackground";
+import { useAuth } from "./context/AuthContext";
 
 function Giris() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+  const { login, googleLogin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    setLocalLoading(true);
 
     try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Giriş başarısız");
-      }
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/panel");
-
+      await login(email, password);
+      // Başarılı giriş sonrası AuthContext state'i güncelliyor
+      // navigate işlemi AuthContext içinde yapılabilir veya burada
+      navigate("/panel", { replace: true });
     } catch (err) {
       console.error("Giriş Hatası Detayı:", err);
-      if (err.message === "Failed to fetch") {
-        setError("Sunucuya ulaşılamadı. Backend'i başlattığınızdan emin olun.");
-      } else {
-        setError(err.message);
-      }
+      // Axios error handling
+      const message = err.response?.data?.error || err.message || "Giriş başarısız";
+      setError(message);
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
   // Google OAuth Login Handler
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      setGoogleLoading(true);
+      setLocalLoading(true);
       setError("");
       
       try {
-        // Google Access Token ile kullanıcı bilgilerini al
+        // Google Access Token ile kullanıcı bilgilerini al (Bunu backend de yapabilir ama client side flow böyle)
+        // DİKKAT: Backend google endpoint'i userinfo beklemiyor, direkt token access token bekliyorsa ona göre düzenlemeli.
+        // Mevcut backend yapısı: email, given_name, family_name, picture, sub istiyor.
+        // O yüzden önce google'dan bilgileri almalıyız.
+        
         const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
         });
         const userInfo = await userInfoRes.json();
         
-        // Backend'e gönder
-        const res = await fetch(`${apiUrl}/api/auth/google`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            credential: tokenResponse.access_token,
-            email: userInfo.email,
-            given_name: userInfo.given_name,
-            family_name: userInfo.family_name,
-            picture: userInfo.picture,
-            sub: userInfo.sub
-          }),
-        });
+        // Backend'e gönderilecek veri paketi
+        const googleData = {
+          credential: tokenResponse.access_token, // Backend bunu kullanmıyor olabilir ama gönderelim
+          email: userInfo.email,
+          given_name: userInfo.given_name,
+          family_name: userInfo.family_name,
+          picture: userInfo.picture,
+          sub: userInfo.sub
+        };
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Google giriş başarısız");
-        }
-
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/panel");
+        await googleLogin(googleData);
+        navigate("/panel", { replace: true });
 
       } catch (err) {
         console.error("Google Giriş Hatası:", err);
-        setError(err.message || "Google ile giriş yapılamadı");
+        const message = err.response?.data?.error || err.message || "Google ile giriş yapılamadı";
+        setError(message);
       } finally {
-        setGoogleLoading(false);
+        setLocalLoading(false);
       }
     },
     onError: (error) => {
@@ -154,7 +133,7 @@ function Giris() {
         </div>
         
         <div className="branding-footer">
-          <p>© 2024 Anket Platformu · Tüm hakları saklıdır</p>
+          <p>© 2025 Anket Platformu · Tüm hakları saklıdır</p>
         </div>
       </div>
 
@@ -204,8 +183,8 @@ function Giris() {
               </div>
             )}
 
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? (
+            <button type="submit" className="btn-primary" disabled={localLoading}>
+              {localLoading ? (
                 <>
                   <span className="spinner"></span>
                   Giriş Yapılıyor...
@@ -225,9 +204,9 @@ function Giris() {
               className="social-btn google" 
               type="button"
               onClick={() => handleGoogleLogin()}
-              disabled={googleLoading}
+              disabled={localLoading}
             >
-              {googleLoading ? (
+              {localLoading ? (
                 <>
                   <span className="spinner"></span>
                   Google ile Giriş Yapılıyor...

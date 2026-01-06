@@ -6,10 +6,9 @@ const ParticleBackground = () => {
     const particlesRef = useRef([]);
     const mouseRef = useRef({ x: 0, y: 0 });
     const animationRef = useRef(null);
-
     // Particle ayarları
     const PARTICLE_COUNT = 80;
-    const PARTICLE_SPEED = 0.5;
+    const PARTICLE_SPEED = 0.15; /* Slower speed */
     const CONNECTION_DISTANCE = 120;
     const MOUSE_INFLUENCE_RADIUS = 150;
 

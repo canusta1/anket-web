@@ -170,54 +170,19 @@ function Profil() {
 
       {/* Main Content */}
       <main className="profile-main">
-        {/* Header */}
-        <div className="profile-header">
-          <div className="profile-avatar">
-            <div className="avatar-circle">
-              {userData.firstName.charAt(0)}{userData.lastName.charAt(0)}
+        {/* Single Profile Card */}
+        <div className="profile-unified-card">
+          {/* Header Section */}
+          <div className="profile-card-header">
+            <div className="profile-avatar-section">
+              <div className="avatar-circle">
+                {userData.firstName.charAt(0)}{userData.lastName.charAt(0)}
+              </div>
+              <div className="profile-name">
+                <h1>{userData.firstName} {userData.lastName}</h1>
+                <p><FaEnvelope /> {userData.email}</p>
+              </div>
             </div>
-            <div className="profile-name">
-              <h1>{userData.firstName} {userData.lastName}</h1>
-              <p>{userData.email}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="profile-stats-grid">
-          <div className="profile-stat-card">
-            <div className="stat-icon green">
-              <FaPoll />
-            </div>
-            <div className="stat-info">
-              <h3>{stats.totalSurveys}</h3>
-              <p>Toplam Anket</p>
-            </div>
-          </div>
-          <div className="profile-stat-card">
-            <div className="stat-icon blue">
-              <FaUsers />
-            </div>
-            <div className="stat-info">
-              <h3>{stats.totalResponses}</h3>
-              <p>Toplam Yanıt</p>
-            </div>
-          </div>
-          <div className="profile-stat-card">
-            <div className="stat-icon orange">
-              <FaChartPie />
-            </div>
-            <div className="stat-info">
-              <h3>{stats.activeSurveys}</h3>
-              <p>Aktif Anket</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Form */}
-        <div className="profile-form-card">
-          <div className="form-card-header">
-            <h2><FaUser /> Kişisel Bilgiler</h2>
             <button
               className={`edit-btn ${editMode ? "cancel" : ""}`}
               onClick={editMode ? handleCancel : () => setEditMode(true)}
@@ -226,61 +191,103 @@ function Profil() {
             </button>
           </div>
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Ad</label>
-              <input
-                type="text"
-                name="firstName"
-                value={userData.firstName}
-                onChange={handleInputChange}
-                disabled={!editMode}
-                className={editMode ? "editable" : ""}
-                placeholder="Adınız"
-              />
-            </div>
+          {/* Divider */}
+          <div className="profile-divider"></div>
 
-            <div className="form-group">
-              <label>Soyad</label>
-              <input
-                type="text"
-                name="lastName"
-                value={userData.lastName}
-                onChange={handleInputChange}
-                disabled={!editMode}
-                className={editMode ? "editable" : ""}
-                placeholder="Soyadınız"
-              />
+          {/* Stats Section */}
+          <div className="profile-stats-inline">
+            <div className="stat-item">
+              <div className="stat-icon green">
+                <FaPoll />
+              </div>
+              <div className="stat-info">
+                <h3>{stats.totalSurveys}</h3>
+                <p>Toplam Anket</p>
+              </div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-icon blue">
+                <FaUsers />
+              </div>
+              <div className="stat-info">
+                <h3>{stats.totalResponses}</h3>
+                <p>Toplam Yanıt</p>
+              </div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-icon orange">
+                <FaChartPie />
+              </div>
+              <div className="stat-info">
+                <h3>{stats.activeSurveys}</h3>
+                <p>Aktif Anket</p>
+              </div>
             </div>
           </div>
 
-          <div className="form-group full-width">
-            <label><FaEnvelope /> E-posta Adresi</label>
-            <div className="readonly-field">
-              <input
-                type="email"
-                value={userData.email}
-                disabled={true}
-                className="readonly"
-              />
-              <span className="readonly-badge">
-                <FaCheckCircle /> Doğrulanmış
-              </span>
-            </div>
-            <small className="helper-text">E-posta adresi değiştirilemez</small>
-          </div>
+          {/* Divider */}
+          <div className="profile-divider"></div>
 
-          {editMode && (
-            <div className="form-actions">
-              <button className="save-btn" onClick={handleSave} disabled={saving}>
-                {saving ? (
-                  <>Kaydediliyor...</>
-                ) : (
-                  <><FaSave /> Değişiklikleri Kaydet</>
-                )}
-              </button>
+          {/* Personal Info Section */}
+          <div className="profile-info-section">
+            <h2><FaUser /> Kişisel Bilgiler</h2>
+            
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Ad</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={userData.firstName}
+                  onChange={handleInputChange}
+                  disabled={!editMode}
+                  className={editMode ? "editable" : ""}
+                  placeholder="Adınız"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Soyad</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={userData.lastName}
+                  onChange={handleInputChange}
+                  disabled={!editMode}
+                  className={editMode ? "editable" : ""}
+                  placeholder="Soyadınız"
+                />
+              </div>
             </div>
-          )}
+
+            <div className="form-group full-width">
+              <label><FaEnvelope /> E-posta Adresi</label>
+              <div className="readonly-field">
+                <input
+                  type="email"
+                  value={userData.email}
+                  disabled={true}
+                  className="readonly"
+                />
+                <span className="readonly-badge">
+                  <FaCheckCircle /> Doğrulanmış
+                </span>
+              </div>
+              <small className="helper-text">E-posta adresi değiştirilemez</small>
+            </div>
+
+            {editMode && (
+              <div className="form-actions">
+                <button className="save-btn" onClick={handleSave} disabled={saving}>
+                  {saving ? (
+                    <>Kaydediliyor...</>
+                  ) : (
+                    <><FaSave /> Değişiklikleri Kaydet</>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>

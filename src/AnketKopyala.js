@@ -13,8 +13,8 @@ import {
     FaChevronRight,
     FaSlidersH
 } from "react-icons/fa";
-import "./SifirdanAnket.css";
 import "./AnketKopyala.css";
+import "./Wizard.css";
 import Navbar from "./components/Navbar";
 import HedefKitleSecimi from "./HedefKitleSecimi";
 import "./AnketSonuclari.css";
@@ -253,35 +253,33 @@ function AnketKopyala() {
             <Navbar activePage="olustur" showCreateButton={false} />
 
             <main className="wizard-main">
-                {/* Stepper */}
-                {currentStep < 5 && (
-                    <div className="wizard-stepper">
-                        <div className={`step-item ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-                            <div className="step-number">{currentStep > 1 ? <FaCheckCircle /> : <FaCopy />}</div>
-                            <div className="step-label">Anket Seç</div>
-                        </div>
-                        <div className="step-connector"></div>
-                        <div className={`step-item ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-                            <div className="step-number">{currentStep > 2 ? <FaCheckCircle /> : "2"}</div>
-                            <div className="step-label">Yeni Bilgiler</div>
-                        </div>
-                        <div className="step-connector"></div>
-                        <div className={`step-item ${currentStep >= 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}>
-                            <div className="step-number">{currentStep > 3 ? <FaCheckCircle /> : "3"}</div>
-                            <div className="step-label">Sorular</div>
-                        </div>
-                        <div className="step-connector"></div>
-                        <div className={`step-item ${currentStep >= 4 ? 'active' : ''}`}>
-                            <div className="step-number">4</div>
-                            <div className="step-label">Hedef Kitle</div>
-                        </div>
-                    </div>
-                )}
-
                 <div className="wizard-content-area">
                     {/* STEP 1: SURVEY SELECTION */}
                     {currentStep === 1 && (
                         <div className="wizard-step step-info animate-in">
+                            {/* Mini Stepper */}
+                            <div className="mini-stepper">
+                                <div className="mini-step active">
+                                    <span className="mini-step-num">1</span>
+                                    <span className="mini-step-text">Anket Seç</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step">
+                                    <span className="mini-step-num">2</span>
+                                    <span className="mini-step-text">Yeni Bilgiler</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step">
+                                    <span className="mini-step-num">3</span>
+                                    <span className="mini-step-text">Sorular</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step">
+                                    <span className="mini-step-num">4</span>
+                                    <span className="mini-step-text">Hedef Kitle</span>
+                                </div>
+                            </div>
+
                             <div className="step-header-text">
                                 <h2><FaCopy style={{ marginRight: '10px', color: 'var(--w-primary)' }} /> Kopyalanacak Anketi Seçin</h2>
                                 <p>Daha önce oluşturduğunuz anketlerden birini seçerek yeni bir kopya oluşturun.</p>
@@ -360,6 +358,29 @@ function AnketKopyala() {
                     {/* STEP 2: NEW NAME & DESCRIPTION */}
                     {currentStep === 2 && (
                         <div className="wizard-step step-info animate-in">
+                            {/* Mini Stepper */}
+                            <div className="mini-stepper">
+                                <div className="mini-step completed" onClick={() => { setSelectedTemplate(null); setSorular([]); setAnketBaslik(''); setAnketAciklama(''); setCurrentStep(1); }}>
+                                    <span className="mini-step-num">1</span>
+                                    <span className="mini-step-text">Anket Seç</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step active">
+                                    <span className="mini-step-num">2</span>
+                                    <span className="mini-step-text">Yeni Bilgiler</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step">
+                                    <span className="mini-step-num">3</span>
+                                    <span className="mini-step-text">Sorular</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step">
+                                    <span className="mini-step-num">4</span>
+                                    <span className="mini-step-text">Hedef Kitle</span>
+                                </div>
+                            </div>
+
                             <div className="step-header-text">
                                 <h2>Yeni Anket Bilgilerini Girin</h2>
                                 <p>Kopyalanan anketinize yeni bir başlık ve açıklama verin.</p>
@@ -369,7 +390,7 @@ function AnketKopyala() {
                                     <label>Anket Başlığı</label>
                                     <input
                                         type="text"
-                                        placeholder="Örn: 2024 Müşteri Deneyimi Araştırması"
+                                        placeholder="Örn: 2025 Müşteri Deneyimi Araştırması"
                                         value={anketBaslik}
                                         onChange={(e) => setAnketBaslik(e.target.value)}
                                         className="fancy-text-input"
@@ -387,13 +408,45 @@ function AnketKopyala() {
                                     />
                                 </div>
                             </div>
+                            {/* Navigation */}
+                            <div className="q-nav-buttons">
+                                <button className="q-nav-btn" onClick={prevStep}>
+                                    <FaChevronLeft /> Geri
+                                </button>
+                                <button className="q-nav-btn primary" onClick={nextStep}>
+                                    Devam Et <FaChevronRight />
+                                </button>
+                            </div>
                         </div>
                     )}
 
-                    {/* STEP 3: QUESTIONS (Same as SifirdanAnket) */}
+                    {/* STEP 3: QUESTIONS */}
                     {currentStep === 3 && (
-                        <div className="wizard-step step-questions animate-in">
-                            <div className="questions-layout">
+                        <div className="wizard-step step-questions step-questions-compact animate-in">
+                            {/* Mini Stepper */}
+                            <div className="mini-stepper">
+                                <div className="mini-step completed" onClick={() => { setSelectedTemplate(null); setSorular([]); setAnketBaslik(''); setAnketAciklama(''); setCurrentStep(1); }}>
+                                    <span className="mini-step-num">1</span>
+                                    <span className="mini-step-text">Anket Seç</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step completed" onClick={() => setCurrentStep(2)}>
+                                    <span className="mini-step-num">2</span>
+                                    <span className="mini-step-text">Yeni Bilgiler</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step active">
+                                    <span className="mini-step-num">3</span>
+                                    <span className="mini-step-text">Sorular</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step">
+                                    <span className="mini-step-num">4</span>
+                                    <span className="mini-step-text">Hedef Kitle</span>
+                                </div>
+                            </div>
+
+                            <div className="questions-layout-compact">
                                 {/* Left Sidebar: Question List */}
                                 <div className="questions-sidebar">
                                     <div className="sidebar-card">
@@ -444,131 +497,113 @@ function AnketKopyala() {
                                                 const activeQ = sorular.find(s => s.id === activeQuestionId) || sorular[0];
                                                 if (activeQ && activeQuestionId !== activeQ.id) setActiveQuestionId(activeQ.id);
                                                 if (!activeQ) return null;
-                                                const index = sorular.findIndex(s => s.id === activeQ.id);
 
                                                 return (
-                                                    <div className="q-workspace">
-                                                        <div className="q-workspace-header">
-                                                            <div className="q-info">
-                                                                <span className="q-index">Soru {index + 1}</span>
-                                                                <span className="q-type-label">{activeQ.tip.replace('-', ' ').toUpperCase()}</span>
-                                                            </div>
+                                                    <div className="q-workspace q-workspace-minimal">
+                                                        {/* Question Text - Auto-resize textarea */}
+                                                        <div className="q-input-row">
+                                                            <textarea
+                                                                placeholder="Soru metnini buraya yazın..."
+                                                                value={activeQ.metin}
+                                                                onChange={(e) => handleSoruDegis(activeQ.id, e.target.value)}
+                                                                className="q-main-input"
+                                                                autoFocus
+                                                                rows={1}
+                                                                onInput={(e) => {
+                                                                    e.target.style.height = 'auto';
+                                                                    e.target.style.height = Math.max(50, e.target.scrollHeight) + 'px';
+                                                                }}
+                                                            />
                                                         </div>
 
-                                                        <div className="q-workspace-panel animate-in">
-                                                            <div className="q-panel-section main-input-section">
-                                                                <label className="section-mini-label">Soru Metni</label>
-                                                                <textarea
-                                                                    placeholder="Katılımcıya ne sormak istersiniz?"
-                                                                    value={activeQ.metin}
-                                                                    onChange={(e) => handleSoruDegis(activeQ.id, e.target.value)}
-                                                                    className="q-panel-input"
-                                                                    autoFocus
-                                                                    rows={1}
-                                                                    onInput={(e) => {
-                                                                        e.target.style.height = 'auto';
-                                                                        e.target.style.height = e.target.scrollHeight + 'px';
-                                                                    }}
-                                                                />
+                                                        {/* Settings Row */}
+                                                        <div className="q-settings-row">
+                                                            <div className="q-type-select">
+                                                                <span className="q-type-label">Tip:</span>
+                                                                <select value={activeQ.tip} onChange={(e) => handleTipDegis(activeQ.id, e.target.value)}>
+                                                                    <option value="acik-uclu">📝 Açık Uçlu</option>
+                                                                    <option value="coktan-tek">◉ Tek Seçim</option>
+                                                                    <option value="coktan-coklu">☑ Çoklu Seçim</option>
+                                                                    <option value="slider">📊 Slider</option>
+                                                                </select>
                                                             </div>
+                                                            <button 
+                                                                className={`q-toggle-btn ${activeQ.zorunlu ? 'active' : ''}`}
+                                                                onClick={() => handleZorunluToggle(activeQ.id)}
+                                                            >
+                                                                {activeQ.zorunlu ? '✓ Zorunlu' : 'İsteğe Bağlı'}
+                                                            </button>
+                                                        </div>
 
-                                                            <div className="q-panel-section settings-section">
-                                                                <div className="section-header">
-                                                                    <FaLayerGroup /> <span>Soru Ayarları</span>
-                                                                </div>
-                                                                <div className="q-config-grid">
-                                                                    <div className="q-config-field">
-                                                                        <label>Soru Tipi</label>
-                                                                        <select value={activeQ.tip} onChange={(e) => handleTipDegis(activeQ.id, e.target.value)}>
-                                                                            <option value="acik-uclu">✍️ Açık Uçlu (Metin)</option>
-                                                                            <option value="coktan-tek">◉ Çoktan Seçmeli (Tek)</option>
-                                                                            <option value="coktan-coklu">☑️ Çoktan Seçmeli (Çoklu)</option>
-                                                                            <option value="slider">🎚️ Slider (Puanlama)</option>
-                                                                        </select>
-                                                                    </div>
-
-                                                                    <div className="q-config-field clickable" onClick={() => handleZorunluToggle(activeQ.id)}>
-                                                                        <label>Zorunluluk</label>
-                                                                        <div className="compact-toggle-wrap">
-                                                                            <div className={`custom-toggle mini ${activeQ.zorunlu ? 'on' : 'off'}`}>
-                                                                                <div className="toggle-circle"></div>
-                                                                            </div>
-                                                                            <span className="toggle-label">{activeQ.zorunlu ? 'Zorunlu' : 'İsteğe Bağlı'}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {activeQ.tip === 'slider' && (
-                                                                <div className="q-panel-section slider-config-section animate-in">
-                                                                    <div className="section-header">
-                                                                        <FaSlidersH /> <span>Slider Yapılandırması</span>
-                                                                    </div>
-                                                                    <div className="slider-config-grid">
-                                                                        <div className="config-group">
-                                                                            <label>Değer Aralığı</label>
-                                                                            <div className="range-inputs">
-                                                                                <input
-                                                                                    type="number"
-                                                                                    value={activeQ.sliderMin || 1}
-                                                                                    onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMin', parseInt(e.target.value))}
-                                                                                    placeholder="Min"
-                                                                                />
-                                                                                <span>-</span>
-                                                                                <input
-                                                                                    type="number"
-                                                                                    value={activeQ.sliderMax || 10}
-                                                                                    onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMax', parseInt(e.target.value))}
-                                                                                    placeholder="Max"
-                                                                                />
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
+                                                        {/* Preview Section */}
+                                                        <div className="q-preview-section">
+                                                            <div className="q-preview-label">Önizleme</div>
+                                                            
+                                                            {/* Open-ended Preview */}
+                                                            {activeQ.tip === 'acik-uclu' && (
+                                                                <div className="q-preview-text">
+                                                                    <textarea 
+                                                                        placeholder="Kullanıcı cevabını buraya yazacak..." 
+                                                                        disabled 
+                                                                        rows={3}
+                                                                    />
                                                                 </div>
                                                             )}
 
-                                                            {activeQ.tip.includes("coktan") && (
-                                                                <div className="q-panel-section choices-section">
-                                                                    <div className="section-header">
-                                                                        <FaClipboardList /> <span>Seçenekler</span>
-                                                                    </div>
-                                                                    <div className="choices-compact-list">
-                                                                        {activeQ.secenekler.map((sec, i) => (
-                                                                            <div key={i} className="choice-compact-row">
-                                                                                <div className="choice-indicator">
-                                                                                    {activeQ.tip === 'coktan-tek' ? <div className="dot-icon" /> : <div className="check-icon" />}
-                                                                                </div>
-                                                                                <input
-                                                                                    type="text"
-                                                                                    value={sec}
-                                                                                    onChange={(e) => handleSecenekDegis(activeQ.id, i, e.target.value)}
-                                                                                    placeholder={`Seçenek ${i + 1}`}
-                                                                                    className="choice-minimal-input"
-                                                                                />
-                                                                                <button className="minimal-del-btn" onClick={() => handleSecenekSil(activeQ.id, i)}>
-                                                                                    <FaTrash />
-                                                                                </button>
-                                                                            </div>
-                                                                        ))}
-                                                                        <button className="add-choice-minimal" onClick={() => handleSecenekEkle(activeQ.id)}>
-                                                                            <FaPlus /> Yeni Seçenek Ekle
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
+                                                            {/* Slider Preview with Config */}
                                                             {activeQ.tip === 'slider' && (
-                                                                <div className="q-panel-section preview-section">
-                                                                    <div className="section-header">
-                                                                        <FaSlidersH /> <span>Slider Önizleme</span>
+                                                                <div className="q-preview-slider">
+                                                                    <div className="q-slider-config">
+                                                                        <span>Aralık:</span>
+                                                                        <input
+                                                                            type="number"
+                                                                            value={activeQ.sliderMin || 1}
+                                                                            onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMin', parseInt(e.target.value))}
+                                                                        />
+                                                                        <span>-</span>
+                                                                        <input
+                                                                            type="number"
+                                                                            value={activeQ.sliderMax || 10}
+                                                                            onChange={(e) => handleSliderAyarlarDegis(activeQ.id, 'sliderMax', parseInt(e.target.value))}
+                                                                        />
                                                                     </div>
-                                                                    <div className="slider-preview-box">
-                                                                        <input type="range" min={activeQ.sliderMin || 1} max={activeQ.sliderMax || 10} disabled />
-                                                                        <div className="slider-labels">
+                                                                    <div className="q-slider-preview">
+                                                                        <input 
+                                                                            type="range" 
+                                                                            min={activeQ.sliderMin || 1} 
+                                                                            max={activeQ.sliderMax || 10} 
+                                                                            defaultValue={Math.floor(((activeQ.sliderMin || 1) + (activeQ.sliderMax || 10)) / 2)}
+                                                                        />
+                                                                        <div className="q-slider-labels">
                                                                             <span>{activeQ.sliderMin || 1}</span>
                                                                             <span>{activeQ.sliderMax || 10}</span>
                                                                         </div>
                                                                     </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Choice Options */}
+                                                            {activeQ.tip.includes("coktan") && (
+                                                                <div className="q-options-list">
+                                                                    {activeQ.secenekler.map((sec, i) => (
+                                                                        <div key={i} className="q-option-row">
+                                                                            <div className="q-option-indicator">
+                                                                                {activeQ.tip === 'coktan-tek' ? '○' : '☐'}
+                                                                            </div>
+                                                                            <input
+                                                                                type="text"
+                                                                                value={sec}
+                                                                                onChange={(e) => handleSecenekDegis(activeQ.id, i, e.target.value)}
+                                                                                placeholder={`Seçenek ${i + 1}`}
+                                                                            />
+                                                                            <button onClick={() => handleSecenekSil(activeQ.id, i)}>
+                                                                                <FaTrash />
+                                                                            </button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <button className="q-add-option" onClick={() => handleSecenekEkle(activeQ.id)}>
+                                                                        <FaPlus /> Seçenek Ekle
+                                                                    </button>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -577,6 +612,16 @@ function AnketKopyala() {
                                             })()}
                                         </>
                                     )}
+
+                                    {/* Navigation inside editor */}
+                                    <div className="q-nav-buttons">
+                                        <button className="q-nav-btn" onClick={prevStep}>
+                                            <FaChevronLeft /> Geri
+                                        </button>
+                                        <button className="q-nav-btn primary" onClick={nextStep}>
+                                            Devam Et <FaChevronRight />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -585,6 +630,29 @@ function AnketKopyala() {
                     {/* STEP 4: AUDIENCE */}
                     {currentStep === 4 && (
                         <div className="wizard-step step-audience animate-in">
+                            {/* Mini Stepper */}
+                            <div className="mini-stepper">
+                                <div className="mini-step completed" onClick={() => { setSelectedTemplate(null); setSorular([]); setAnketBaslik(''); setAnketAciklama(''); setCurrentStep(1); }}>
+                                    <span className="mini-step-num">1</span>
+                                    <span className="mini-step-text">Anket Seç</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step completed" onClick={() => setCurrentStep(2)}>
+                                    <span className="mini-step-num">2</span>
+                                    <span className="mini-step-text">Yeni Bilgiler</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step completed" onClick={() => setCurrentStep(3)}>
+                                    <span className="mini-step-num">3</span>
+                                    <span className="mini-step-text">Sorular</span>
+                                </div>
+                                <div className="mini-step-line"></div>
+                                <div className="mini-step active">
+                                    <span className="mini-step-num">4</span>
+                                    <span className="mini-step-text">Hedef Kitle</span>
+                                </div>
+                            </div>
+
                             <div className="step-header-text">
                                 <h2>Hedef Kitle ve Kurallar</h2>
                                 <p>Anketinizin kimler tarafından ve hangi kurallarla doldurulacağını belirleyin.</p>
@@ -598,6 +666,16 @@ function AnketKopyala() {
                                 kayitliKonumKriteri={kayitliKonumKriteri}
                                 setKayitliKonumKriteri={setKayitliKonumKriteri}
                             />
+
+                            {/* Navigation */}
+                            <div className="q-nav-buttons">
+                                <button className="q-nav-btn" onClick={prevStep}>
+                                    <FaChevronLeft /> Geri
+                                </button>
+                                <button className="q-nav-btn primary" onClick={handleFinalYayinla} disabled={loading}>
+                                    {loading ? "Yayınlanıyor..." : "Anketi Yayınla"} <FaCheckCircle />
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -744,28 +822,6 @@ function AnketKopyala() {
                         </div>
                     )}
                 </div>
-
-                {/* Footer Controls */}
-                {currentStep > 1 && currentStep < 5 && (
-                    <div className="wizard-footer">
-                        <div className="footer-left">
-                            <button className="btn-wizard prev" onClick={prevStep}>
-                                <FaChevronLeft /> Geri
-                            </button>
-                        </div>
-                        <div className="footer-right">
-                            {currentStep < 4 ? (
-                                <button className="btn-wizard next" onClick={nextStep}>
-                                    Devam Et <FaChevronRight />
-                                </button>
-                            ) : (
-                                <button className="btn-wizard launch" onClick={handleFinalYayinla} disabled={loading}>
-                                    {loading ? "Yayınlanıyor..." : "Anketi Yayınla"} <FaCheckCircle />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                )}
             </main>
         </div>
     );

@@ -281,72 +281,8 @@ body.dark-mode .nav-link:hover {
   }
 }
 
-.step-header-text {
-  margin-bottom: 32px;
-  text-align: center;
-}
 
-.step-header-text h2 {
-  font-size: 2rem;
-  font-weight: 900;
-  letter-spacing: -1px;
-  margin-bottom: 8px;
-}
-
-.step-header-text p {
-  color: var(--w-text-muted);
-  font-size: 1rem;
-}
-
-/* Step 1: Info Form */
-.info-form-fancy {
-  max-width: 800px;
-  margin: 0 auto;
-  background: var(--w-card);
-  padding: 48px;
-  border-radius: 24px;
-  border: 1px solid var(--w-border);
-  box-shadow: var(--w-shadow-lg);
-}
-
-.fancy-input-group {
-  margin-bottom: 24px;
-}
-
-.fancy-input-group label {
-  display: block;
-  font-weight: 800;
-  font-size: 0.95rem;
-  margin-bottom: 8px;
-}
-
-.fancy-text-input,
-.fancy-textarea {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--w-bg);
-  border: 2px solid var(--w-border);
-  border-radius: 12px;
-  color: var(--w-text);
-  font-size: 1.1rem;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-
-.fancy-text-input:focus,
-.fancy-textarea:focus {
-  outline: none;
-  border-color: var(--w-primary);
-  background: var(--w-card);
-  box-shadow: 0 0 0 4px var(--w-accent-light);
-}
-
-.input-hint {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--w-text-muted);
-  margin-top: 6px;
-}
+/* Info Form Styles Removed - Uses Wizard.css */
 
 /* =========================================
    STEP 2: NEW MASTER-DETAIL LAYOUT
@@ -894,154 +830,8 @@ body.dark-mode .nav-link:hover {
   box-shadow: 0 6px 16px rgba(0, 212, 170, 0.4);
 }
 
-/* Step 3: Audience Grid - Horizontal 5 Columns */
-.audience-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-.audience-card {
-  background: var(--w-card);
-  border: 1px solid var(--w-border);
-  border-radius: 12px;
-  padding: 24px 20px;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.3s;
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.audience-card:hover {
-  border-color: var(--w-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--w-shadow-sm);
-}
-
-.audience-card.wide {
-  grid-column: auto;
-}
-
-/* Disable wide span in 4-col mode */
-
-.check-indicator {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  color: var(--w-border);
-  font-size: 1.2rem;
-}
-
-.check-indicator.active {
-  color: var(--w-primary);
-}
-
-.card-icon {
-  font-size: 2rem;
-  color: var(--w-primary);
-  margin-bottom: 12px;
-}
-
-.audience-card h3 {
-  font-size: 1.15rem;
-  font-weight: 800;
-  margin-bottom: 6px;
-  color: var(--w-text);
-}
-
-.audience-card p {
-  color: var(--w-text-muted);
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-.audience-card.expanded {
-  border-color: var(--w-primary);
-  background: var(--w-accent-light);
-  justify-content: flex-start;
-}
-
-.nested-input,
-.nested-actions {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid var(--w-border);
-}
-
-.nested-input input {
-  width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid var(--w-primary);
-  background: var(--w-card);
-  color: var(--w-text);
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.location-badge {
-  background: var(--w-primary);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 0.75rem;
-}
-
-.no-location {
-  color: #ef4444;
-  font-weight: 600;
-  font-size: 0.75rem;
-}
-
-.select-map-btn {
-  padding: 4px 8px;
-  background: var(--w-primary);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 0.75rem;
-  margin-top: 8px;
-}
-
-@media (max-width: 1200px) {
-  .audience-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Wizard Footer */
-.wizard-footer {
-  background: var(--w-card);
-  border-top: 1px solid var(--w-border);
-  padding: 24px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  bottom: 0;
-  z-index: 900;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
-}
-
-.btn-wizard {
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.2s;
-}
+/* Step 3: Audience Grid Styles MOVED TO HedefKitleSecimi.css */
+/* SifirdanAnket.css artık temiz */
 
 .btn-wizard.next,
 .btn-wizard.launch {
@@ -1363,4 +1153,17 @@ body.dark-mode .nav-link:hover {
   font-size: 0.95rem;
   color: var(--w-text);
   font-weight: 600;
+}
+
+/*
+   MOVED TO Wizard.css:
+   - Mini Stepper
+   - Q-Nav Buttons (Inline Navigation)
+   - Questions Layout Compact
+   - Minimal Question Editor
+*/
+@media (max-width: 900px) {
+  .mini-step-text {
+    display: none;
+  }
 }

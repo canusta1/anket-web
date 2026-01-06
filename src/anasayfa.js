@@ -7,6 +7,9 @@ import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 function Anasayfa() {
   useEffect(() => {
+    // Anasayfaya her gelişte oturumu sonlandır (geri tuşu koruması)
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.scrollTo(0, 0);
   }, []);
 
@@ -105,7 +108,7 @@ function Anasayfa() {
             </ul>
           </div>
           <div className="feature-card featured">
-            <div className="featured-badge">Popüler</div>
+            <div className="featured-badge">Hemen</div>
             <div className="feature-icon">🤖</div>
             <h3>AI ile Oluştur</h3>
             <p>Sadece konuyu yazın, yapay zeka sizin için profesyonel sorular oluştursun.</p>

@@ -8,6 +8,21 @@ const aiRoutes = require('./aiRoutes');
 
 const app = express();
 
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+
+// --- 0. Güvenlik Middleware'leri ---
+app.use(helmet()); // HTTP başlıklarını güvenli hale getir
+
+// Rate Limiting (DoS koruması)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 dakika
+  max: 100, // IP başına limit
+  message: { error: "Çok fazla istek gönderildi, lütfen sonra tekrar deneyin." }
+});
+// Tüm API'lere uygula
+app.use("/api", limiter);
+
 // --- 1. CORS Ayarları (Mobil + Localhost için) ---
 const corsOptions = {
   origin: function (origin, callback) {
@@ -21,11 +36,11 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://192.168.')) {
       callback(null, true);
     } else {
-      callback(null, true); // Her origin'e izin ver (development için)
+      callback(null, true);
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 

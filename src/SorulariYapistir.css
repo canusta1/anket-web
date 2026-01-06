@@ -8,39 +8,8 @@
 }
 
 /* Paste Form */
-.paste-form {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px 0;
-}
-
-.paste-form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: 32px;
-}
-
-.paste-form-col {
-    background: var(--w-card);
-    border: 1px solid var(--w-border);
-    border-radius: 16px;
-    padding: 28px;
-}
-
-.paste-form-col h3 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1rem;
-    color: var(--w-text);
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--w-border);
-}
-
-.paste-form-col h3 svg {
-    color: var(--w-primary);
-}
+/* Paste Form Styles Removed - Uses Wizard.css Unified Card */
+/* Kept local overrides if needed */
 
 /* JSON Upload Section */
 .json-upload-section {
