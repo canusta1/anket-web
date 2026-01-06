@@ -14,6 +14,7 @@ function Anasayfa() {
     setIsScrolled(window.scrollY > 50);
   }, []);
 
+
   useEffect(() => {
     // Anasayfaya her gelişte oturumu sonlandır (geri tuşu koruması)
     localStorage.removeItem('token');
