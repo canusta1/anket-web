@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import "./Panel.css";
 import { FaSpinner, FaCalendarAlt, FaPoll, FaRobot, FaPencilAlt, FaLink, FaUserEdit, FaTrashAlt, FaChartBar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -20,8 +20,14 @@ function Panel() {
   const navigate = useNavigate();
   const [filterType, setFilterType] = useState('hepsi'); // hepsi, aktif, pasif, ai, manuel
   
-  // Anket oluşturma sayfasına yönlendir
-  const handleAnketOlustur = () => navigate("/anket-olustur");
+  // 🔧 Performance: Toast mesajını useCallback ile optimize et
+  const showToast = useCallback((type, text) => {
+    setToastMessage({ type, text });
+    setTimeout(() => setToastMessage(null), 3000);
+  }, []);
+
+  // 🔧 Performance: Anket oluşturma sayfasına yönlendir
+  const handleAnketOlustur = useCallback(() => navigate("/anket-olustur"), [navigate]);
   
   // Dinamik istatistikler hesaplama
   const stats = useMemo(() => {
@@ -425,7 +431,65 @@ function Panel() {
                           </div>
                         </div>
 
-                        <div className="col col-type">
+                        {/* 📱 Mobil için bilgi satırı */}
+                        <div className="mobile-info-row">
+                          <div className="mobile-type">
+                            {anket.aiIleOlusturuldu ? (
+                              <span className="type-badge ai">
+                                <FaRobot /> AI
+                              </span>
+                            ) : (
+                              <span className="type-badge human">
+                                <FaUserEdit /> Manuel
+                              </span>
+                            )}
+                          </div>
+                          <div className="mobile-stats">
+                            <span className="mobile-stat">
+                              <FaPoll /> {getSoruSayisi(anket)} soru
+                            </span>
+                            <span className="mobile-stat">
+                              <FaChartBar /> {anket.toplamCevapSayisi || 0} cevap
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 📱 Mobil için durum ve tarih satırı */}
+                        <div className="mobile-status-row">
+                          <div
+                            className="status-toggle mobile-toggle"
+                            onClick={() => handleStatusChange(anket._id, anket.durum)}
+                            style={{
+                              cursor: updatingStatus === anket._id ? 'wait' : 'pointer',
+                              opacity: updatingStatus === anket._id ? 0.7 : 1
+                            }}
+                          >
+                            <div
+                              className="toggle-track"
+                              style={{
+                                background: anket.durum === 'aktif'
+                                  ? 'linear-gradient(135deg, #00dc82 0%, #00b86c 100%)'
+                                  : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)'
+                              }}
+                            >
+                              <div
+                                className="toggle-thumb"
+                                style={{
+                                  left: anket.durum === 'aktif' ? '24px' : '2px'
+                                }}
+                              />
+                            </div>
+                            <span className={`toggle-label ${anket.durum}`}>
+                              {anket.durum === 'aktif' ? 'Aktif' : 'Pasif'}
+                            </span>
+                          </div>
+                          <div className="mobile-date">
+                            <FaCalendarAlt /> {formatTarih(anket.createdAt)}
+                          </div>
+                        </div>
+
+                        {/* Desktop: Tür */}
+                        <div className="col col-type desktop-only">
                           {anket.aiIleOlusturuldu ? (
                             <span className="type-badge ai">
                               <FaRobot /> AI
@@ -437,21 +501,24 @@ function Panel() {
                           )}
                         </div>
 
-                        <div className="col col-questions">
+                        {/* Desktop: Soru sayısı */}
+                        <div className="col col-questions desktop-only">
                           <div className="stat-badge">
                             <FaPoll className="badge-icon" />
                             <span>{getSoruSayisi(anket)}</span>
                           </div>
                         </div>
 
-                        <div className="col col-responses">
+                        {/* Desktop: Cevap sayısı */}
+                        <div className="col col-responses desktop-only">
                           <div className="stat-badge">
                             <FaChartBar className="badge-icon" />
                             <span>{anket.toplamCevapSayisi || 0}</span>
                           </div>
                         </div>
 
-                        <div className="col col-status">
+                        {/* Desktop: Durum */}
+                        <div className="col col-status desktop-only">
                           <div
                             className="status-toggle"
                             onClick={() => handleStatusChange(anket._id, anket.durum)}
@@ -508,7 +575,8 @@ function Panel() {
                           </div>
                         </div>
 
-                        <div className="col col-date">
+                        {/* Desktop: Tarih */}
+                        <div className="col col-date desktop-only">
                           <div className="date-content">
                             <FaCalendarAlt className="date-icon-small" />
                             {formatTarih(anket.createdAt)}

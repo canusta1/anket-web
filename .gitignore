@@ -25,3 +25,14 @@ yarn-error.log*
 /anket-backend/node_modules
 /anket-backend/.env
 
+# Python virtual environment
+.venv/
+venv/
+env/
+*.pyc
+__pycache__/
+*.pyd
+*.pyo
+*.so
+*.dll
+

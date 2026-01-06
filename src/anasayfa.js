@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "./Anasayfa.css";
 import { Link } from "react-router-dom";
 import ParticleBackground from "./components/ParticleBackground";
@@ -6,14 +6,29 @@ import aiLogo from "./res/drawable/unnamed.png";
 import SurvAILogo from "./assets/SurvAI_Logo.png";
 
 function Anasayfa() {
+  // 🎯 Navbar scroll efekti için state
+  const [isScrolled, setIsScrolled] = useState(false);
+  
+  // 🔧 Performance: Scroll handler'ı useCallback ile optimize et
+  const handleScroll = useCallback(() => {
+    setIsScrolled(window.scrollY > 50);
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    
+    // 📱 Scroll event listener ekle
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   return (
     <div className="landing-page">
-      {/* Navbar */}
-      <nav className="landing-navbar">
+      {/* Navbar - Scroll'da gölge efekti */}
+      <nav className={`landing-navbar ${isScrolled ? 'navbar-scrolled' : ''}`}>
         <Link to="/" className="landing-logo">
           <img src={SurvAILogo} alt="SurvAI" className="landing-logo-img" />
         </Link>
