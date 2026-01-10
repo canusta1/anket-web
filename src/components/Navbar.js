@@ -53,7 +53,13 @@ function Navbar({ activePage = '', showCreateButton = true }) {
       <nav className="global-navbar">
         <div className="nav-left">
           <FaBars className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
-          <img src={SurvAILogo} alt="SurvAI" className="navbar-logo-img" />
+          <img 
+            src={SurvAILogo} 
+            alt="SurvAI" 
+            className="navbar-logo-img" 
+            onClick={() => navigate('/panel')} 
+            style={{ cursor: 'pointer' }}
+          />
         </div>
 
         <div className="nav-right">
@@ -81,7 +87,7 @@ function Navbar({ activePage = '', showCreateButton = true }) {
       {/* Sol Menü (Sidebar) */}
       <div className={`global-sidebar ${menuOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">
+          <div className="sidebar-logo" onClick={() => { navigate('/panel'); closeMenu(); }} style={{ cursor: 'pointer' }}>
             <img src={SurvAILogo} alt="SurvAI" className="sidebar-logo-img" />
           </div>
           <div className="sidebar-subtitle">Anket Yönetim Sistemi</div>

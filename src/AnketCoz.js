@@ -250,7 +250,7 @@ const AnketCoz = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ surveyId: anket._id, contactInfo: phoneNumber, type: 'sms' })
       });
-      if (!response.ok) throw new Error('SMS gönderilemedi');
+      if (!response.ok) throw new Error(' Bu telefon no ile daha önce bu ankete katılım sağlanmış. Aynı telefon no ile birden fazla kez katılamazsınız.');
 
       setVerifiedPhoneNumber(phoneNumber);
       setPhoneVerificationStep('code');
@@ -401,9 +401,11 @@ const AnketCoz = () => {
     if (!katilimciBilgileri.ad.trim()) errors.ad = 'Gerekli';
     if (!katilimciBilgileri.soyad.trim()) errors.soyad = 'Gerekli';
 
-    // Doğrulama kontrolü
-    if (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified') errors.mail = 'Doğrulama gerekli';
-    if (anket.hedefKitleKriterleri?.telefonNumarasi === true && phoneVerificationStep !== 'verified') errors.telefon = 'Doğrulama gerekli';
+    // Doğrulama kontrolü - TÜM kriterler kontrol edilmeli
+    if (anket.hedefKitleKriterleri?.mail === true && emailVerificationStep !== 'verified') errors.mail = 'E-posta doğrulaması gerekli';
+    if (anket.hedefKitleKriterleri?.telefonNumarasi === true && phoneVerificationStep !== 'verified') errors.telefon = 'Telefon doğrulaması gerekli';
+    if (anket.hedefKitleKriterleri?.kimlikDogrulama === true && identityVerificationStep !== 'verified') errors.kimlik = 'Kimlik doğrulaması gerekli';
+    if (anket.hedefKitleKriterleri?.tcNo === true && tcVerificationStep !== 'verified') errors.tcNo = 'TC Kimlik No doğrulaması gerekli';
 
     setHatalar(errors);
     if (Object.keys(errors).length === 0) setCurrentStep(2);
@@ -732,17 +734,19 @@ const AnketCoz = () => {
                       <div className="options-list">
                         {(soru.secenekler || []).map((secenek, idx) => {
                           const text = typeof secenek === 'string' ? secenek : secenek.metni;
+                          // Benzersiz değer olarak _id veya index kullan (aynı metin sorunu için)
+                          const optionValue = secenek._id || `option_${idx}`;
                           const isSelected = soru.soruTipi === 'coktan-tek'
-                            ? cevaplar[soru._id] === text
-                            : (cevaplar[soru._id] || []).includes(text);
+                            ? cevaplar[soru._id] === optionValue
+                            : (cevaplar[soru._id] || []).includes(optionValue);
 
                           return (
                             <div
-                              key={idx}
+                              key={optionValue}
                               className={`custom-option ${isSelected ? 'selected' : ''}`}
                               onClick={() => {
-                                if (soru.soruTipi === 'coktan-tek') handleAnswerChange(soru._id, text);
-                                else handleCheckboxChange(soru._id, text, !isSelected);
+                                if (soru.soruTipi === 'coktan-tek') handleAnswerChange(soru._id, optionValue);
+                                else handleCheckboxChange(soru._id, optionValue, !isSelected);
                               }}
                             >
                               <div className="option-indicator"></div>

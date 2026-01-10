@@ -670,24 +670,52 @@ router.get("/:id/results", auth(true), async (req, res) => {
           };
         });
 
-        // Cevapları say - Seçenek METNİ ile eşleştir (ID değil)
+        // Cevapları say - Seçenek ID veya METNİ ile eşleştir (hem yeni hem eski format)
         soruCevaplari.forEach((cevap) => {
           if (Array.isArray(cevap)) {
-            // Çoklu seçim (checkbox) - Her bir metni bul
-            cevap.forEach((secenekMetni) => {
-              // Seçenek metnine göre ID'sini bul ve artır
-              const secenekEntry = Object.values(soruStat.dagilim).find(
-                s => s.metin === secenekMetni || s.metin.trim() === String(secenekMetni).trim()
+            // Çoklu seçim (checkbox) - Her bir değeri bul
+            cevap.forEach((val) => {
+              // Önce ID ile eşleştir, bulamazsa metin ile dene
+              let secenekEntry = Object.values(soruStat.dagilim).find(
+                s => s.secenekId === val || s.secenekId === String(val)
               );
+              // ID bulunamazsa metin ile dene (eski format)
+              if (!secenekEntry) {
+                secenekEntry = Object.values(soruStat.dagilim).find(
+                  s => s.metin === val || s.metin.trim() === String(val).trim()
+                );
+              }
+              // option_X formatı ile dene
+              if (!secenekEntry && String(val).startsWith('option_')) {
+                const idx = parseInt(String(val).replace('option_', ''));
+                const secenekArr = Object.values(soruStat.dagilim);
+                if (secenekArr[idx]) {
+                  secenekEntry = secenekArr[idx];
+                }
+              }
               if (secenekEntry) {
                 secenekEntry.sayi++;
               }
             });
           } else {
-            // Tek seçim (radio) - Metni eşleştir
-            const secenekEntry = Object.values(soruStat.dagilim).find(
-              s => s.metin === cevap || s.metin.trim() === String(cevap).trim()
+            // Tek seçim (radio) - ID veya metin ile eşleştir
+            let secenekEntry = Object.values(soruStat.dagilim).find(
+              s => s.secenekId === cevap || s.secenekId === String(cevap)
             );
+            // ID bulunamazsa metin ile dene
+            if (!secenekEntry) {
+              secenekEntry = Object.values(soruStat.dagilim).find(
+                s => s.metin === cevap || s.metin.trim() === String(cevap).trim()
+              );
+            }
+            // option_X formatı ile dene
+            if (!secenekEntry && String(cevap).startsWith('option_')) {
+              const idx = parseInt(String(cevap).replace('option_', ''));
+              const secenekArr = Object.values(soruStat.dagilim);
+              if (secenekArr[idx]) {
+                secenekEntry = secenekArr[idx];
+              }
+            }
             if (secenekEntry) {
               secenekEntry.sayi++;
             }

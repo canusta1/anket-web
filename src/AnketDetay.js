@@ -604,10 +604,25 @@ function AnketDetay() {
                         const cevap = katilimci.cevaplar[soru._id.toString()];
                         let cevapMetni = '';
 
+                        // Helper function to convert option ID to text
+                        const getOptionText = (optionId) => {
+                          if (!soru.secenekler) return optionId;
+                          // Find by _id or by index format (option_X)
+                          const found = soru.secenekler.find((sec, idx) => 
+                            sec._id?.toString() === optionId || 
+                            `option_${idx}` === optionId
+                          );
+                          return found ? (found.metni || found) : optionId;
+                        };
+
                         if (Array.isArray(cevap)) {
-                          cevapMetni = cevap.join(', ');
+                          // Multiple choice - map IDs to text
+                          cevapMetni = cevap.map(c => getOptionText(c)).join(', ');
                         } else if (typeof cevap === 'object' && cevap !== null) {
                           cevapMetni = cevap.toString();
+                        } else if (cevap && ['coktan-tek', 'coktan-coklu'].includes(soru.soruTipi)) {
+                          // Single choice - convert ID to text
+                          cevapMetni = getOptionText(String(cevap));
                         } else {
                           cevapMetni = String(cevap || '-');
                         }

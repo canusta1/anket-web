@@ -1,8 +1,10 @@
 // anket-backend/routes/verification.js
 const router = require("express").Router();
 const Survey = require("../models/Survey");
+const SurveyResponse = require("../models/SurveyResponse");
 const { generateVerificationCode, sendVerificationCode } = require("../services/mailService");
 const { generateSMSVerificationCode, sendSMSVerification } = require("../services/smsService");
+const { decryptSensitiveFields } = require("../services/encryptionService");
 
 // Kimlik doğrulama için gerekli modüller
 const multer = require("multer");
@@ -160,6 +162,18 @@ router.post("/send-code", async (req, res) => {
 
     // Type'a göre validasyon ve kod gönderme
     if (type === 'email') {
+      // MÜKERRER KONTROL: Bu email ile daha önce bu ankete cevap verilmiş mi?
+      const existingResponses = await SurveyResponse.find({ anketId: surveyId });
+      for (const response of existingResponses) {
+        const decrypted = decryptSensitiveFields(response.katilimciBilgileri || {});
+        if (decrypted.mail && decrypted.mail.toLowerCase() === contactInfo.toLowerCase()) {
+          return res.status(403).json({
+            success: false,
+            error: "Bu e-posta adresi ile daha önce bu ankete katılım sağlanmış. Aynı e-posta ile birden fazla kez katılamazsınız."
+          });
+        }
+      }
+
       // Email uzantısını kontrol et
       const userEmailDomain = contactInfo.substring(contactInfo.lastIndexOf("@") + 1).toLowerCase();
       let allowedDomains = survey.hedefKitleKriterleri?.mailUzantisi || [];
@@ -217,6 +231,18 @@ router.post("/send-code", async (req, res) => {
           success: false,
           error: "Geçersiz telefon numarası formatı. 0 ile başlayan 11 haneli numara giriniz."
         });
+      }
+
+      // MÜKERRER KONTROL: Bu telefon numarası ile daha önce bu ankete cevap verilmiş mi?
+      const existingResponses = await SurveyResponse.find({ anketId: surveyId });
+      for (const response of existingResponses) {
+        const decrypted = decryptSensitiveFields(response.katilimciBilgileri || {});
+        if (decrypted.telefonNumarasi && decrypted.telefonNumarasi === contactInfo) {
+          return res.status(403).json({
+            success: false,
+            error: "Bu telefon numarası ile daha önce bu ankete katılım sağlanmış. Aynı telefon numarası ile birden fazla kez katılamazsınız."
+          });
+        }
       }
 
       // 6 haneli kod oluştur
@@ -372,8 +398,13 @@ router.post("/verify-identity", upload.fields([
     const faceResult = await runFaceVerification(idCardFile.path, selfieFile.path);
 
     console.log("Yüz karşılaştırma sonucu:", JSON.stringify(faceResult, null, 2));
+    
+    // Güvenlik kontrolleri logla
+    if (faceResult.security_checks) {
+      console.log("Güvenlik kontrolleri:", JSON.stringify(faceResult.security_checks, null, 2));
+    }
 
-    // Yüz eşleşmedi ise
+    // Yüz eşleşmedi veya güvenlik kontrolü başarısız ise
     if (!faceResult.match) {
       // Dosyaları temizle
       await cleanupTempFiles(uploadedFiles);
@@ -383,7 +414,8 @@ router.post("/verify-identity", upload.fields([
         error: faceResult.error || "Yüz doğrulaması başarısız. Kimlik fotoğrafı ve selfie aynı kişiye ait değil.",
         details: {
           faceMatch: false,
-          faceScore: faceResult.score
+          faceScore: faceResult.score,
+          securityChecks: faceResult.security_checks || null
         }
       });
     }

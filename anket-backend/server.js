@@ -46,8 +46,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// --- 2. JSON Parser ---
-app.use(express.json());
+// --- 2. JSON Parser (50MB limit - büyük görseller için) ---
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // DB Bağlantısı
 mongoose
