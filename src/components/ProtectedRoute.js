@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
  * ProtectedRoute - Korumalı sayfa wrapper'ı (AuthContext ile)
  */
 function ProtectedRoute({ children }) {
-  const { user, loading, token } = useAuth();
+  const { loading, token } = useAuth();
   const location = useLocation();
 
   // Yükleniyor durumu

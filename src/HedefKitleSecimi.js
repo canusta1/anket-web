@@ -241,7 +241,7 @@ function HedefKitleSecimi({
                             <div className="nested-input" onClick={e => e.stopPropagation()}>
                                 <input
                                     type="text"
-                                    placeholder="@kurum.com"
+                                    placeholder="kurum.com"
                                     value={mailUzantisi}
                                     onChange={e => setMailUzantisi(e.target.value)}
                                 />

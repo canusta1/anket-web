@@ -37,7 +37,8 @@ const SoruSchema = new mongoose.Schema(
     minDegeri: Number,
     maxDegeri: Number,
     minEtiket: String,
-    maxEtiket: String
+    maxEtiket: String,
+    gorselUrl: { type: String, default: null } // Soru görseli (base64 veya URL)
   },
   { _id: true, timestamps: true }
 );

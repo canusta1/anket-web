@@ -369,7 +369,7 @@
 }
 
 .hero-ai-logo {
-  width: 320px;
+  width: 600px;
   height: auto;
   animation: float 3s ease-in-out infinite;
   filter: drop-shadow(0 20px 40px rgba(0, 212, 170, 0.3));
@@ -625,7 +625,7 @@
    SECURITY SECTION
 ======================== */
 .security-section {
-  padding: 100px 60px;
+  padding: 100px 10px;
   background: var(--landing-bg);
 }
 
@@ -828,7 +828,7 @@
    STEPS SECTION
 ======================== */
 .steps-section {
-  padding: 50px 60px 100px;
+  padding: 100px -500px 10px;
   background: var(--landing-bg);
 }
 

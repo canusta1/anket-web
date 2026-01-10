@@ -42,7 +42,7 @@ function Navbar({ activePage = '', showCreateButton = true }) {
 
   const handleLogout = () => {
     logout();
-    navigate('/giris', { replace: true });
+    navigate('/anasayfa', { replace: true });
   };
 
   const closeMenu = () => setMenuOpen(false);

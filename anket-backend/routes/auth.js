@@ -14,7 +14,7 @@ const CODE_EXPIRY = 10 * 60 * 1000; // 10 dakika
 
 function sign(u) {
   return jwt.sign(
-    { _id: u._id, email: u.email, roles: u.roles },
+    { _id: u._id, email: u.email },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES || "7d" }
   );
@@ -66,6 +66,19 @@ router.post("/register", async (req, res) => {
       throw new Error("Zorunlu alanlar eksik");
     if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error("Geçersiz e-posta");
     if (password.length < 6) throw new Error("Şifre min 6 karakter");
+
+    // Telefon numarası kontrolü
+    if (phone) {
+      // Telefon formatı kontrolü (0 ile başlayan 11 haneli numara)
+      if (!/^0\d{10}$/.test(phone)) {
+        throw new Error("Geçersiz telefon numarası formatı. 0 ile başlayan 11 haneli numara giriniz.");
+      }
+      // Aynı telefon numarası ile kayıtlı kullanıcı var mı?
+      const existingPhone = await User.findOne({ phone });
+      if (existingPhone) {
+        throw new Error("Bu telefon numarası zaten kayıtlı");
+      }
+    }
 
     // Doğrulama kodu kontrolü
     if (!verificationCode) {
@@ -208,6 +221,144 @@ router.put("/me", auth(true), async (req, res) => {
     if (e.code === 11000) {
       return res.status(400).json({ error: "Bu e-posta veya telefon numarası zaten kullanımda." });
     }
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// --- ŞİFREMİ UNUTTUM ---
+
+// Şifre sıfırlama kodları (Memory'de)
+const resetCodes = new Map();
+const RESET_CODE_EXPIRY = 10 * 60 * 1000; // 10 dakika
+const MAX_RESET_ATTEMPTS = 3;
+
+// 1. Şifre sıfırlama kodu gönder
+router.post("/forgot-password/send-code", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) throw new Error("E-posta adresi gerekli");
+    if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error("Geçersiz e-posta");
+
+    // Bu e-posta kayıtlı mı?
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı");
+    }
+
+    // Doğrulama kodu oluştur
+    const code = generateVerificationCode();
+    
+    // Kodu memory'de sakla
+    resetCodes.set(email, {
+      code,
+      expiry: Date.now() + RESET_CODE_EXPIRY,
+      attempts: 0
+    });
+
+    // E-posta gönder
+    await sendVerificationCode(email, code, user.firstName || 'Kullanıcı');
+
+    console.log(`✅ Şifre sıfırlama kodu gönderildi: ${email}`);
+    res.json({ 
+      message: "Şifre sıfırlama kodu e-posta adresinize gönderildi",
+      expiresIn: RESET_CODE_EXPIRY / 1000 
+    });
+
+  } catch (e) {
+    console.error("❌ Şifre sıfırlama kodu gönderme hatası:", e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// 2. Kod doğrula
+router.post("/forgot-password/verify-code", async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) throw new Error("E-posta ve kod gerekli");
+
+    const storedData = resetCodes.get(email);
+    if (!storedData) {
+      throw new Error("Doğrulama kodu bulunamadı. Lütfen yeni kod isteyin.");
+    }
+
+    // Süre kontrolü
+    if (Date.now() > storedData.expiry) {
+      resetCodes.delete(email);
+      throw new Error("Doğrulama kodunun süresi doldu. Lütfen yeni kod isteyin.");
+    }
+
+    // Deneme sayısı kontrolü
+    if (storedData.attempts >= MAX_RESET_ATTEMPTS) {
+      resetCodes.delete(email);
+      throw new Error("3 yanlış deneme hakkınızı kullandınız. Lütfen yeni kod isteyin.");
+    }
+
+    // Kod kontrolü
+    if (storedData.code !== code) {
+      storedData.attempts++;
+      const remaining = MAX_RESET_ATTEMPTS - storedData.attempts;
+      if (remaining <= 0) {
+        resetCodes.delete(email);
+        throw new Error("3 yanlış deneme hakkınızı kullandınız. Lütfen yeni kod isteyin.");
+      }
+      throw new Error(`Doğrulama kodu hatalı. Kalan hak: ${remaining}`);
+    }
+
+    // Kod doğru - kodun onaylandığını işaretle (şifre değiştirme için)
+    storedData.verified = true;
+    
+    console.log(`✅ Şifre sıfırlama kodu doğrulandı: ${email}`);
+    res.json({ message: "Kod doğrulandı. Şimdi yeni şifrenizi belirleyebilirsiniz." });
+
+  } catch (e) {
+    console.error("❌ Kod doğrulama hatası:", e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// 3. Şifre güncelle
+router.post("/forgot-password/reset-password", async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      throw new Error("Tüm alanlar gerekli");
+    }
+
+    // Şifre kriteri kontrolü
+    if (newPassword.length < 6) {
+      throw new Error("Şifre en az 6 karakter olmalı");
+    }
+
+    const storedData = resetCodes.get(email);
+    if (!storedData) {
+      throw new Error("Geçersiz istek. Lütfen işlemi baştan başlatın.");
+    }
+
+    // Kod doğrulanmış mı?
+    if (!storedData.verified || storedData.code !== code) {
+      throw new Error("Kod doğrulanmamış. Lütfen önce kodu doğrulayın.");
+    }
+
+    // Kullanıcıyı bul ve şifreyi güncelle
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Kullanıcı bulunamadı");
+    }
+
+    user.password = newPassword; // Model'deki pre-save hook otomatik hash'leyecek
+    await user.save();
+
+    // Kodu temizle
+    resetCodes.delete(email);
+
+    console.log(`✅ Şifre başarıyla güncellendi: ${email}`);
+    res.json({ message: "Şifreniz başarıyla güncellendi. Şimdi giriş yapabilirsiniz." });
+
+  } catch (e) {
+    console.error("❌ Şifre güncelleme hatası:", e.message);
     res.status(400).json({ error: e.message });
   }
 });

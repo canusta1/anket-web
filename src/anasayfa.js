@@ -226,7 +226,7 @@ function Anasayfa() {
           <div className="step-card">
             <div className="step-number">2</div>
             <h3>Paylaş</h3>
-            <p>Bağlantıyı e-posta veya sosyal medyada paylaşın</p>
+            <p>Bağlantıyı QR kod  veya kopyalayarak paylaşın</p>
           </div>
           <div className="step-arrow">→</div>
           <div className="step-card">
@@ -254,37 +254,11 @@ function Anasayfa() {
       </section>
 
       {/* Footer */}
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <img src={SurvAILogo} alt="SurvAI" className="footer-logo-img" />
-            <p>Profesyonel Anket Yönetim Sistemi</p>
-          </div>
-          <div className="footer-links">
-            <div className="footer-column">
-              <h4>Ürün</h4>
-              <a href="#">Özellikler</a>
-              <a href="#">Fiyatlandırma</a>
-              <a href="#">Şablonlar</a>
-            </div>
-            <div className="footer-column">
-              <h4>Destek</h4>
-              <a href="#">Yardım Merkezi</a>
-              <a href="#">İletişim</a>
-              <a href="#">SSS</a>
-            </div>
-            <div className="footer-column">
-              <h4>Yasal</h4>
-              <a href="#">Gizlilik Politikası</a>
-              <a href="#">Kullanım Koşulları</a>
-              <a href="#">KVKK</a>
-            </div>
-          </div>
-        </div>
+      
         <div className="footer-bottom">
           <p>© 2025 SurvAI - Tüm hakları saklıdır.</p>
         </div>
-      </footer>
+      
     </div>
   );
 }

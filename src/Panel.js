@@ -10,7 +10,6 @@ function Panel() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [durumFilter, setDurumFilter] = useState("tumu"); // tumu, aktif, pasif
   const [toastMessage, setToastMessage] = useState(null);
   const [updatingStatus, setUpdatingStatus] = useState(null); // Hangi anket güncelleniyor
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -187,9 +186,6 @@ function Panel() {
     const aramaUygun = anket.anketBaslik?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       anket.anketAciklama?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Durum filtresi (tablodaki select dropdown)
-    const durumUygun = durumFilter === 'tumu' || anket.durum === durumFilter;
-
     // Tür filtresi (stats bar butonları)
     let turUygun = true;
     if (filterType === 'aktif') turUygun = anket.durum === 'aktif';
@@ -197,7 +193,7 @@ function Panel() {
     else if (filterType === 'ai') turUygun = anket.aiIleOlusturuldu === true;
     else if (filterType === 'manuel') turUygun = !anket.aiIleOlusturuldu;
 
-    return aramaUygun && durumUygun && turUygun;
+    return aramaUygun && turUygun;
   });
 
   const totalPages = Math.ceil(filteredAnketler.length / itemsPerPage);
@@ -340,31 +336,7 @@ function Panel() {
                     <div className="col col-type">Tür</div>
                     <div className="col col-questions">Sorular</div>
                     <div className="col col-responses">Cevaplar</div>
-                    <div className="col col-status" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      Durum
-                      <select
-                        value={durumFilter}
-                        onChange={(e) => {
-                          setDurumFilter(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: '12px',
-                          border: '2px solid rgba(255,255,255,0.3)',
-                          background: 'rgba(255,255,255,0.2)',
-                          color: 'white',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          outline: 'none'
-                        }}
-                      >
-                        <option value="tumu" style={{ color: '#333' }}>Tümü</option>
-                        <option value="aktif" style={{ color: '#333' }}>Aktif</option>
-                        <option value="pasif" style={{ color: '#333' }}>Pasif</option>
-                      </select>
-                    </div>
+                    <div className="col col-status">Durum</div>
                     <div className="col col-date">Tarih</div>
                     <div className="col col-actions">İşlemler</div>
                   </div>

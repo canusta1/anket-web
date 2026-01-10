@@ -715,6 +715,13 @@ const AnketCoz = () => {
                     <div className="question-number">{index + 1}</div>
                     <div className="question-text">{soru.soruMetni}</div>
                   </div>
+                  
+                  {/* Soru Görseli */}
+                  {soru.gorselUrl && (
+                    <div className="question-image">
+                      <img src={soru.gorselUrl} alt={`Soru ${index + 1} görseli`} />
+                    </div>
+                  )}
 
                   <div className="question-content">
                     {soru.soruTipi === 'acik-uclu' && (

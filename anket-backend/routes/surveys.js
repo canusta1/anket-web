@@ -3,6 +3,7 @@ const Survey = require("../models/Survey");
 const SurveyLink = require("../models/SurveyLink");
 const SurveyResponse = require("../models/SurveyResponse");
 const auth = require("../middleware/auth");
+const { encryptSensitiveFields, decryptSensitiveFields } = require("../services/encryptionService");
 
 // Frontend'in çalıştığı adres
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:51900";
@@ -54,7 +55,8 @@ function temizleSorular(sorular) {
       maxDegeri: soru.maxDegeri,
       minEtiket: soru.minEtiket,
       maxEtiket: soru.maxEtiket,
-      zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : true
+      zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : true,
+      gorselUrl: soru.gorselUrl || null // Soru görseli (base64 veya URL)
     };
   });
 }
@@ -334,10 +336,12 @@ router.post("/submit", async (req, res) => {
       }
     }
 
-    // Cevabı Kaydet
+    // Cevabı Kaydet - Hassas verileri şifrele
+    const sifrelenmisBilgiler = encryptSensitiveFields(birlestirilenBilgiler);
+    
     const yeniCevap = new SurveyResponse({
       anketId: anketId,
-      katilimciBilgileri: birlestirilenBilgiler,
+      katilimciBilgileri: sifrelenmisBilgiler,
       cevaplar: cevaplar
     });
 
@@ -566,9 +570,15 @@ router.get("/:id/responses", auth(true), async (req, res) => {
     const cevaplar = await SurveyResponse.find({ anketId: req.params.id })
       .sort({ olusturulmaTarihi: -1 });
 
+    // Hassas verileri çöz (sadece anket sahibi görebilir)
+    const cozulmusCevaplar = cevaplar.map(c => ({
+      ...c.toObject(),
+      katilimciBilgileri: decryptSensitiveFields(c.katilimciBilgileri || {})
+    }));
+
     res.json({
       success: true,
-      data: cevaplar,
+      data: cozulmusCevaplar,
       toplam: cevaplar.length
     });
   } catch (e) {
@@ -730,11 +740,12 @@ router.get("/:id/results", auth(true), async (req, res) => {
       istatistikler.sorular.push(soruStat);
     });
 
-    // Katılımcı listesi
+
+    // Katılımcı listesi - Hassas verileri çöz (sadece anket sahibi görebilir)
     const katilimcilar = cevaplar.map((response) => ({
       _id: response._id,
       olusturulmaTarihi: response.olusturulmaTarihi,
-      katilimciBilgileri: response.katilimciBilgileri || {},
+      katilimciBilgileri: decryptSensitiveFields(response.katilimciBilgileri || {}),
       cevaplar: response.cevaplar
     }));
 

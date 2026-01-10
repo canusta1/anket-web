@@ -12,8 +12,12 @@ import {
     FaClipboardList,
     FaChevronLeft,
     FaChevronRight,
-    FaSlidersH
+    FaSlidersH,
+    FaQrcode,
+    FaTimes,
+    FaImage
 } from "react-icons/fa";
+import { QRCodeSVG } from "qrcode.react";
 import "./SorulariYapistir.css";
 import "./Wizard.css";
 import Navbar from "./components/Navbar";
@@ -47,6 +51,7 @@ function SorulariYapistir() {
     const [kayitliKonumKriteri, setKayitliKonumKriteri] = useState(null);
     const [loading, setLoading] = useState(false);
     const [olusanLink, setOlusanLink] = useState(null);
+    const [showQrModal, setShowQrModal] = useState(false);
 
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000';
 
@@ -211,6 +216,17 @@ function SorulariYapistir() {
     const handleSecenekSil = (sId, index) => setSorular(sorular.map(s => s.id === sId ? { ...s, secenekler: s.secenekler.filter((_, i) => i !== index) } : s));
     const handleSecenekEkle = (sId) => setSorular(sorular.map(s => s.id === sId ? { ...s, secenekler: [...s.secenekler, `Yeni Seçenek`] } : s));
     const handleZorunluToggle = (id) => setSorular(sorular.map(s => s.id === id ? { ...s, zorunlu: !s.zorunlu } : s));
+    
+    // Görsel yükleme handler
+    const handleGorselYukle = (id, file) => {
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { alert('Görsel boyutu 2MB\'dan küçük olmalıdır.'); return; }
+        const reader = new FileReader();
+        reader.onload = (e) => { setSorular(sorular.map(s => s.id === id ? { ...s, gorselUrl: e.target.result } : s)); };
+        reader.readAsDataURL(file);
+    };
+    const handleGorselSil = (id) => { setSorular(sorular.map(s => s.id === id ? { ...s, gorselUrl: null } : s)); };
+    
     const handleSoruSil = (id) => {
         const yeniSorular = sorular.filter(s => s.id !== id);
         setSorular(yeniSorular);
@@ -218,7 +234,7 @@ function SorulariYapistir() {
     };
     const handleYeniSoruEkle = () => {
         const yeniId = Math.random();
-        const yeniSoru = { id: yeniId, metin: "", tip: "acik-uclu", secenekler: [], zorunlu: false };
+        const yeniSoru = { id: yeniId, metin: "", tip: "acik-uclu", secenekler: [], zorunlu: false, gorselUrl: null };
         setSorular([...sorular, yeniSoru]);
         setActiveQuestionId(yeniId);
     };
@@ -272,7 +288,8 @@ function SorulariYapistir() {
             siraNo: idx + 1,
             secenekler: s.secenekler.map((m, i) => ({ secenekId: i.toString(), metin: m })),
             sliderMin: s.tip === 'slider' ? (s.sliderMin || 1) : null,
-            sliderMax: s.tip === 'slider' ? (s.sliderMax || 10) : null
+            sliderMax: s.tip === 'slider' ? (s.sliderMax || 10) : null,
+            gorselUrl: s.gorselUrl || null
         }));
 
         const finalData = {
@@ -530,11 +547,28 @@ function SorulariYapistir() {
                                                             >
                                                                 {activeQ.zorunlu ? '✓ Zorunlu' : 'İsteğe Bağlı'}
                                                             </button>
+                                                            
+                                                            {/* Görüntü Yükle Butonu */}
+                                                            <label className={`q-toggle-btn q-image-btn ${activeQ.gorselUrl ? 'has-image' : ''}`}>
+                                                                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleGorselYukle(activeQ.id, e.target.files[0])} />
+                                                                <FaImage style={{ marginRight: '6px' }} />
+                                                                {activeQ.gorselUrl ? 'Görsel Var' : 'Görüntü Yükle'}
+                                                            </label>
                                                         </div>
 
                                                         {/* Preview Section */}
                                                         <div className="q-preview-section">
                                                             <div className="q-preview-label">Önizleme</div>
+                                                            
+                                                            {/* Görsel Önizleme */}
+                                                            {activeQ.gorselUrl && (
+                                                                <div className="q-image-preview">
+                                                                    <img src={activeQ.gorselUrl} alt="Soru görseli" />
+                                                                    <button className="q-image-remove" onClick={() => handleGorselSil(activeQ.id)} type="button">
+                                                                        <FaTimes /> Görseli Kaldır
+                                                                    </button>
+                                                                </div>
+                                                            )}
                                                             
                                                             {/* Open-ended Preview */}
                                                             {activeQ.tip === 'acik-uclu' && (
@@ -809,7 +843,109 @@ function SorulariYapistir() {
                                     >
                                         Anketi Görüntüle
                                     </button>
+                                    <button
+                                        onClick={() => setShowQrModal(true)}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '14px 28px',
+                                            borderRadius: '10px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <FaQrcode /> QR Kod
+                                    </button>
                                 </div>
+
+                                {/* QR Code Modal */}
+                                {showQrModal && (
+                                    <div
+                                        onClick={() => setShowQrModal(false)}
+                                        style={{
+                                            position: 'fixed',
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            background: 'rgba(0, 0, 0, 0.85)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            zIndex: 9999,
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <div
+                                            onClick={(e) => e.stopPropagation()}
+                                            style={{
+                                                background: 'white',
+                                                borderRadius: '24px',
+                                                padding: '40px',
+                                                textAlign: 'center',
+                                                position: 'relative',
+                                                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.3)'
+                                            }}
+                                        >
+                                            <button
+                                                onClick={() => setShowQrModal(false)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '16px',
+                                                    right: '16px',
+                                                    background: '#f1f5f9',
+                                                    border: 'none',
+                                                    borderRadius: '50%',
+                                                    width: '40px',
+                                                    height: '40px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer',
+                                                    fontSize: '1.2rem',
+                                                    color: '#64748b'
+                                                }}
+                                            >
+                                                <FaTimes />
+                                            </button>
+                                            <h3 style={{
+                                                margin: '0 0 24px',
+                                                fontSize: '1.25rem',
+                                                fontWeight: '700',
+                                                color: '#1e293b'
+                                            }}>
+                                                📱 Anketi Tara
+                                            </h3>
+                                            <div style={{
+                                                padding: '20px',
+                                                background: 'white',
+                                                borderRadius: '16px',
+                                                border: '3px solid #e2e8f0'
+                                            }}>
+                                                <QRCodeSVG
+                                                    value={olusanLink}
+                                                    size={280}
+                                                    level="H"
+                                                    includeMargin={true}
+                                                />
+                                            </div>
+                                            <p style={{
+                                                marginTop: '20px',
+                                                fontSize: '0.9rem',
+                                                color: '#64748b'
+                                            }}>
+                                                Telefonunuzun kamerasıyla QR kodu tarayın
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

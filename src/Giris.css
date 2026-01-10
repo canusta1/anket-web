@@ -317,6 +317,45 @@
     flex-shrink: 0;
 }
 
+.alert-success {
+    background: rgba(0, 212, 170, 0.1);
+    border: 1px solid rgba(0, 212, 170, 0.3);
+    color: var(--accent-primary);
+}
+
+.alert-success svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Link Button (text button) */
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition-fast);
+}
+
+.link-btn:hover {
+    color: #33e0bd;
+    text-decoration: underline;
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+    text-align: right;
+    margin-top: -8px;
+}
+
+.forgot-password-link .link-btn {
+    font-size: 0.85rem;
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;
