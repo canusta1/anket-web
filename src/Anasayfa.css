@@ -828,7 +828,7 @@
    STEPS SECTION
 ======================== */
 .steps-section {
-  padding: 100px -500px 10px;
+  padding: 100px 60px;
   background: var(--landing-bg);
 }
 
@@ -836,53 +836,71 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  max-width: 900px;
+  gap: 16px;
+  max-width: 1400px;
   margin: 0 auto;
+  flex-wrap: wrap;
 }
 
 .step-card {
+  position: relative;
   background: var(--landing-card);
   border: 1px solid var(--landing-border);
   border-radius: 16px;
-  padding: 32px;
+  padding: 32px 24px;
   text-align: center;
   flex: 1;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 🎯 Step kart hover efekti */
-.step-card:hover {
-  transform: translateY(-8px);
-  border-color: var(--landing-accent);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-}
-
-.step-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: var(--landing-gradient);
-  color: #0a0f14;
-  font-size: 1.25rem;
-  font-weight: 700;
-  border-radius: 50%;
-  margin-bottom: 16px;
+  min-width: 240px;
+  max-width: 280px;
   transition: all 0.3s ease;
 }
 
-/* ✨ Numara hover'da büyür */
+/* 🎯 Step kart hover efekti - Basit ve şık */
+.step-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--landing-accent);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* 🎨 Step İkon */
+.step-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.step-card:hover .step-icon {
+  transform: scale(1.1);
+}
+
+.step-number {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: var(--landing-gradient);
+  color: #0a0f14;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: transform 0.3s ease;
+}
+
+/* ✨ Numara hover'da hafif büyür */
 .step-card:hover .step-number {
   transform: scale(1.1);
-  box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
 }
 
 .step-card h3 {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 12px 0 8px;
+  color: var(--landing-text);
   transition: color 0.3s ease;
 }
 
@@ -893,18 +911,24 @@
 .step-card p {
   font-size: 0.9rem;
   color: var(--landing-text-muted);
+  line-height: 1.5;
+}
+
+.step-card:hover p {
+  color: var(--landing-text);
 }
 
 .step-arrow {
   font-size: 2rem;
-  color: var(--landing-text-muted);
-  transition: all 0.3s ease;
-  animation: arrowPulse 2s infinite;
+  color: var(--landing-accent);
+  animation: arrowPulse 2s ease-in-out infinite;
+  font-weight: bold;
+  filter: drop-shadow(0 0 10px rgba(0, 212, 170, 0.5));
 }
 
 @keyframes arrowPulse {
-  0%, 100% { opacity: 0.5; transform: translateX(0); }
-  50% { opacity: 1; transform: translateX(5px); }
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(8px); opacity: 0.7; }
 }
 
 /* ========================

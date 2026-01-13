@@ -1,27 +1,21 @@
-// anket-web/anket-backend/models/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 10);
 
-// --- Şema ---
+// kullanici semasi
 const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true, minlength: 2 },
   lastName: { type: String, required: true, trim: true, minlength: 2 },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-
-  password: { type: String, required: true, minlength: 6 }, // HASH saklanır
-  
-  // Telefon numarası (isteğe bağlı, benzersiz)
+  password: { type: String, required: true, minlength: 6 },
   phone: { type: String, trim: true, unique: true, sparse: true },
-  
-  // Google OAuth alanları
   googleId: { type: String, unique: true, sparse: true },
   profilePicture: { type: String },
   isGoogleUser: { type: Boolean, default: false },
 }, { timestamps: true });
 
-// Parola hash
+// kaydetmeden once sifreyi hashle
 UserSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
@@ -29,12 +23,12 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-// Parola kontrol
+// sifre kontrolu
 UserSchema.methods.checkPassword = function (plain) {
   return bcrypt.compare(plain, this.password);
 };
 
-// Güvenli JSON (API'ye döneceğimiz versiyon)
+// guvenli json donusu
 UserSchema.methods.safeJSON = function () {
   return {
     _id: this._id,

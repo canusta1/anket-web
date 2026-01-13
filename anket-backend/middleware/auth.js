@@ -1,4 +1,4 @@
-// anket-web/anket-backend/middleware/auth.js
+
 const jwt = require("jsonwebtoken");
 
 module.exports = (required = true) => (req, res, next) => {

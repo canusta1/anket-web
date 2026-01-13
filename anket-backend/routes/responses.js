@@ -1,13 +1,9 @@
-// anket-backend/routes/responses.js
-
 const router = require("express").Router();
 const SurveyResponse = require("../models/SurveyResponse");
 const Survey = require("../models/Survey");
 const auth = require("../middleware/auth");
 
-// ============================================
-// 1. TEK BİR CEVAP DETAYI
-// ============================================
+// tek bir cevap detayi
 router.get("/:responseId", auth(true), async (req, res) => {
   try {
     const cevap = await SurveyResponse.findById(req.params.responseId);
@@ -18,7 +14,6 @@ router.get("/:responseId", auth(true), async (req, res) => {
       });
     }
 
-    // Güvenlik: Sadece sahibi görebilir
     const anket = await Survey.findById(cevap.anketId);
     if (!anket) {
       return res.status(404).json({
@@ -47,9 +42,7 @@ router.get("/:responseId", auth(true), async (req, res) => {
   }
 });
 
-// ============================================
-// 2. CEVAP SİL (ANKET SAHİBİ İÇİN)
-// ============================================
+// cevap sil
 router.delete("/:responseId", auth(true), async (req, res) => {
   try {
     const cevap = await SurveyResponse.findById(req.params.responseId);
@@ -60,7 +53,6 @@ router.delete("/:responseId", auth(true), async (req, res) => {
       });
     }
 
-    // Güvenlik: Sadece sahibi silebilir
     const anket = await Survey.findById(cevap.anketId);
     if (!anket) {
       return res.status(404).json({
@@ -76,11 +68,9 @@ router.delete("/:responseId", auth(true), async (req, res) => {
       });
     }
 
-    // Toplam cevap sayısını azalt
     anket.toplamCevapSayisi = Math.max(0, (anket.toplamCevapSayisi || 1) - 1);
     await anket.save();
 
-    // Cevabı sil
     await SurveyResponse.findByIdAndDelete(req.params.responseId);
 
     res.status(204).end();

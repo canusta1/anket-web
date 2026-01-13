@@ -1,4 +1,4 @@
-// Switch to Groq SDK implementation
+
 const Groq = require("groq-sdk");
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -31,7 +31,6 @@ const generateSurveyQuestions = async (topic, questionCount) => {
     const topicLower = topic.toLowerCase();
     let questionTypes = ["acik-uclu", "coktan-tek", "coktan-coklu", "slider"];
 
-    // Eğer "açık uçlu" belirtilmişse, sadece açık uçlu soruları kullan
     if (topicLower.includes("açık uçlu")) {
         questionTypes = ["acik-uclu"];
     } else if (topicLower.includes("çoktan seçmeli")) {
@@ -67,10 +66,8 @@ KURALLAR:
         let text = resp.choices[0].message.content;
         console.log('📝 AI Yanıtı (ilk 500 karakter):', text.substring(0, 500));
 
-        // Markdown code block temizle
         text = text.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
 
-        // JSON bulup çıkart - daha esnek regex
         let jsonMatch = text.match(/\{[\s\S]*\}/);
         let jsonStr = jsonMatch ? jsonMatch[0] : null;
 
@@ -79,22 +76,18 @@ KURALLAR:
             throw new Error("AI yanıtından JSON çıkarılamadı - yanıt geçerli JSON içermiyor");
         }
 
-        // JSON'u temizle ve parse et
         let parsedData;
         try {
-            // Kaçan karakterleri düzelt
             jsonStr = jsonStr
                 .replace(/[\n\r]/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
 
-            // Kesik JSON'u tamamlamaya çalış
             let openBraces = (jsonStr.match(/\{/g) || []).length;
             let closeBraces = (jsonStr.match(/\}/g) || []).length;
             let openBrackets = (jsonStr.match(/\[/g) || []).length;
             let closeBrackets = (jsonStr.match(/\]/g) || []).length;
 
-            // Eksik parantezleri ekle
             while (closeBrackets < openBrackets) {
                 jsonStr += ']';
                 closeBrackets++;
@@ -104,13 +97,11 @@ KURALLAR:
                 closeBraces++;
             }
 
-            // Trailing comma düzelt
             jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
 
             parsedData = JSON.parse(jsonStr);
             console.log('✅ JSON parse başarılı');
 
-            // Validasyon: questions array mi?
             if (!Array.isArray(parsedData.questions)) {
                 throw new Error("Questions array olmalı");
             }
@@ -124,7 +115,6 @@ KURALLAR:
             throw parseError;
         }
 
-        // İstenen soru sayısına kes (AI fazla soru üretebiliyor)
         const questionsSliced = (parsedData.questions || []).slice(0, questionCount);
 
         // Tip normalizasyonu - AI yanlış tip üretirse düzelt (İngilizce -> Türkçe)
@@ -133,7 +123,6 @@ KURALLAR:
             "multi_select": "coktan-coklu",
             "rating": "slider",
             "text": "acik-uclu",
-            // Eski Türkçe tipler için backward compatibility
             "acik-uclu": "acik-uclu",
             "açık-uçlu": "acik-uclu",
             "açık uçlu": "acik-uclu",

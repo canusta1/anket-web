@@ -1,6 +1,6 @@
-// anket-backend/models/SurveyLink.js
 const mongoose = require("mongoose");
 
+// anket paylasim linki semasi
 const SurveyLinkSchema = new mongoose.Schema({
   anketId: {
     type: mongoose.Schema.Types.ObjectId,

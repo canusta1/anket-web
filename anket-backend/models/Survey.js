@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// --- Alt Şema: Seçenekler ---
+// secenek semasi
 const SecenekSchema = new mongoose.Schema(
   {
     _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
@@ -9,7 +9,7 @@ const SecenekSchema = new mongoose.Schema(
   { _id: true }
 );
 
-// --- Alt Şema: Sorular ---
+// soru semasi
 const SoruSchema = new mongoose.Schema(
   {
     _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
@@ -38,12 +38,12 @@ const SoruSchema = new mongoose.Schema(
     maxDegeri: Number,
     minEtiket: String,
     maxEtiket: String,
-    gorselUrl: { type: String, default: null } // Soru görseli (base64 veya URL)
+    gorselUrl: { type: String, default: null }
   },
   { _id: true, timestamps: true }
 );
 
-// --- Ana Şema: Anket ---
+// anket semasi
 const SurveySchema = new mongoose.Schema(
   {
     kullaniciId: {
@@ -65,7 +65,7 @@ const SurveySchema = new mongoose.Schema(
       }
     },
 
-    // --- HEDEF KİTLE KRİTERLERİ ---
+    // hedef kitle kriterleri
     hedefKitleKriterleri: {
       mail: { type: Boolean, default: false },
       mailUzantisi: { type: String, default: "" },
@@ -74,23 +74,19 @@ const SurveySchema = new mongoose.Schema(
       telefonNumarasi: { type: Boolean, default: false },
       konum: { type: Boolean, default: false },
 
-      // Konum Kısıtlaması
+      // konum kisitlamasi
       konumKisitlamasi: {
         tip: {
           type: String,
           enum: ["radius", "mahalle", "ilce", "sehir"],
           default: null
         },
-        // Yarıçap tipi için (metre cinsinden): 50, 100, 500, 1000, 5000
         radiusMetre: { type: Number, default: null },
-        // Anket oluşturan kişinin konumu
         anketKoordinatlari: {
           latitude: { type: Number, default: null },
           longitude: { type: Number, default: null }
         },
-        // Adresi göstermek için
         adres: { type: String, default: "" },
-        // Mahalle/İlçe/Şehir kısıtlamaları için
         mahalle: { type: String, default: "" },
         ilce: { type: String, default: "" },
         sehir: { type: String, default: "" }

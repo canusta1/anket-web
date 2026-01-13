@@ -214,25 +214,35 @@ function Anasayfa() {
       <section className="steps-section">
         <div className="section-header">
           <h2>Nasıl Çalışır?</h2>
-          <p>3 basit adımda anketinizi oluşturun</p>
+          <p>4 basit adımda anketinizi oluşturun ve yönetin</p>
         </div>
         <div className="steps-container">
           <div className="step-card">
+            <div className="step-icon">📝</div>
             <div className="step-number">1</div>
             <h3>Anket Oluştur</h3>
-            <p>Sıfırdan veya AI yardımıyla anketinizi hazırlayın</p>
+            <p>Sıfırdan veya AI yardımıyla profesyonel anketinizi hazırlayın</p>
           </div>
           <div className="step-arrow">→</div>
           <div className="step-card">
+            <div className="step-icon">🎯</div>
             <div className="step-number">2</div>
-            <h3>Paylaş</h3>
-            <p>Bağlantıyı QR kod  veya kopyalayarak paylaşın</p>
+            <h3>Hedef Kitle Seç</h3>
+            <p>Konum, kimlik doğrulama ve özel kriterleri belirleyin</p>
           </div>
           <div className="step-arrow">→</div>
           <div className="step-card">
+            <div className="step-icon">🚀</div>
             <div className="step-number">3</div>
-            <h3>Analiz Et</h3>
-            <p>Yanıtları anlık olarak grafiklerle görün</p>
+            <h3>Anketi Yayınla</h3>
+            <p>QR kod veya link ile anketinizi kolayca paylaşın</p>
+          </div>
+          <div className="step-arrow">→</div>
+          <div className="step-card">
+            <div className="step-icon">📊</div>
+            <div className="step-number">4</div>
+            <h3>Sonuçları Analiz Et</h3>
+            <p>AI destekli analizler ve grafiklerle sonuçları yorumlayın</p>
           </div>
         </div>
       </section>

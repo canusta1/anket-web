@@ -5,12 +5,9 @@ const SurveyResponse = require("../models/SurveyResponse");
 const auth = require("../middleware/auth");
 const { encryptSensitiveFields, decryptSensitiveFields } = require("../services/encryptionService");
 
-// Frontend'in çalıştığı adres
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:51900";
 
-// ============================================
-// VERİ TEMIZLEME FONKSİYONU
-// ============================================
+// veri temizleme fonksiyonu
 function temizleSorular(sorular) {
   const tipiHaritas = {
     "acik-uclu": "acik-uclu",
@@ -56,16 +53,14 @@ function temizleSorular(sorular) {
       minEtiket: soru.minEtiket,
       maxEtiket: soru.maxEtiket,
       zorunlu: soru.zorunlu !== undefined ? soru.zorunlu : true,
-      gorselUrl: soru.gorselUrl || null // Soru görseli (base64 veya URL)
+      gorselUrl: soru.gorselUrl || null
     };
   });
 }
 
-// ============================================
-// HAVERSINE MESAFE FORMÜLÜ (METRE CİNSİNDEN)
-// ============================================
+// haversine mesafe formulu
 function haversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000; // Dünya yarıçapı (metre)
+  const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a =
@@ -76,9 +71,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// ============================================
-// 1. ANKETİ KATILIMCIYA GETİR (LİNK KODU İLE)
-// ============================================
+// anketi link kodu ile getir
 router.get("/by-link/:linkKodu", async (req, res) => {
   try {
     const { linkKodu } = req.params;
@@ -116,9 +109,7 @@ router.get("/by-link/:linkKodu", async (req, res) => {
   }
 });
 
-// ============================================
-// 2. ANKET OLUŞTUR (POST /)
-// ============================================
+// anket olustur
 router.post("/", auth(true), async (req, res) => {
   try {
     const {
@@ -135,15 +126,14 @@ router.post("/", auth(true), async (req, res) => {
     const islenmisSorular = temizleSorular(sorular);
     const linkKodu = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-    // Request'in geldikği origin'den URL al (localhost vs IP)
     const requestOrigin = req.get('origin') || req.get('referer') || `http://${req.get('host')}`;
-    const baseUrl = requestOrigin.split('/').slice(0, 3).join('/'); // Protocol + Host + Port
+    const baseUrl = requestOrigin.split('/').slice(0, 3).join('/');
     const tamLink = `${baseUrl}/anket-coz/${linkKodu}`;
 
     console.log("🌐 Request Origin:", requestOrigin);
     console.log("🔗 Oluşturulan Link:", tamLink);
 
-    // --- KONUM KISITLAMASı ENTEGRASYONU ---
+    // Konum kısıtlaması ayarları
     const konumKisitlamasi = (hedefKitleKriterleri?.konum && hedefKitleKriterleri?.konumHedefi)
       ? {
         tip: hedefKitleKriterleri.konumHedefi.tip || null,
@@ -215,16 +205,13 @@ router.post("/", auth(true), async (req, res) => {
   }
 });
 
-// ============================================
-// 3. KULLANICININ ANKETLERİNİ LİSTELE
-// ============================================
+// kullanicinin anketlerini listele
 router.get("/", auth(true), async (req, res) => {
   try {
     const items = await Survey.find({ kullaniciId: req.user._id })
       .sort({ createdAt: -1 })
       .select("anketBaslik anketAciklama sorular durum toplamCevapSayisi createdAt paylasimLinki aiIleOlusturuldu");
 
-    // Her anket için SurveyLink'ten tamLink'i al
     const itemsWithLinks = await Promise.all(
       items.map(async (item) => {
         const link = await SurveyLink.findOne({ anketId: item._id });
@@ -241,9 +228,7 @@ router.get("/", auth(true), async (req, res) => {
   }
 });
 
-// ============================================
-// 4. TEK ANKET DETAYI
-// ============================================
+// tek anket detayi
 router.get("/:id", auth(true), async (req, res) => {
   try {
     const item = await Survey.findById(req.params.id);
@@ -259,9 +244,7 @@ router.get("/:id", auth(true), async (req, res) => {
   }
 });
 
-// ============================================
-// 5. CEVAPLARI KAYDET (SUBMIT) - GEOFENCING KONTROLÜ
-// ============================================
+// cevaplari kaydet
 router.post("/submit", async (req, res) => {
   try {
     const { anketId, cevaplar, katilimciBilgileri, dogrulamaBilgileri } = req.body;
@@ -276,19 +259,16 @@ router.post("/submit", async (req, res) => {
       return res.status(404).json({ success: false, error: "Anket bulunamadı" });
     }
 
-    // --- KONUM FİLTRESİ KONTROLÜ (YENİ) ---
     const kriterler = anket.hedefKitleKriterleri;
 
-    // Eğer konum kriteri aktifse ve bir hedef tanımlanmışsa kontrol et
     if (kriterler.konum && kriterler.konumHedefi && kriterler.konumHedefi.tip) {
 
-      const hedef = kriterler.konumHedefi; // DB'deki hedef { tip: 'radius', hedef: { lat... } }
-      const kullanici = dogrulamaBilgileri; // Kullanıcıdan gelen { konumLat, konumLng, il, ilce... }
+      const hedef = kriterler.konumHedefi;
+      const kullanici = dogrulamaBilgileri;
 
       let filtreGecti = false;
       console.log(`[Submit] Konum Kontrolü: Tip=${hedef.tip}`);
 
-      // 1. Radius (Mesafe) Kontrolü
       if (hedef.tip === "radius") {
         if (hedef.hedef?.lat && hedef.hedef?.lng && kullanici?.konumLat && kullanici?.konumLng) {
           const mesafe = haversineDistance(
@@ -306,7 +286,6 @@ router.post("/submit", async (req, res) => {
         }
       }
 
-      // 2. Bölge Kontrolü (String Karşılaştırma)
       else if (hedef.tip === "sehir") {
         const hedefSehir = hedef.hedef?.il?.toLowerCase().trim();
         const kulSehir = kullanici?.sehir?.toLowerCase().trim();
@@ -321,7 +300,6 @@ router.post("/submit", async (req, res) => {
         const hedefMah = hedef.hedef?.mahalle?.toLowerCase().trim();
         const kulMah = kullanici?.mahalle?.toLowerCase().trim();
 
-        // Mahalle isimlerinde "Mahallesi" eki farklılık gösterebilir
         if (hedefMah && kulMah) {
           const temizHedef = hedefMah.replace(' mahallesi', '').replace(' mah.', '').trim();
           filtreGecti = kulMah.includes(temizHedef);
@@ -336,9 +314,8 @@ router.post("/submit", async (req, res) => {
       }
     }
 
-    // Cevabı Kaydet - Hassas verileri şifrele
     const sifrelenmisBilgiler = encryptSensitiveFields(birlestirilenBilgiler);
-    
+
     const yeniCevap = new SurveyResponse({
       anketId: anketId,
       katilimciBilgileri: sifrelenmisBilgiler,
@@ -347,7 +324,6 @@ router.post("/submit", async (req, res) => {
 
     const kaydedilenCevap = await yeniCevap.save();
 
-    // Anketin toplam cevap sayısını artır
     anket.toplamCevapSayisi = (anket.toplamCevapSayisi || 0) + 1;
     await anket.save();
 
@@ -364,28 +340,22 @@ router.post("/submit", async (req, res) => {
   }
 });
 
-// ============================================
-// 6. ANKET SİL (TAM TEMİZLİK)
-// ============================================
+// anket sil
 router.delete("/:id", auth(true), async (req, res) => {
   try {
     const anketId = req.params.id;
     const anket = await Survey.findById(anketId);
-    
+
     if (!anket) return res.status(404).json({ success: false, error: "Anket bulunamadı." });
 
-    // Yetki kontrolü (sadece kendi anketini silebilir)
     if (anket.kullaniciId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, error: "Bu anketi silme yetkiniz yok." });
     }
 
-    // 1. Ankete bağlı tüm linkleri sil
     await SurveyLink.deleteMany({ anketId });
-    
-    // 2. Ankete verilmiş tüm cevapları sil
+
     await SurveyResponse.deleteMany({ anketId });
-    
-    // 3. Anketin kendisini sil
+
     await Survey.findByIdAndDelete(anketId);
 
     console.log(`🗑️ Anket ve tüm verileri silindi: ${anketId}`);
@@ -397,14 +367,11 @@ router.delete("/:id", auth(true), async (req, res) => {
   }
 });
 
-// ============================================
-// 6.5 ANKET DURUMUNU GÜNCELLE (AKTİF/PASİF)
-// ============================================
+// anket durumunu guncelle
 router.patch("/:id/status", auth(true), async (req, res) => {
   try {
     const { durum } = req.body;
 
-    // Validasyon
     if (!['aktif', 'pasif'].includes(durum)) {
       return res.status(400).json({
         success: false,
@@ -417,7 +384,6 @@ router.patch("/:id/status", auth(true), async (req, res) => {
       return res.status(404).json({ success: false, error: "Anket bulunamadı" });
     }
 
-    // Yetki kontrolü
     if (anket.kullaniciId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, error: "Bu anketi değiştirme yetkiniz yok" });
     }
@@ -438,22 +404,17 @@ router.patch("/:id/status", auth(true), async (req, res) => {
   }
 });
 
-// ============================================
-// 7. KONUM DOĞRULAMA KONTROL
-// ============================================
-
+// konum dogrulama kontrol
 router.post("/check-location/:anketId", async (req, res) => {
   try {
     const { anketId } = req.params;
     const { latitude, longitude, mahalle, ilce, sehir } = req.body;
 
-    // Anketi bul
     const anket = await Survey.findById(anketId);
     if (!anket) {
       return res.status(404).json({ success: false, error: "Anket bulunamadı" });
     }
 
-    // Konum kriteri var mı kontrol et
     if (!anket.hedefKitleKriterleri?.konum) {
       return res.json({ success: true, passed: true, message: "Bu anket için konum kriteri yok" });
     }
@@ -469,7 +430,6 @@ router.post("/check-location/:anketId", async (req, res) => {
 
     let passed = false;
 
-    // Radius kontrol
     if (konumKisitlamasi.tip === "radius") {
       if (!latitude || !longitude || !konumKisitlamasi.anketKoordinatlari.latitude || !konumKisitlamasi.anketKoordinatlari.longitude) {
         return res.status(400).json({
@@ -498,7 +458,6 @@ router.post("/check-location/:anketId", async (req, res) => {
         });
       }
     }
-    // Mahalle kontrol
     else if (konumKisitlamasi.tip === "mahalle") {
       const userMahalle = mahalle?.toLowerCase()?.trim();
       const targetMahalle = konumKisitlamasi.mahalle?.toLowerCase()?.trim();

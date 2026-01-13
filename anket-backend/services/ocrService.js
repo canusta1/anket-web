@@ -1,15 +1,9 @@
-// anket-backend/services/ocrService.js
-// Tesseract.js ile OCR servisi - Gelişmiş Görüntü Ön İşleme
-// Çoklu strateji ile TC Kimlik No okuma
-
 const { createWorker } = require('tesseract.js');
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 
-/**
- * Çoklu ön işleme stratejileri - Her biri farklı koşullar için optimize edilmiş
- */
+// on isleme stratejileri
 const PREPROCESSING_STRATEGIES = [
     {
         name: 'light-threshold',
@@ -92,9 +86,7 @@ const PREPROCESSING_STRATEGIES = [
     }
 ];
 
-/**
- * Görüntüyü belirtilen strateji ile işle
- */
+// goruntu isle
 async function processWithStrategy(imagePath, strategy) {
     try {
         const inputBuffer = await fs.promises.readFile(imagePath);
@@ -108,9 +100,7 @@ async function processWithStrategy(imagePath, strategy) {
     }
 }
 
-/**
- * İşlenmiş dosyaları temizle
- */
+// islenmis dosyalari temizle
 async function cleanupProcessedFiles(filePaths) {
     for (const filePath of filePaths) {
         if (filePath && fs.existsSync(filePath)) {
@@ -123,9 +113,7 @@ async function cleanupProcessedFiles(filePaths) {
     }
 }
 
-/**
- * OCR ile metin çıkar - optimize edilmiş ayarlarla
- */
+// ocr calistir
 async function runOCR(imagePath) {
     let worker = null;
     try {
@@ -148,9 +136,7 @@ async function runOCR(imagePath) {
     }
 }
 
-/**
- * Metinden tüm potansiyel TC numaralarını çıkar
- */
+// potansiyel tc numaralarini cikar
 function extractAllPotentialTCs(text) {
     if (!text || typeof text !== 'string') return [];
 
@@ -161,7 +147,7 @@ function extractAllPotentialTCs(text) {
     // Sliding window ile tüm 11 haneli olası sayıları çıkar
     for (let i = 0; i <= digits.length - 11; i++) {
         const candidate = digits.substring(i, i + 11);
-        
+
         // İlk hane 0 olamaz
         if (candidate[0] !== '0') {
             candidates.add(candidate);
@@ -171,9 +157,7 @@ function extractAllPotentialTCs(text) {
     return [...candidates];
 }
 
-/**
- * TC Kimlik No algoritma doğrulaması
- */
+// tc kimlik no algoritma dogrulamasi
 function isValidTCKimlikNo(tc) {
     if (!tc || tc.length !== 11) return false;
     if (tc[0] === '0') return false;
@@ -194,10 +178,7 @@ function isValidTCKimlikNo(tc) {
     return true;
 }
 
-/**
- * ANA FONKSİYON: Kimlik kartından TC oku
- * Çoklu strateji ile deneyerek en iyi sonucu bulur
- */
+// kimlik kartindan tc oku
 async function readTCFromIdCard(imagePath, targetTc = null) {
     const result = {
         success: false,

@@ -1,21 +1,18 @@
-// routes/geocoding.js
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-// POST /api/geocode - Reverse Geocoding
+// konum adres cevirme
 router.post('/geocode', async (req, res) => {
     try {
         const { latitude, longitude } = req.body;
 
-        // Parametreleri doğrula
         if (!latitude || !longitude) {
             return res.status(400).json({
                 error: 'Latitude ve longitude parametreleri zorunludur'
             });
         }
 
-        // Google API Key'i çevre değişkeninden al
         const googleApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
         if (!googleApiKey) {
@@ -25,22 +22,19 @@ router.post('/geocode', async (req, res) => {
             });
         }
 
-        // Google Geocoding API URL'sini oluştur
         const latlngParam = `${parseFloat(latitude).toFixed(8)},${parseFloat(longitude).toFixed(8)}`;
         const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latlngParam}&key=${googleApiKey}&language=tr`;
 
         console.log('[Geocoding] Konum sorgusu:', { latitude, longitude });
 
-        // Google API'ye istek at
         const response = await axios.get(geocodeUrl, {
-            timeout: 10000 // 10 saniye timeout
+            timeout: 10000
         });
 
         const data = response.data;
 
         console.log('[Geocoding] API Yanıtı Status:', data.status);
 
-        // Google API yanıtını kontrol et
         if (data.status === 'OK' && data.results && data.results.length > 0) {
             const adres = data.results[0].formatted_address;
             const components = data.results[0].address_components;
@@ -50,7 +44,6 @@ router.post('/geocode', async (req, res) => {
                 console.log(`  - ${c.long_name} (${c.short_name}): ${c.types.join(', ')}`);
             });
 
-            // Ek bilgileri çıkar
             let sehir = '';
             let ilce = '';
             let mahalle = '';
@@ -58,30 +51,24 @@ router.post('/geocode', async (req, res) => {
             let postaKodu = '';
 
             components.forEach(component => {
-                // Sokak adresi
                 if (component.types.includes('route')) {
                     sokak = component.long_name;
                 }
-                // Mahalle (neighborhood)
                 if (component.types.includes('neighborhood')) {
                     mahalle = component.long_name;
                 }
-                // Administrative_area_level_4 - Türkiye'de bu mahalle olabilir
                 if (component.types.includes('administrative_area_level_4') && !mahalle) {
                     mahalle = component.long_name;
                 }
-                // İlçe - level_2 veya level_3
                 if (component.types.includes('administrative_area_level_3')) {
                     ilce = component.long_name;
                 }
                 if (component.types.includes('administrative_area_level_2') && !ilce) {
                     ilce = component.long_name;
                 }
-                // İl/Şehir - level_1
                 if (component.types.includes('administrative_area_level_1')) {
                     sehir = component.long_name;
                 }
-                // Fallback: locality = şehir veya ilçe
                 if (component.types.includes('locality')) {
                     if (!sehir && !ilce) {
                         sehir = component.long_name;
@@ -89,7 +76,6 @@ router.post('/geocode', async (req, res) => {
                         ilce = component.long_name;
                     }
                 }
-                // Posta kodu
                 if (component.types.includes('postal_code')) {
                     postaKodu = component.long_name;
                 }

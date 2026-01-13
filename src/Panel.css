@@ -911,14 +911,20 @@ body.dark-mode .nav-link:hover {
 }
 
 .delete-modal {
-  background: var(--panel-card-bg);
+  background: #ffffff;
   width: 100%;
   max-width: 500px;
   border-radius: 20px;
-  border: 1px solid var(--panel-border);
+  border: 1px solid #e2e8f0;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   animation: slideUp 0.3s ease-out;
+}
+
+/* Dark mode modal */
+body.dark-mode .delete-modal {
+  background: #161b22;
+  border-color: #30363d;
 }
 
 .delete-modal-header {
@@ -947,15 +953,24 @@ body.dark-mode .nav-link:hover {
 
 .delete-modal-body {
   padding: 24px;
+  background: #ffffff;
+}
+
+body.dark-mode .delete-modal-body {
+  background: #161b22;
 }
 
 .delete-modal-body p {
   margin-bottom: 12px;
-  color: var(--panel-text);
+  color: #1e293b;
+}
+
+body.dark-mode .delete-modal-body p {
+  color: #f0f6fc;
 }
 
 .danger-text {
-  color: #e53e3e;
+  color: #c53030;
   font-weight: 600;
   background: #fff5f5;
   padding: 10px;
@@ -966,6 +981,7 @@ body.dark-mode .nav-link:hover {
 
 .dark-mode .danger-text {
   background: #2d1616;
+  color: #fca5a5;
 }
 
 .confirmation-input-group {
@@ -977,18 +993,28 @@ body.dark-mode .nav-link:hover {
   font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 8px;
-  color: var(--panel-text-muted);
+  color: #64748b;
+}
+
+body.dark-mode .confirmation-input-group label {
+  color: #c9d1d9;
 }
 
 .confirmation-input-group input {
   width: 100%;
   padding: 12px 16px;
   border-radius: 10px;
-  border: 2px solid var(--panel-border);
-  background: var(--panel-bg);
-  color: var(--panel-text);
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
   font-size: 0.95rem;
   transition: all 0.2s;
+}
+
+body.dark-mode .confirmation-input-group input {
+  border-color: #30363d;
+  background: #0d1117;
+  color: #f0f6fc;
 }
 
 .confirmation-input-group input:focus {
@@ -999,18 +1025,23 @@ body.dark-mode .nav-link:hover {
 
 .delete-modal-footer {
   padding: 20px 24px;
-  background: var(--panel-bg-alt);
+  background: #f8fafc;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  border-top: 1px solid var(--panel-border);
+  border-top: 1px solid #e2e8f0;
+}
+
+body.dark-mode .delete-modal-footer {
+  background: #0d1117;
+  border-top-color: #30363d;
 }
 
 .btn-cancel {
   padding: 12px 22px;
   background: transparent;
-  border: 1px solid var(--panel-border);
-  color: var(--panel-text-muted);
+  border: 1px solid #e2e8f0;
+  color: #64748b;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
@@ -1019,12 +1050,23 @@ body.dark-mode .nav-link:hover {
   min-height: 44px;
 }
 
+body.dark-mode .btn-cancel {
+  border-color: #30363d;
+  color: #c9d1d9;
+}
+
 /* ✨ Hover - Yazı görünür kalır */
 .btn-cancel:hover {
-  background: var(--panel-bg);
-  border-color: var(--panel-text-muted);
-  color: var(--panel-text); /* 🎯 Renk sabit */
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b; /* 🎯 Renk sabit */
   transform: translateY(-1px);
+}
+
+body.dark-mode .btn-cancel:hover {
+  background: #1c2128;
+  border-color: #c9d1d9;
+  color: #f0f6fc;
 }
 
 .btn-confirm-delete {

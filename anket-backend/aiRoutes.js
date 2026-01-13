@@ -1,18 +1,12 @@
-// backend/routes/aiRoutes.js
 const express = require('express');
 const router = express.Router();
 const { generateSurveyQuestions, analyzeSurveyResponses } = require('./aiService');
 
-/**
- * POST /api/ai/generate-survey
- * AI ile anket soruları oluşturur
- * Body: { topic: string, questionCount: number }
- */
+// ai ile anket olustur
 router.post('/generate-survey', async (req, res) => {
     try {
         const { topic, questionCount } = req.body;
 
-        // Validasyon
         if (!topic || !topic.trim()) {
             return res.status(400).json({
                 success: false,
@@ -29,7 +23,6 @@ router.post('/generate-survey', async (req, res) => {
 
         console.log(`AI anket oluşturuluyor: ${topic} (${questionCount} soru)`);
 
-        // AI servisini çağır
         const result = await generateSurveyQuestions(topic, questionCount);
 
         res.json({
@@ -47,16 +40,11 @@ router.post('/generate-survey', async (req, res) => {
     }
 });
 
-/**
- * POST /api/ai/analyze-survey
- * Anket cevaplarını analiz eder
- * Body: { anketId: string } (veya direkt anket ve cevap verileri)
- */
+// anket cevaplarini analiz et
 router.post('/analyze-survey', async (req, res) => {
     try {
         const { anketData, cevaplar } = req.body;
 
-        // Validasyon
         if (!anketData || !cevaplar) {
             return res.status(400).json({
                 success: false,
@@ -73,7 +61,6 @@ router.post('/analyze-survey', async (req, res) => {
 
         console.log(`Anket analiz ediliyor: ${cevaplar.length} cevap`);
 
-        // AI servisini çağır
         const analiz = await analyzeSurveyResponses(anketData, cevaplar);
 
         res.json({
@@ -91,10 +78,7 @@ router.post('/analyze-survey', async (req, res) => {
     }
 });
 
-/**
- * GET /api/ai/health
- * AI servisinin durumunu kontrol eder
- */
+// ai servis durumu
 router.get('/health', (req, res) => {
     const hasApiKey = !!process.env.GROQ_API_KEY;
 

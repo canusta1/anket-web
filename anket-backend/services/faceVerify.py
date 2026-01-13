@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Face Verification Microservice
-Kimlik fotoğrafı ve selfie karşılaştırma servisi
-Güvenlik: Kimlik kartı tespiti ve aynı dosya kontrolü
-"""
-
 import sys
 import json
 import os

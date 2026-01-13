@@ -1,4 +1,4 @@
-// anket-backend/routes/verification.js
+
 const router = require("express").Router();
 const Survey = require("../models/Survey");
 const SurveyResponse = require("../models/SurveyResponse");
@@ -6,37 +6,35 @@ const { generateVerificationCode, sendVerificationCode } = require("../services/
 const { generateSMSVerificationCode, sendSMSVerification } = require("../services/smsService");
 const { decryptSensitiveFields } = require("../services/encryptionService");
 
-// Kimlik doğrulama için gerekli modüller
+
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
 const { readTCFromIdCard } = require("../services/ocrService");
 
-// Geçici bellekte doğrulama kodlarını saklayacağız
-// Gerçek uygulamada Redis veya veritabanı kullanılmalı
+// gecici dogrulama kodlari
 const verificationCodes = new Map();
 
-// uploads/temp klasörünün varlığını kontrol et ve oluştur
+// uploads klasorunu olustur
 const uploadDir = path.join(__dirname, "..", "uploads", "temp");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer yapılandırması - dosyaları geçici klasöre kaydet
+// multer yapilandirmasi
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Benzersiz dosya adı oluştur
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + "-" + uniqueSuffix + ext);
   }
 });
 
-// Dosya filtresi - sadece resim dosyaları kabul et
+// dosya filtresi
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -52,15 +50,12 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 10 * 1024 * 1024
   },
   fileFilter: fileFilter
 });
 
-/**
- * Geçici dosyaları sil - güvenlik için
- * @param {string[]} filePaths - Silinecek dosya yolları
- */
+// gecici dosyalari sil
 async function cleanupTempFiles(filePaths) {
   for (const filePath of filePaths) {
     try {
@@ -74,20 +69,13 @@ async function cleanupTempFiles(filePaths) {
   }
 }
 
-/**
- * Python yüz doğrulama scriptini çalıştır
- * @param {string} idCardPath - Kimlik kartı fotoğrafı yolu
- * @param {string} selfiePath - Selfie fotoğrafı yolu
- * @returns {Promise<{match: boolean, score: number, error: string|null}>}
- */
+// python yuz dogrulama scripti
 function runFaceVerification(idCardPath, selfiePath) {
   return new Promise((resolve, reject) => {
     const pythonScript = path.join(__dirname, "..", "services", "faceVerify.py");
 
-    // Virtual environment'daki Python executable'ını kullan
     const pythonExecutable = path.join(__dirname, "..", "..", ".venv", "Scripts", "python.exe");
 
-    // Python scriptini çalıştır
     const pythonProcess = spawn(pythonExecutable, [pythonScript, idCardPath, selfiePath]);
 
     let stdout = "";
@@ -105,7 +93,6 @@ function runFaceVerification(idCardPath, selfiePath) {
     pythonProcess.on("close", (code) => {
       console.log(`Python script exit code: ${code}`);
       try {
-        // stdout'tan JSON parse et
         const result = JSON.parse(stdout.trim());
         resolve(result);
       } catch (parseError) {
@@ -127,15 +114,11 @@ function runFaceVerification(idCardPath, selfiePath) {
   });
 }
 
-/**
- * POST /api/verification/send-code
- * Email veya SMS doğrulama kodu gönder
- */
+// dogrulama kodu gonder
 router.post("/send-code", async (req, res) => {
   try {
     const { surveyId, contactInfo, type } = req.body;
 
-    // Validasyon
     if (!surveyId || !contactInfo || !type) {
       return res.status(400).json({
         success: false,
@@ -143,7 +126,6 @@ router.post("/send-code", async (req, res) => {
       });
     }
 
-    // Type kontrolü
     if (!['email', 'sms'].includes(type)) {
       return res.status(400).json({
         success: false,
@@ -160,9 +142,7 @@ router.post("/send-code", async (req, res) => {
       });
     }
 
-    // Type'a göre validasyon ve kod gönderme
     if (type === 'email') {
-      // MÜKERRER KONTROL: Bu email ile daha önce bu ankete cevap verilmiş mi?
       const existingResponses = await SurveyResponse.find({ anketId: surveyId });
       for (const response of existingResponses) {
         const decrypted = decryptSensitiveFields(response.katilimciBilgileri || {});
@@ -174,11 +154,9 @@ router.post("/send-code", async (req, res) => {
         }
       }
 
-      // Email uzantısını kontrol et
       const userEmailDomain = contactInfo.substring(contactInfo.lastIndexOf("@") + 1).toLowerCase();
       let allowedDomains = survey.hedefKitleKriterleri?.mailUzantisi || [];
 
-      // mailUzantisi string ise array'e çevir ve @ işaretini kaldır
       if (typeof allowedDomains === 'string' && allowedDomains.length > 0) {
         allowedDomains = allowedDomains
           .split(',')
@@ -203,18 +181,15 @@ router.post("/send-code", async (req, res) => {
         }
       }
 
-      // 6 haneli kod oluştur
       const verificationCode = generateVerificationCode();
 
-      // Kodu geçici bellekte sakla (10 dakika geçerlilik)
       const codeKey = `${surveyId}:${contactInfo}`;
       verificationCodes.set(codeKey, {
         code: verificationCode,
-        expiresAt: Date.now() + 10 * 60 * 1000, // 10 dakika
+        expiresAt: Date.now() + 10 * 60 * 1000,
         attempts: 0
       });
 
-      // Mail gönder
       const surveyTitle = survey.anketBaslik || survey.baslik || 'Anket';
       await sendVerificationCode(contactInfo, verificationCode, surveyTitle);
 
@@ -224,8 +199,6 @@ router.post("/send-code", async (req, res) => {
       });
 
     } else if (type === 'sms') {
-      // SMS doğrulama
-      // Telefon numarası formatını kontrol et
       if (!/^0\d{10}$/.test(contactInfo)) {
         return res.status(400).json({
           success: false,
@@ -233,7 +206,6 @@ router.post("/send-code", async (req, res) => {
         });
       }
 
-      // MÜKERRER KONTROL: Bu telefon numarası ile daha önce bu ankete cevap verilmiş mi?
       const existingResponses = await SurveyResponse.find({ anketId: surveyId });
       for (const response of existingResponses) {
         const decrypted = decryptSensitiveFields(response.katilimciBilgileri || {});
@@ -245,18 +217,15 @@ router.post("/send-code", async (req, res) => {
         }
       }
 
-      // 6 haneli kod oluştur
       const verificationCode = generateSMSVerificationCode();
 
-      // Kodu geçici bellekte sakla (10 dakika geçerlilik)
       const codeKey = `${surveyId}:${contactInfo}`;
       verificationCodes.set(codeKey, {
         code: verificationCode,
-        expiresAt: Date.now() + 10 * 60 * 1000, // 10 dakika
+        expiresAt: Date.now() + 10 * 60 * 1000,
         attempts: 0
       });
 
-      // SMS gönder (Mock)
       await sendSMSVerification(contactInfo, verificationCode);
 
       res.json({
@@ -274,18 +243,13 @@ router.post("/send-code", async (req, res) => {
   }
 });
 
-/**
- * POST /api/verification/verify-code
- * Doğrulama kodunu kontrol et (Email veya SMS)
- */
+// kod dogrula
 router.post("/verify-code", async (req, res) => {
   try {
     const { surveyId, contactInfo, code } = req.body;
 
-    // Geriye uyumluluk için email parametresini destekle
     const verificationContact = contactInfo || req.body.email;
 
-    // Validasyon
     if (!surveyId || !verificationContact || !code) {
       return res.status(400).json({
         success: false,
@@ -296,7 +260,6 @@ router.post("/verify-code", async (req, res) => {
     const codeKey = `${surveyId}:${verificationContact}`;
     const storedData = verificationCodes.get(codeKey);
 
-    // Kod yoksa veya süresi geçmişse
     if (!storedData) {
       return res.status(400).json({
         success: false,
@@ -304,7 +267,6 @@ router.post("/verify-code", async (req, res) => {
       });
     }
 
-    // Süresi kontrol et
     if (Date.now() > storedData.expiresAt) {
       verificationCodes.delete(codeKey);
       return res.status(400).json({
@@ -313,7 +275,6 @@ router.post("/verify-code", async (req, res) => {
       });
     }
 
-    // Deneme sayısını kontrol et (max 5 deneme)
     if (storedData.attempts >= 5) {
       verificationCodes.delete(codeKey);
       return res.status(429).json({
@@ -322,7 +283,6 @@ router.post("/verify-code", async (req, res) => {
       });
     }
 
-    // Kodu kontrol et
     if (code !== storedData.code) {
       storedData.attempts++;
       return res.status(400).json({
@@ -332,10 +292,8 @@ router.post("/verify-code", async (req, res) => {
       });
     }
 
-    // Başarılı doğrulama
     verificationCodes.delete(codeKey);
 
-    // Token oluştur (anket çözme için)
     const token = `${surveyId}:${verificationContact}:${Date.now()}`;
 
     res.json({
@@ -352,20 +310,7 @@ router.post("/verify-code", async (req, res) => {
   }
 });
 
-/**
- * POST /api/verification/verify-identity
- * Kimlik ve Yüz Doğrulama - Yüksek Güvenlikli
- * 
- * Beklenen dosyalar:
- * - idCard: Kimlik kartı fotoğrafı
- * - selfie: Selfie fotoğrafı
- * 
- * İş Akışı:
- * 1. Dosyaları al ve geçici klasöre kaydet
- * 2. Python script ile yüz karşılaştırması yap
- * 3. Eşleşirse OCR ile TC Kimlik No oku
- * 4. Sonucu dön ve dosyaları sil
- */
+// kimlik ve yuz dogrulama
 router.post("/verify-identity", upload.fields([
   { name: "idCard", maxCount: 1 },
   { name: "selfie", maxCount: 1 }
@@ -374,7 +319,6 @@ router.post("/verify-identity", upload.fields([
   const uploadedFiles = [];
 
   try {
-    // Dosya kontrolü
     if (!req.files || !req.files.idCard || !req.files.selfie) {
       return res.status(400).json({
         success: false,
@@ -393,20 +337,16 @@ router.post("/verify-identity", upload.fields([
     console.log(`  - Kimlik boyut: ${idCardFile.mimetype}`);
     console.log(`  - Selfie boyut: ${selfieFile.mimetype}`);
 
-    // ADIM 1: Python script ile yüz karşılaştırması
-    console.log("Yüz karşılaştırması yapılıyor...");
+    console.log("Yuz karsilastirmasi yapiliyor...");
     const faceResult = await runFaceVerification(idCardFile.path, selfieFile.path);
 
     console.log("Yüz karşılaştırma sonucu:", JSON.stringify(faceResult, null, 2));
-    
-    // Güvenlik kontrolleri logla
+
     if (faceResult.security_checks) {
       console.log("Güvenlik kontrolleri:", JSON.stringify(faceResult.security_checks, null, 2));
     }
 
-    // Yüz eşleşmedi veya güvenlik kontrolü başarısız ise
     if (!faceResult.match) {
-      // Dosyaları temizle
       await cleanupTempFiles(uploadedFiles);
 
       return res.status(400).json({
@@ -420,14 +360,10 @@ router.post("/verify-identity", upload.fields([
       });
     }
 
-    // ADIM 2: OCR DEVRE DIŞI - Yüz doğrulama yeterli
-    // Tesseract.js worker sorunu çözülene kadar OCR atlanıyor
-    console.log("OCR atlanıyor - yüz doğrulama başarılı, devam ediliyor...");
+    console.log("OCR atlaniyor - yuz dogrulama basarili...");
 
-    // Dosyaları temizle
     await cleanupTempFiles(uploadedFiles);
 
-    // Yüz eşleşti - doğrulama başarılı
     const verificationToken = `identity:FACE_VERIFIED:${Date.now()}`;
 
     res.json({
@@ -445,7 +381,6 @@ router.post("/verify-identity", upload.fields([
   } catch (error) {
     console.error("Kimlik doğrulama hatası:", error);
 
-    // Hata durumunda da dosyaları temizle
     await cleanupTempFiles(uploadedFiles);
 
     res.status(500).json({
@@ -455,21 +390,13 @@ router.post("/verify-identity", upload.fields([
   }
 });
 
-/**
- * POST /api/verification/verify-tc-ocr
- * TC Kimlik No OCR Doğrulaması
- * 
- * Beklenen:
- * - tcNo: Kullanıcının girdiği TC Kimlik No
- * - idCard: Kimlik kartı fotoğrafı
- */
+// tc kimlik no ocr dogrulama
 router.post("/verify-tc-ocr", upload.single("idCard"), async (req, res) => {
   const uploadedFiles = [];
 
   try {
     const { tcNo } = req.body;
 
-    // Validasyon
     if (!tcNo || tcNo.length !== 11) {
       return res.status(400).json({
         success: false,
@@ -490,13 +417,11 @@ router.post("/verify-tc-ocr", upload.single("idCard"), async (req, res) => {
     console.log(`  - Girilen TC: ${tcNo}`);
     console.log(`  - Kimlik kartı: ${req.file.filename}`);
 
-    // OCR ile TC Kimlik No oku
     console.log("OCR ile TC Kimlik No okunuyor...");
     const ocrResult = await readTCFromIdCard(req.file.path);
 
     console.log("OCR sonucu:", ocrResult);
 
-    // OCR başarısız olduysa
     if (!ocrResult.success || !ocrResult.tcKimlikNo) {
       await cleanupTempFiles(uploadedFiles);
 
@@ -506,7 +431,6 @@ router.post("/verify-tc-ocr", upload.single("idCard"), async (req, res) => {
       });
     }
 
-    // TC eşleşiyor mu kontrol et
     if (ocrResult.tcKimlikNo !== tcNo) {
       await cleanupTempFiles(uploadedFiles);
 
@@ -516,10 +440,8 @@ router.post("/verify-tc-ocr", upload.single("idCard"), async (req, res) => {
       });
     }
 
-    // Dosyaları temizle
     await cleanupTempFiles(uploadedFiles);
 
-    // TC doğrulama başarılı
     const verificationToken = `tc:${tcNo}:${Date.now()}`;
 
     res.json({
@@ -542,7 +464,7 @@ router.post("/verify-tc-ocr", upload.single("idCard"), async (req, res) => {
   }
 });
 
-// Multer hata yönetimi middleware'i
+// multer hata yonetimi
 router.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
