@@ -1,74 +1,28 @@
-<<<<<<< HEAD
-# anket-web
-=======
-# Getting Started with Create React App
+# 🛡️ SurvAI - Web Client (anket-web)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Yapay Zeka Destekli ve Çok Faktörlü Doğrulamalı (MFA) Güvenli Anket Platformu**
 
-## Available Scripts
+SurvAI, anket manipülasyonlarını engellemek ve sadece **gerçek kullanıcıların** veri girişini garanti altına almak için tasarlanmış uçtan uca güvenli bir platformdur. Bu depo, projenin **React.js** ile geliştirilmiş kullanıcı arayüzü (Frontend) tarafını içermektedir.
 
-In the project directory, you can run:
+### 🚀 Öne Çıkan Mühendislik Özellikleri
+- **Biyometrik Yüz Doğrulama:** Kamera entegrasyonu ile anketi dolduran kişinin gerçek bir insan olup olmadığını analiz eden bilgisayarlı görü (Computer Vision) katmanı.
+- **Çok Faktörlü Kimlik Doğrulama (MFA):** E-posta ve SMS tabanlı OTP (One-Time Password) doğrulama süreçleriyle kullanıcı izolasyonu.
+- **Yapay Zeka Destekli Analiz:** Toplanan verilerin Groq AI ve Büyük Dil Modelleri (LLM) ile anlamlandırılması.
+- **Modern ve Reaktif Arayüz:** Kullanıcı deneyimini kesintiye uğratmayan, asenkron backend iletişimine sahip modern React mimarisi.
 
-### `npm start`
+### 🛠️ Kullanılan Teknolojiler (Frontend Ekosistemi)
+- **Framework:** React.js
+- **State Management:** Context API / Redux (Projeye göre uyarlanmıştır)
+- **Güvenlik İletişimi:** JWT (JSON Web Token) tabanlı güvenli oturum yönetimi
+- **Backend Entegrasyonu:** RESTful API (Node.js & Express.js ile haberleşir)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### ⚙️ Kurulum ve Çalıştırma (Geliştiriciler İçin)
 
-### `npm test`
+Projeyi kendi bilgisayarınızda (lokal ortamda) ayağa kaldırmak için aşağıdaki adımları izleyebilirsiniz:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
->>>>>>> 3722ad86e91382e26ddb01e21fdb81f8aba4001c
+**1. Repoyu Klonlayın:**
+```bash
+git clone [https://github.com/canusta1/anket-web.git](https://github.com/canusta1/anket-web.git)
+cd anket-web
